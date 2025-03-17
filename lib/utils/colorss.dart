@@ -1,6 +1,4 @@
 import 'dart:math';
-
-
 import 'package:flutter/material.dart';
 
 index_color(int index) {

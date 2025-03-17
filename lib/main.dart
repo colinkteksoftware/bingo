@@ -1,60 +1,29 @@
-import 'package:bingo/ui/login.dart';
+import 'package:bingo/app.dart';
+import 'package:bingo/providers/home_provider.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
-
-// flutter local notification setup
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp, // Mantener la orientación en modo retrato
-  ]); 
+    DeviceOrientation.portraitUp,
+  ]);
+
   runApp(
-    Builder(builder: (context) {
-      final mediaQueryData = MediaQuery.of(context);
-      final mediaQueryDataWithLinearTextScaling = mediaQueryData.copyWith(
-          textScaler:
-              TextScaler.linear(mediaQueryData.textScaler.textScaleFactor));
-      return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 0.9),
-          child: MyApp());
-    }),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+      ],
+      child: Builder(builder: (context) {
+        final mediaQueryData = MediaQuery.of(context);
+        mediaQueryData.copyWith(
+            textScaler:
+                TextScaler.linear(mediaQueryData.textScaler.textScaleFactor));
+        return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 0.9),
+            child: const App());
+      }),
+    ),
   );
-}
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  /*  final GlobalKey<NavigatorState> navigatorKey =
-      new GlobalKey<NavigatorState>();
-  final GlobalKey<ScaffoldMessengerState> messengerKey =
-      new GlobalKey<ScaffoldMessengerState>(); */
-  final GlobalKey estado = GlobalKey();
-  @override
-  void initState() {
-    super.initState();
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Sistema Bingo',
-      home: Login(),
-
-      routes: {
-        'login': (context) => Login(),
-      },
-    );
-  }
-}
-
-Widget inicio(BuildContext context) {
-  return Login();
 }

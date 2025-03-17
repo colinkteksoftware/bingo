@@ -1,26 +1,21 @@
-// To parse this JSON data, do
-//
-//     final show = showFromJson(jsonString);
-
 import 'dart:convert';
 
+Cartilla cartillaFromJson(String str) => Cartilla.fromJson(json.decode(str));
 
-Welcome welcomeFromJson(String str) => Welcome.fromJson(json.decode(str));
+String cartillaToJson(Cartilla data) => json.encode(data.toJson());
 
-String welcomeToJson(Welcome data) => json.encode(data.toJson());
-
-class Welcome {
+class Cartilla {
     int? cartillaGrupoDetalleId;
     String? nombreGrupo;
     String? grupoCartillas;
 
-    Welcome({
+    Cartilla({
         this.cartillaGrupoDetalleId,
         this.nombreGrupo,
         this.grupoCartillas,
     });
 
-    factory Welcome.fromJson(Map<String, dynamic> json) => Welcome(
+    factory Cartilla.fromJson(Map<String, dynamic> json) => Cartilla(
         cartillaGrupoDetalleId: json["cartillaGrupoDetalleId"],
         nombreGrupo: json["nombreGrupo"],
         grupoCartillas: json["grupoCartillas"],

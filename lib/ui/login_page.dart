@@ -3,28 +3,30 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:math';
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/bingos.dart';
-import 'package:bingo/ui/configuraip.dart';
-import 'package:bingo/ui/crearcliente.dart';
-import 'package:bingo/utiles/conversiones.dart';
-import 'package:bingo/utiles/responsivo.dart';
+import 'package:bingo/ui/bingo_page.dart';
+import 'package:bingo/ui/setting_page.dart';
+import 'package:bingo/ui/user/person_page.dart';
+import 'package:bingo/utils/background.dart';
+import 'package:bingo/utils/conversiones.dart';
+import 'package:bingo/utils/responsivo.dart';
+import 'package:bingo/utils/defaults.dart';
+import 'package:bingo/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:bingo/models/modelCliente.dart' as cliente;
-import 'package:bingo/utiles/preferencias.dart';
-import 'package:http/http.dart' as http;
+import 'package:bingo/utils/preferencias.dart';
 import 'package:bingo/models/salasconvert.dart';
 import 'package:http/io_client.dart';
 
-class Login extends StatefulWidget {
+class LoginPage extends StatefulWidget {
   static const String routeName = '/login';
 
-  const Login({super.key});
+  const LoginPage({super.key});
 
   @override
-  State<Login> createState() => _Login();
+  State<LoginPage> createState() => _LoginPage();
 }
 
-class _Login extends State<Login> {
+class _LoginPage extends State<LoginPage> {
   bool _loading = false;
   var txtControlerUsuario = TextEditingController();
   var txtControlerClave = TextEditingController();
@@ -37,12 +39,10 @@ class _Login extends State<Login> {
   void initState() {
     iniciarPreferencias();
     super.initState();
-    // if (pf.getIp.trim() == "") {
-    // //  pf.setIP = "181.48.34.230";
-    // }
   }
 
   final ipController = TextEditingController(text: "0.0.0.0");
+
   void iniciarPreferencias() async {
     await pf.initPrefs();
     ipController.text = pf.getIp;
@@ -134,7 +134,7 @@ class _Login extends State<Login> {
                                 left: -15,
                                 child: Column(
                                   children: [
-                                    box(),
+                                    customBox3(),
                                   ],
                                 ),
                               ),
@@ -143,7 +143,7 @@ class _Login extends State<Login> {
                                 left: 105,
                                 child: Column(
                                   children: [
-                                    box2(),
+                                    customBox4(),
                                   ],
                                 ),
                               ),
@@ -305,8 +305,10 @@ class _Login extends State<Login> {
                                                         txtControlerClave.text);
 
                                                     const snackBar = SnackBar(
-                                                        content: Text(
-                                                            "Iniciando Sesion un momento ..."),
+                                                        content: Center(
+                                                          child: Text(
+                                                              "Iniciando sesión un momento ..."),
+                                                        ),
                                                         duration: Duration(
                                                             milliseconds:
                                                                 5000));
@@ -371,12 +373,15 @@ class _Login extends State<Login> {
                                                     width: size.width * 0.3,
                                                     duration: 2,
                                                     onPressed: () async {
-                                                      await Navigator.push(
+                                                      /*await Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                              builder:
-                                                                  (context) =>
-                                                                      Grid()));
+                                                              builder: (context) =>
+                                                                  PersonPage()));*/
+
+                                                      await Navigator.pushNamed(
+                                                          context,
+                                                          AppRoutes.person);
                                                     },
                                                     child: Container(
                                                         padding:
@@ -407,12 +412,14 @@ class _Login extends State<Login> {
                                                     width: size.width * 0.3,
                                                     duration: 2,
                                                     onPressed: () async {
-                                                      await Navigator.push(
+                                                      /*await Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
                                                               builder: (context) =>
-                                                                  const ConfiguraIP()));
-
+                                                                  const SettingPage()));*/
+                                                      await Navigator.pushNamed(
+                                                          context,
+                                                          AppRoutes.setting);
                                                       iniciarPreferencias();
                                                     },
                                                     child: Container(
@@ -473,22 +480,20 @@ class _Login extends State<Login> {
 
   List<Sala>? sala;
   final ioc = HttpClient();
-  Future<void> _login(
-      BuildContext context, String usuario, String password) async {
+  Future<void> _login(BuildContext context, String usuario, String password) async {
     try {
       ioc.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
       final http = IOClient(ioc);
 
-      String ruta =
-          '${ipController.text}/api/Login/PromotorLogin/$usuario/$password';
-      print('SERVICE => $ruta');
+      if (pf.getIp.trim().isNotEmpty) {
+        pf.setIP = ipController.text;
+      } else {
+        pf.setIP = basement;
+      }
 
-      /*ruta = ipController.text +
-          "/api/Login/PromotorLogin/" +
-          usuario +
-          "/" +
-          password;*/
+      String ruta = '${pf.getIp.toString()}/api/Login/PromotorLogin/$usuario/$password';
+      print('SERVICE => $ruta');
 
       final uri = Uri.parse(ruta);
       final headers = {'Content-Type': 'application/json'};
@@ -500,7 +505,6 @@ class _Login extends State<Login> {
       if (response.statusCode == 200) {
         setState(() {
           final datos2 = json.decode(response.body);
-
           datosuser = cliente.ModelCliente(
             promotorId: datos2["promotorId"] ?? 0,
             nombres: datos2["nombres"] ?? "",
@@ -521,7 +525,8 @@ class _Login extends State<Login> {
         });
         if (datosuser != null &&
             datosuser!.estado == true &&
-            datosuser!.usuario == usuario) {
+            datosuser!.usuario.toString() == usuario.toString().toUpperCase() || 
+            datosuser!.usuario.toString() == usuario.toString().toLowerCase()) {
           setState(() {
             pf.setUsuario = txtControlerUsuario.text;
             pf.setRecuerda = _isChecked;
@@ -534,11 +539,9 @@ class _Login extends State<Login> {
 
             _loading = true;
           });
-
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => Bingos(datosuser: datosuser)));
+          
+          Navigator.pushNamed(context, AppRoutes.bingo,
+              arguments: datosuser);
         } else {
           showAlerta(context, 'Mensaje Informativo',
               'Contraseña Incorrecta Verificar!!');
@@ -547,13 +550,13 @@ class _Login extends State<Login> {
         _loading = false;
         pf.setpassword = "";
         showAlerta(
-            context, 'Mensaje Informativo', 'Servidor no Responde Validar!!');
+            context, 'Mensaje Informativo', 'Servidor no Responde, Validar!!');
       }
     } catch (e) {
       _loading = false;
       pf.setpassword = "";
       showAlerta(
-          context, 'Mensaje Informativo', 'Servidor no Responde Validar!!');
+          context, 'Mensaje Informativo', 'Servidor no Responde, Validar!!');
     }
   }
 
@@ -612,41 +615,5 @@ class _Login extends State<Login> {
     } catch (e) {
       return const AssetImage('assets/F1.png');
     }
-  }
-}
-
-class box extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: -pi / 5,
-      child: Container(
-          height: 330,
-          width: 500,
-          decoration: BoxDecoration(
-              color: const Color(0xFF03045e),
-              borderRadius: BorderRadius.circular(40),
-              gradient: const LinearGradient(
-                  colors: [Color(0xFFcaf0f8), Color(0xFF0077b6)],
-                  stops: [0.0, 0.8]))),
-    );
-  }
-}
-
-class box2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: 180 / pi,
-      child: Container(
-          height: 390,
-          width: 300,
-          decoration: BoxDecoration(
-              color: const Color(0xFF03045e),
-              borderRadius: BorderRadius.circular(40),
-              gradient: const LinearGradient(
-                  colors: [Color(0xFFcaf0f8), Color(0xFF0077b6)],
-                  stops: [0.0, 0.8]))),
-    );
   }
 }

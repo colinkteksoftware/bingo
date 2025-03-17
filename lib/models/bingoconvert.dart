@@ -4,31 +4,26 @@
 
 import 'dart:convert';
 
+List<BingoSala> bingoSalaFromMap(String str) => List<BingoSala>.from(json.decode(str).map((x) => BingoSala.fromMap(x)));
 
-List<Sala> salaFromMap(String str) => List<Sala>.from(json.decode(str).map((x) => Sala.fromMap(x)));
+String bingoSalaToMap(List<BingoSala> data) => json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
 
-String salaToMap(List<Sala> data) => json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
-
-class Sala {
+class BingoSala {
     Bingo bingo;
  
-
-    Sala({
-        required this.bingo,
-   
+    BingoSala({
+        required this.bingo   
     });
 
-    factory Sala.fromMap(Map<String, dynamic> json) => Sala(
+    factory BingoSala.fromMap(Map<String, dynamic> json) => BingoSala(
         bingo: Bingo.fromMap(json["bingo"]),
 
     );
 
     Map<String, dynamic> toMap() => {
-        "bingo": bingo.toMap(),
-
+        "bingo": bingo.toMap()
     };
 }
-
 
 class Bingo {
     int bingoId;

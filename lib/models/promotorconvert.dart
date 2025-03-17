@@ -1,12 +1,3 @@
-// To parse this JSON data, do
-//
-//     final show = showFromJson(jsonString);
-
-
-// To parse this JSON data, do
-//
-//     final promotor = promotorFromJson(jsonString);
-
 import 'dart:convert';
 
 Promotor promotorFromJson(String str) => Promotor.fromJson(json.decode(str));

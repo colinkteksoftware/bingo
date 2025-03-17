@@ -13,7 +13,7 @@ String convertirdinero(dynamic n) {
     if (x.toString() != "") {
       // final currencyFormatter = NumberFormat.currency(locale: 'eu', symbol: '');
       //final currencyFormatter = new NumberFormat("#,##0.00", "en_US");
-      final currencyFormatter = new NumberFormat.simpleCurrency();
+      final currencyFormatter = NumberFormat.simpleCurrency();
       rp = currencyFormatter.format(x);
       return rp;
     } else {
@@ -43,7 +43,7 @@ String convertirdinero2(dynamic n) {
       // n = n / 100;
       // final currencyFormatter = NumberFormat.currency(locale: 'eu', symbol: '');
 
-      return "\$" + n.toString();
+      return "\$$n";
       // currencyFormatter.format(n);
     } else {
       n = "";
@@ -65,7 +65,7 @@ String convertirdinerosindecimales(dynamic n) {
       x = currencyFormatter.format(n).trim();
       logitud = x.length;
       x = x.substring(0, logitud - 3);
-      return "\$" + x;
+      return "\$$x";
     } else {
       n = "";
       return "\$0.0";
@@ -214,31 +214,29 @@ void showAlerta(BuildContext context, String titulo, String mensaje) {
       context: context,
       builder: (buildcontext) {
         return AlertDialog(
-          title: Container(
-            child: Column(
-              children: [
-                Image.asset(
-                  'assets/images/logo.png',
-                  height: 60,
-
-                  //color: Colors.white,
+          title: Column(
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: 60,          
+                //color: Colors.white,
+              ),
+              const SizedBox(height:10),
+              Text(
+                titulo,
+                style: TextStyle(
+                  color: const Color(0xFF03045e),
+                  fontSize: size.width * 0.032,
+                  fontFamily: 'gotic',
+                  fontWeight: FontWeight.bold,
                 ),
-                Text(
-                  "$titulo",
-                  style: TextStyle(
-                    color: Color(0xFF03045e),
-                    fontSize: size.width * 0.032,
-                    fontFamily: 'gotic',
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ],
-            ),
+              )
+            ],
           ),
           content: Text(
-            "$mensaje",
+            mensaje,
             style: TextStyle(
-              color: Color(0xFF03045e),
+              color: const Color(0xFF03045e),
               fontSize: size.width * 0.032,
               fontFamily: 'gotic',
               fontWeight: FontWeight.bold,
@@ -246,24 +244,24 @@ void showAlerta(BuildContext context, String titulo, String mensaje) {
           ),
           actions: <Widget>[
             ElevatedButton(
-              child: Text(
-                "OK",
-                style: TextStyle(
-                  color: Color(0xFFcaf0f8),
-                  fontSize: size.width * 0.032,
-                  fontFamily: 'gotic',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: Color(0xFF03045e),
+                backgroundColor: const Color(0xFF03045e),
                 disabledForegroundColor: Colors.grey.withOpacity(0.38),
                 disabledBackgroundColor: Colors.grey.withOpacity(0.12),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: Text(
+                "OK",
+                style: TextStyle(
+                  color: const Color(0xFFcaf0f8),
+                  fontSize: size.width * 0.032,
+                  fontFamily: 'gotic',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );

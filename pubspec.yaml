@@ -2,7 +2,7 @@ name: bingo
 description: "A new Flutter project."
 publish_to: 'none' 
 
-version: 1.0.0+1
+version: 1.0.3
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -19,6 +19,7 @@ dependencies:
   permission_handler: ^11.3.1
   simple_barcode_scanner: ^0.1.1
   animated_text_kit: ^4.2.2
+  provider: ^6.1.2
 
   flutter_localizations:
     sdk: flutter
@@ -45,6 +46,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/icons
+    - assets/icons/
     
 

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-List<Bingo> salaFromMap(String str) =>
-    List<Bingo>.from(json.decode(str).map((x) => Bingo.fromMap(x)));
+List<Venta> ventaFromMap(String str) =>
+    List<Venta>.from(json.decode(str).map((x) => Venta.fromMap(x)));
 
-String salaToMap(List<Bingo> data) =>
+String ventaToMap(List<Venta> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
 
-class Bingo {
+class Venta {
   int? ventaId;
   String? codigoModulo;
   DateTime? fechaRegistro;
@@ -18,7 +18,7 @@ class Bingo {
   double? precioTotalCartilla;
   int? totalCartillas;
 
-  Bingo({
+  Venta({
     required this.ventaId,
     required this.codigoModulo,
     required this.fechaRegistro,
@@ -31,7 +31,7 @@ class Bingo {
     required this.totalCartillas,
   });
 
-  factory Bingo.fromMap(Map<String, dynamic> json) => Bingo(
+  factory Venta.fromMap(Map<String, dynamic> json) => Venta(
         ventaId: json["ventaId"] ?? 0,
         codigoModulo: json["codigoModulo"] ?? "",
         fechaRegistro: DateTime.parse(json["fechaRegistro"]),

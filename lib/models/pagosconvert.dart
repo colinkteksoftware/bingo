@@ -4,11 +4,11 @@
 
 import 'dart:convert';
 
-List<Promotor> promotorFromJson(String str) => List<Promotor>.from(json.decode(str).map((x) => Promotor.fromJson(x)));
+List<Pago> pagoFromJson(String str) => List<Pago>.from(json.decode(str).map((x) => Pago.fromJson(x)));
 
-String promotorToJson(List<Promotor> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String pagoToJson(List<Pago> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class Promotor {
+class Pago {
     String? clienteId;
     int? bingoId;
     int? ventaId;
@@ -16,7 +16,7 @@ class Promotor {
     String? codigoModulo;
     List<DetallePremioFigura>? detallePremioFigura;
 
-    Promotor({
+    Pago({
         this.clienteId,
         this.bingoId,
         this.ventaId,
@@ -25,7 +25,7 @@ class Promotor {
         this.detallePremioFigura,
     });
 
-    factory Promotor.fromJson(Map<String, dynamic> json) => Promotor(
+    factory Pago.fromJson(Map<String, dynamic> json) => Pago(
         clienteId: json["clienteId"].toString(),
         bingoId: json["bingoId"],
         ventaId: json["ventaId"],
@@ -79,7 +79,7 @@ class DetallePremioFigura {
         estadoPago: json["estadoPago"],
         listaAdicionales: json["listaAdicionales"] == null ? [] : List<ListaAdicionale>.from(json["listaAdicionales"]!.map((x) => ListaAdicionale.fromJson(x))),
         isGanadorCartaRey: json["isGanadorCartaRey"],
-        nombreCartaRey: json["nombreCartaRey"] == null?"":json["nombreCartaRey"],
+        nombreCartaRey: json["nombreCartaRey"] ?? "",
     );
 
     Map<String, dynamic> toJson() => {

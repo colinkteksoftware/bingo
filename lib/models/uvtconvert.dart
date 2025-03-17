@@ -4,11 +4,11 @@
 
 import 'dart:convert';
 
-Promotor promotorFromJson(String str) => Promotor.fromJson(json.decode(str));
+Uvt uvtFromJson(String str) => Uvt.fromJson(json.decode(str));
 
-String promotorToJson(Promotor data) => json.encode(data.toJson());
+String uvtToJson(Uvt data) => json.encode(data.toJson());
 
-class Promotor {
+class Uvt {
     int? parametroTransmisionId;
     String? usuarioOperador;
     String? nit;
@@ -21,7 +21,7 @@ class Promotor {
     String? claveFabricante;
     String? codigoSha;
 
-    Promotor({
+    Uvt({
         this.parametroTransmisionId,
         this.usuarioOperador,
         this.nit,
@@ -35,12 +35,12 @@ class Promotor {
         this.codigoSha,
     });
 
-    factory Promotor.fromJson(Map<String, dynamic> json) => Promotor(
+    factory Uvt.fromJson(Map<String, dynamic> json) => Uvt(
         parametroTransmisionId: json["parametroTransmisionId"],
         usuarioOperador: json["usuarioOperador"],
         nit: json["nit"],
         contrato: json["contrato"],
-        codigoLocal: json["codigoLocal"] == null ? "":json["codigoLocal"],
+        codigoLocal: json["codigoLocal"] ?? "",
         municipio: json["municipio"],
         identificacionBingo: json["identificacionBingo"],
         cantidadUvt: json["cantidadUvt"],

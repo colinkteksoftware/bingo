@@ -3,7 +3,9 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/ui/login.dart';
+import 'package:bingo/models/personaconvert.dart';
+import 'package:bingo/ui/login_page.dart';
+import 'package:bingo/utils/background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -15,27 +17,22 @@ import 'package:bingo/models/modelCliente.dart';
 
 //import 'package:bingo/ui/tablaHorizontalMenu.dart';
 
-import 'package:bingo/utiles/preferencias.dart';
-
-import 'package:bingo/models/clienteconvert.dart' as chatsconvert;
+import 'package:bingo/utils/preferencias.dart';
 import 'package:http/io_client.dart';
-
 import 'package:intl/intl.dart';
-
 import 'package:http/http.dart' as http;
 
-Future<List<chatsconvert.Asd>?>? chats;
+Future<List<Persona>?>? chats;
+Persona? listchat;
 
-chatsconvert.Asd? listchat;
-
-class ModificarUsuario extends StatefulWidget {
-  String doi;
-  ModificarUsuario({super.key, required this.doi});
+class UpdatePersonPage extends StatefulWidget {
+  ModelCliente? datosuser;
+  UpdatePersonPage({super.key, required this.datosuser});
   @override
-  State<ModificarUsuario> createState() => _ModificarUsuarioState();
+  State<UpdatePersonPage> createState() => _UpdatePersonPageState();
 }
 
-class _ModificarUsuarioState extends State<ModificarUsuario> {
+class _UpdatePersonPageState extends State<UpdatePersonPage> {
   //ModelCliente _modelGanadoresDisplay = new ModelCliente(
   //idCliente:0,
 //contrato:"",
@@ -59,6 +56,14 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
 
   @override
   void initState() {
+    nomClieController.text = widget.datosuser!.nombres!;
+    apeclieController.text = widget.datosuser!.apellidos!;
+
+    dniController.text = widget.datosuser!.doi!;
+    telefonoController.text = widget.datosuser!.telefono!;
+    correoController.text = widget.datosuser!.usuario!;
+    claveController.text;
+    estatus = widget.datosuser!.estado!;
     iniciarPreferencias();
     super.initState();
   }
@@ -73,15 +78,13 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
   final ipController = TextEditingController(text: "0.0.0.0");
   bool estatus = true;
   final idClienteController = TextEditingController();
-  final nomClieController = TextEditingController(text: "");
-  final apeclieController = TextEditingController(text: "");
-  final direccionController = TextEditingController(text: "");
-  final departamentoController = TextEditingController(text: "");
+  final nomClieController = TextEditingController();
+  final apeclieController = TextEditingController();
   final fechaNacimientoController = TextEditingController();
   final sexoController = TextEditingController();
-  final correoController = TextEditingController(text: "");
+  final correoController = TextEditingController();
   final claveController = TextEditingController();
-  final telefonoController = TextEditingController(text: "");
+  final telefonoController = TextEditingController();
   final dniController = TextEditingController();
   final nacionalidadController = TextEditingController();
   final puntosRedimiblesController = TextEditingController(text: "0");
@@ -90,6 +93,66 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
   final fechaRegistroController = TextEditingController();
   final fecha_UltimaVisitaController = TextEditingController();
   final estadoController = TextEditingController();
+
+  Future<Persona> fetchPost(int status, String dni) async {
+    final pf = new Preferencias();
+    ioc.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    final http = new IOClient(ioc);
+    final url = Uri.parse("${ipController.text}/Apicentral/api/Clientes/ConsultaCliente/${pf.getCodigoSala}/$dni");
+
+    var respuesta = await http.get(url);
+    try {
+      //print(url);
+      if (respuesta.statusCode == 200) {
+        setState(() {
+          Map<String, dynamic> map =
+              jsonDecode(utf8.decode(respuesta.bodyBytes));
+          listchat = Persona.fromJson(map);
+
+          idClienteController.text = listchat!.idCliente!.toString();
+          nomClieController.text = listchat!.nomClie!.toString();
+          apeclieController.text = listchat!.apeclie!.toString();
+          fechaNacimientoController.text = DateFormat('yyyy-MM-dd')
+              .format(listchat!.fechaNacimiento!)
+              .toString();
+          sexoController.text = listchat!.sexo!.toString();
+          correoController.text = listchat!.correo!.toString();
+          claveController.text = listchat!.clave!.toString();
+          telefonoController.text = listchat!.telefono!.toString();
+          dniController.text = listchat!.dni!.toString();
+          nacionalidadController.text = listchat!.nacionalidad!.toString();
+          puntosRedimiblesController.text =
+              listchat!.puntosRedimibles!.toString();
+          puntosCuponesController.text = listchat!.puntosCupones!.toString();
+          puntosJugablesController.text = listchat!.puntosJugables!.toString();
+          fechaRegistroController.text = listchat!.fechaRegistro!.toString();
+          fecha_UltimaVisitaController.text =
+              listchat!.fechaUltimaVisita!.toString();
+          estadoController.text = listchat!.estado!.toString();
+        });
+        setState(() {});
+
+        return listchat!;
+      } else {
+        const snackBar = SnackBar(
+            content: Center(
+              child: Text(
+                  "Error al Conectarse con la Api\n posiblemente Servidor Principal esta fuera de Linea!!"),
+            ));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        throw new Exception("Error al Conectarse con la Api");
+      }
+    } catch (e) {
+      const snackBar = SnackBar(
+          content: Center(
+            child: Text(
+                "Error al Conectarse con la Api\n posiblemente Servidor Principal esta fuera de Linea!!"),
+          ));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      throw new Exception("Error al Conectarse con la Api");
+    }
+  }
 
   Widget _buildImageFromBase64(String base64Image) {
     try {
@@ -109,26 +172,6 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
       );
     }
   }
-
-  final Map<int, String> documentTypes = {
-    11: "Registro Civil",
-    12: "Tarjeta Identidad",
-    13: "Cédula Ciudadanía",
-    22: "Cédula Extranjería",
-    31: "NIT",
-    41: "Pasaporte",
-    42: "Documento Identificación Extranjero",
-    43: "Sin Identificación Exterior",
-    44: "Identificación Extranjero Persona Jurídica",
-    46: "Carné Diplomático",
-    14: "Certificado Registraduría",
-    15: "Documento Sucesión Ilíquida",
-    33: "ID Extranjeros No NIT",
-    21: "Tarjeta Extranjería",
-    47: "Sociedad Extranjera"
-  };
-
-  int? _selectedStd;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController? foldernameController = TextEditingController(text: "");
@@ -168,7 +211,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                   left: -15,
                                   child: Column(
                                     children: [
-                                      box(),
+                                      customBox3(),
                                     ],
                                   ),
                                 ),
@@ -177,7 +220,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                   left: 105,
                                   child: Column(
                                     children: [
-                                      box2(),
+                                      customBox4(),
                                     ],
                                   ),
                                 ),
@@ -229,6 +272,27 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                           ),
                                                         ],
                                                       ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsetsDirectional
+                                                                .fromSTEB(0, 20,
+                                                                    0, 0),
+                                                        child: Container(
+                                                          height:
+                                                              size.height * 0.2,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            image: DecorationImage(
+                                                                image: AssetImage(
+                                                                    "assets/images/logo.png"),
+                                                                fit: BoxFit
+                                                                    .fill),
+                                                          ),
+                                                          alignment:
+                                                              AlignmentDirectional(
+                                                                  0, 0),
+                                                        ),
+                                                      ),
                                                       Text('Bienvenido',
                                                           textAlign:
                                                               TextAlign.center,
@@ -250,7 +314,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                                 .fromSTEB(0, 12,
                                                                     0, 24),
                                                         child: Text(
-                                                            'Diligencia los datos para crear la cuenta cliente.',
+                                                            'Actualiza los datos para modificar tu cuenta.',
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style: TextStyle(
@@ -267,88 +331,6 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                               letterSpacing:
                                                                   0.0,
                                                             )),
-                                                      ),
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
-                                                          border: Border(
-                                                            bottom: BorderSide(
-                                                              color:
-                                                                  Colors.black,
-                                                              width: 2.0,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        width: size.width * 0.8,
-                                                        child:
-                                                            DropdownButtonHideUnderline(
-                                                          child: ButtonTheme(
-                                                            alignedDropdown:
-                                                                true,
-                                                            child:
-                                                                DropdownButton<
-                                                                    int>(
-                                                              dropdownColor:
-                                                                  Color(
-                                                                      0xFF424242),
-                                                              isExpanded: true,
-                                                              value:
-                                                                  _selectedStd, // Aquí almacenamos el int
-                                                              style: TextStyle(
-                                                                color: Color(
-                                                                    0xFF424242),
-                                                                fontSize:
-                                                                    size.width *
-                                                                        0.04,
-                                                              ),
-                                                              hint: Text(
-                                                                "Seleccione tipo Documento",
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontSize:
-                                                                      size.width *
-                                                                          0.04,
-                                                                ),
-                                                              ),
-                                                              onChanged: (int?
-                                                                  newValue) {
-                                                                setState(() {
-                                                                  _selectedStd =
-                                                                      newValue; // Guarda el valor entero
-                                                                });
-                                                              },
-                                                              itemHeight:
-                                                                  size.height *
-                                                                      0.08,
-                                                              items: documentTypes
-                                                                  .entries
-                                                                  .map<DropdownMenuItem<int>>(
-                                                                      (entry) {
-                                                                return DropdownMenuItem<
-                                                                    int>(
-                                                                  value:
-                                                                      entry.key,
-                                                                  child: Text(
-                                                                    entry
-                                                                        .value, // Muestra la descripción en la lista
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontSize:
-                                                                          size.width *
-                                                                              0.04,
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              }).toList(),
-                                                            ),
-                                                          ),
-                                                        ),
                                                       ),
                                                       SizedBox(
                                                         height: 5,
@@ -536,274 +518,13 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                               FontWeight.bold,
                                                         ),
                                                         controller:
-                                                            correoController,
+                                                            claveController,
                                                         enabled: true,
                                                         obscureText: false,
                                                         decoration:
                                                             InputDecoration(
-                                                          labelText: 'Email',
-                                                          hintText: 'Email',
-                                                          labelStyle: TextStyle(
-                                                            color: Color(
-                                                                0xFF03045e),
-                                                            fontSize:
-                                                                size.width *
-                                                                    0.04,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          enabledBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          errorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedErrorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          filled: true,
-                                                          fillColor:
-                                                              Colors.white,
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      TextFormField(
-                                                        style: TextStyle(
-                                                          color:
-                                                              Color(0xFF03045e),
-                                                          fontSize:
-                                                              size.width * 0.04,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        controller:
-                                                            telefonoController,
-                                                        enabled: true,
-                                                        obscureText: false,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText: 'Telefono',
-                                                          hintText: 'Telefono',
-                                                          labelStyle: TextStyle(
-                                                            color: Color(
-                                                                0xFF03045e),
-                                                            fontSize:
-                                                                size.width *
-                                                                    0.04,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          enabledBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          errorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedErrorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          filled: true,
-                                                          fillColor:
-                                                              Colors.white,
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      TextFormField(
-                                                        style: TextStyle(
-                                                          color:
-                                                              Color(0xFF03045e),
-                                                          fontSize:
-                                                              size.width * 0.04,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        controller:
-                                                            departamentoController,
-                                                        enabled: true,
-                                                        obscureText: false,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              'Departamento',
-                                                          hintText:
-                                                              'Departamento',
-                                                          labelStyle: TextStyle(
-                                                            color: Color(
-                                                                0xFF03045e),
-                                                            fontSize:
-                                                                size.width *
-                                                                    0.04,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          enabledBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          errorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedErrorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          filled: true,
-                                                          fillColor:
-                                                              Colors.white,
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 15,
-                                                      ),
-                                                      TextFormField(
-                                                        style: TextStyle(
-                                                          color:
-                                                              Color(0xFF03045e),
-                                                          fontSize:
-                                                              size.width * 0.04,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        controller:
-                                                            direccionController,
-                                                        enabled: true,
-                                                        obscureText: false,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              'Direccion',
-                                                          hintText: 'Direccion',
+                                                          labelText: 'Clave',
+                                                          hintText: 'Clave',
                                                           labelStyle: TextStyle(
                                                             color: Color(
                                                                 0xFF03045e),
@@ -895,16 +616,71 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                             duration: 2,
                                                             onPressed:
                                                                 () async {
-                                                              if (_selectedStd ==
-                                                                  null) {
-                                                                final snackBar =
-                                                                    SnackBar(
-                                                                        content:
-                                                                            Text("Error  Seleccione un tipo de documento.."));
-                                                                ScaffoldMessenger.of(
-                                                                        context)
-                                                                    .showSnackBar(
-                                                                        snackBar);
+                                                              if (claveController
+                                                                          .text ==
+                                                                      "" ||
+                                                                  claveController
+                                                                      .text
+                                                                      .isEmpty) {
+                                                                var size =
+                                                                    MediaQuery.of(
+                                                                            context)
+                                                                        .size;
+
+                                                                showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (BuildContext
+                                                                          context) {
+                                                                    return AlertDialog(
+                                                                      backgroundColor: Colors
+                                                                          .white
+                                                                          .withOpacity(
+                                                                              1),
+                                                                      title:
+                                                                          Text(
+                                                                        'Por favor ingrese su clave o cambiela',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Color(0xFF03045e)),
+                                                                      ),
+                                                                      content: Text(
+                                                                          'Ingresa clave'),
+                                                                      actions: <Widget>[
+                                                                        Column(
+                                                                          children: [
+                                                                            Row(
+                                                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                              children: [
+                                                                                TextButton(
+                                                                                  style: TextButton.styleFrom(
+                                                                                    shape: RoundedRectangleBorder(
+                                                                                      borderRadius: BorderRadius.circular(0.0),
+                                                                                      side: const BorderSide(color: Colors.grey),
+                                                                                    ),
+                                                                                    backgroundColor: Color(0xFF03045e),
+                                                                                  ),
+                                                                                  child: Text(
+                                                                                    'Confirmar',
+                                                                                    style: TextStyle(fontSize: size.width * 0.03, color: Colors.white),
+                                                                                  ),
+                                                                                  onPressed: () async {
+                                                                                    //   await fetchShowsdelete(order.ventaId.toString());
+                                                                                    //   listaset = fetchShows();
+                                                                                    Navigator.of(context).pop();
+                                                                                    setState(() {});
+                                                                                  },
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ],
+                                                                        )
+                                                                      ],
+                                                                    );
+                                                                  },
+                                                                );
                                                               } else {
                                                                 _login(context);
                                                               }
@@ -915,7 +691,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                                       .center,
                                                               children: [
                                                                 Text(
-                                                                  'Crear Cliente',
+                                                                  'Actualizar Promotor',
                                                                   style:
                                                                       TextStyle(
                                                                     color: Color(
@@ -933,6 +709,132 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
                                                               ],
                                                             ),
                                                           )),
+                                                      SwitchListTile(
+                                                        subtitle: Text(
+                                                          estatus
+                                                              ? " Oprime para Desactivar Usuario:"
+                                                              : "Oprime para Activar Usuario",
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xFFcaf0f8),
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.032,
+                                                            fontFamily: 'gotic',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        controlAffinity:
+                                                            ListTileControlAffinity
+                                                                .leading,
+                                                        activeColor:
+                                                            Color(0xFF03045e),
+                                                        title: Text(
+                                                          estatus
+                                                              ? "Activado:"
+                                                              : "Cartilla: ",
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xFFcaf0f8),
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.032,
+                                                            fontFamily: 'gotic',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        value: estatus,
+                                                        onChanged:
+                                                            (value) async {
+                                                          if (value == false) {
+                                                            var size =
+                                                                MediaQuery.of(
+                                                                        context)
+                                                                    .size;
+
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return AlertDialog(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .white
+                                                                          .withOpacity(
+                                                                              1),
+                                                                  title: Text(
+                                                                    'Seguro que deseas eliminar la cuenta?',
+                                                                    style: TextStyle(
+                                                                        color: Color(
+                                                                            0xFF03045e)),
+                                                                  ),
+                                                                  content: Text(
+                                                                      'Eliminar Cuenta'),
+                                                                  actions: <Widget>[
+                                                                    Column(
+                                                                      children: [
+                                                                        Row(
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.center,
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceAround,
+                                                                          children: [
+                                                                            TextButton(
+                                                                              style: TextButton.styleFrom(
+                                                                                shape: RoundedRectangleBorder(
+                                                                                  borderRadius: BorderRadius.circular(0.0),
+                                                                                  side: const BorderSide(color: Colors.grey),
+                                                                                ),
+                                                                                backgroundColor: Colors.red[900],
+                                                                              ),
+                                                                              child: Text(
+                                                                                'Cancelar',
+                                                                                style: TextStyle(fontSize: size.width * 0.03, color: Colors.white),
+                                                                              ),
+                                                                              onPressed: () {
+                                                                                Navigator.of(context).pop();
+                                                                              },
+                                                                            ),
+                                                                            TextButton(
+                                                                              style: TextButton.styleFrom(
+                                                                                shape: RoundedRectangleBorder(
+                                                                                  borderRadius: BorderRadius.circular(0.0),
+                                                                                  side: const BorderSide(color: Colors.grey),
+                                                                                ),
+                                                                                backgroundColor: Color(0xFF03045e),
+                                                                              ),
+                                                                              child: Text(
+                                                                                'Confirmar',
+                                                                                style: TextStyle(fontSize: size.width * 0.03, color: Colors.white),
+                                                                              ),
+                                                                              onPressed: () async {
+                                                                                //   await fetchShowsdelete(order.ventaId.toString());
+                                                                                //   listaset = fetchShows();
+                                                                                setState(() {
+                                                                                  estatus = value;
+                                                                                });
+
+                                                                                desactivar(context);
+
+                                                                                setState(() {});
+                                                                              },
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    )
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                          }
+
+                                                          // _modeld.status.text = value == true ? "1" : "0";
+                                                        },
+                                                      )
                                                     ])))))
                               ])
                             ]))))
@@ -950,7 +852,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
     try {
       String ruta;
 
-      ruta = ipController.text + "/api/ClienteInterno/PostCliente";
+      ruta = ipController.text + "/api/Login/ActualizaPromotor";
 
       final uri = Uri.parse(ruta);
       final headers = {'Content-Type': 'application/json'};
@@ -961,44 +863,51 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
           headers: headers,
           encoding: encoding,
           body: jsonEncode({
-            "clienteid": 0,
+            "promotorId": widget.datosuser!.promotorId,
             "nombres": nomClieController.text,
             "apellidos": apeclieController.text,
-            "tipoDocumento": _selectedStd,
-            "doi": widget.doi,
-            "direccion": direccionController.text,
-            "departamento": departamentoController.text,
+            "tipoDocumento": 11,
+            "doi": dniController.text,
             "telefono": telefonoController.text,
-            "email": correoController.text,
-            "fechaRegistro": "2025-01-23T18:23:01.761Z",
-            "extranetid": 0,
-            "synchronizer": 0
+            "usuario": correoController.text,
+            "password": claveController.text,
+            "estado": true,
+            "tipousuario": 2,
+            "comision": 0
           }));
 
       if (response.statusCode == 200) {
-        final snackBar = SnackBar(content: Text("Se Creo el Cliente.."));
+        pf.setUsuario = correoController.text;
+        pf.setpassword = claveController.text;
+        const snackBar =
+            SnackBar(content: Center(child: Text("Se ha actualizado el promotor..")), backgroundColor: Colors.green,);
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         await Future.delayed(const Duration(seconds: 2), () {
-          Navigator.of(context).pop();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) =>
+                false, // Elimina todas las rutas anteriores
+          );
         });
       } else {
-        final snackBar =
-            SnackBar(content: Text("Error  Registro  con Problemas.."));
+        const snackBar =
+            SnackBar(content: Center(child: Text("Error registro con problemas..")));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
-      final snackBar =
-          SnackBar(content: Text("Error  Registro  con Problemas.."));
+      const snackBar =
+          SnackBar(content: Center(child: Text("Error registro con problemas..")));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      throw new Exception("Error al Conectarse con la Api");
+      throw Exception("Error al Conectarse con la Api");
     }
   }
 
-  final ioc = new HttpClient();
+  final ioc = HttpClient();
   void desactivar(BuildContext context) async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
-    final http = new IOClient(ioc);
+    final http = IOClient(ioc);
     try {
       String ruta;
 
@@ -1013,6 +922,7 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
           headers: headers,
           encoding: encoding,
           body: jsonEncode({
+            "promotorId": widget.datosuser!.promotorId,
             "nombres": nomClieController.text,
             "apellidos": apeclieController.text,
             "tipoDocumento": 11,
@@ -1026,21 +936,26 @@ class _ModificarUsuarioState extends State<ModificarUsuario> {
           }));
 
       if (response.statusCode == 200) {
-        final snackBar = SnackBar(content: Text("Se Creo el Cliente.."));
+        const snackBar = SnackBar(content: Center(child: Text("Se actualizo el promotor..")), backgroundColor: Colors.green,);
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         await Future.delayed(const Duration(seconds: 2), () {
-          Navigator.of(context).pop();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (Route<dynamic> route) =>
+                false, // Elimina todas las rutas anteriores
+          );
         });
       } else {
-        final snackBar =
-            SnackBar(content: Text("Error  Registro  con Problemas.."));
+        const snackBar =
+            SnackBar(content: Center(child: Text("Error registro con problemas..")));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
-      final snackBar =
-          SnackBar(content: Text("Error  Registro  con Problemas.."));
+      const snackBar =
+          SnackBar(content: Center(child: Text("Error registro con problemas..")));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      throw new Exception("Error al Conectarse con la Api");
+      throw Exception("Error al Conectarse con la Api");
     }
   }
 }

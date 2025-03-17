@@ -6,7 +6,7 @@ class Splash extends StatelessWidget {
   static const String routeName = '/splash';
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         alignment: Alignment.center,

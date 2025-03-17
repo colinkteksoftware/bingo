@@ -1,30 +1,30 @@
 import 'dart:ui';
 
-import 'package:bingo/ui/login.dart';
+import 'package:bingo/ui/login_page.dart';
+import 'package:bingo/utils/background.dart';
+import 'package:bingo/utils/routes.dart';
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
-import 'package:bingo/utiles/preferencias.dart';
+import 'package:bingo/utils/preferencias.dart';
 
-class ConfiguraIP extends StatefulWidget {
+class SettingPage extends StatefulWidget {
   static const String routeName = '/configuraIP';
 
-  const ConfiguraIP({Key? key}) : super(key: key);
+  const SettingPage({Key? key}) : super(key: key);
 
   @override
-  State<ConfiguraIP> createState() => _ConfiguraIPState();
+  State<SettingPage> createState() => _SettingPageState();
 }
 
 bool _isChecked = false;
 final pf = Preferencias();
 
-class _ConfiguraIPState extends State<ConfiguraIP> {
+class _SettingPageState extends State<SettingPage> {
   final ipController = TextEditingController(text: pf.getIp);
 
   var maskFormatter = MaskedTextController(mask: '#.#.#.#', translator: {
     '#': RegExp(r'^([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
   });
-
-  //final pf = new Preferencias();
 
   @override
   void dispose() {
@@ -39,6 +39,7 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
           colors: [Color(0xFFcaf0f8), Color(0xFF00b4d8)],
           stops: [0.3, 0.9]));
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     List<Color> _colors = [Colors.greenAccent, Colors.blue];
@@ -63,7 +64,6 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                            
                               Stack(children: [
                                 Container(
                                   decoration: boxDecoration,
@@ -73,7 +73,7 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                   left: -15,
                                   child: Column(
                                     children: [
-                                      box(),
+                                      customBox3(),
                                     ],
                                   ),
                                 ),
@@ -82,7 +82,7 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                   left: 105,
                                   child: Column(
                                     children: [
-                                      box2(),
+                                      customBox4(),
                                     ],
                                   ),
                                 ),
@@ -91,18 +91,19 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                     child: Container(
                                         height: size.height,
                                         width: double.infinity,
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 570
-                                        ),
+                                        constraints:
+                                            const BoxConstraints(maxWidth: 570),
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(12),
                                         ),
                                         child: Align(
                                             alignment:
-                                                const AlignmentDirectional(0, 0),
+                                                const AlignmentDirectional(
+                                                    0, 0),
                                             child: Padding(
-                                                padding: const EdgeInsets.all(32),
+                                                padding:
+                                                    const EdgeInsets.all(32),
                                                 child: Column(
                                                     mainAxisSize:
                                                         MainAxisSize.max,
@@ -110,25 +111,27 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                                         CrossAxisAlignment
                                                             .center,
                                                     children: [
-                                                                          Padding(
-                            padding:
-                                const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
-                            child: Container(
-                           
-                              height: size.height *0.2,
-                              decoration: const BoxDecoration(
-                                  
-                                   image: DecorationImage(
-                                    
-                  image: AssetImage("assets/images/logo.png"),
-                  fit: BoxFit.fill),
-                        
-                              ),
-                              alignment: const AlignmentDirectional(0, 0),
-                              
-                            ),
-                            
-                          ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(
+                                                                0, 20, 0, 0),
+                                                        child: Container(
+                                                          height:
+                                                              size.height * 0.2,
+                                                          decoration:
+                                                              const BoxDecoration(
+                                                            image: DecorationImage(
+                                                                image: AssetImage(
+                                                                    "assets/images/logo.png"),
+                                                                fit: BoxFit
+                                                                    .fill),
+                                                          ),
+                                                          alignment:
+                                                              const AlignmentDirectional(
+                                                                  0, 0),
+                                                        ),
+                                                      ),
                                                       Text('Bienvenido',
                                                           textAlign:
                                                               TextAlign.center,
@@ -147,8 +150,8 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                                       Padding(
                                                         padding:
                                                             const EdgeInsetsDirectional
-                                                                .fromSTEB(0, 12,
-                                                                    0, 24),
+                                                                .fromSTEB(
+                                                                0, 12, 0, 24),
                                                         child: Text(
                                                           'Registra los datos de la ip y el puerto ejemplo https://192.168.0.90:8080',
                                                           textAlign:
@@ -171,8 +174,8 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                                         controller:
                                                             ipController,
                                                         style: TextStyle(
-                                                          color:
-                                                              const Color(0xFF03045e),
+                                                          color: const Color(
+                                                              0xFF03045e),
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -205,9 +208,11 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                                           return null;
                                                         },
                                                       ),
-                                                      const SizedBox(height: 30),
+                                                      const SizedBox(
+                                                          height: 30),
                                                       // _checkboxRecuerda(),
-                                                      const SizedBox(height: 30),
+                                                      const SizedBox(
+                                                          height: 30),
                                                       Theme(
                                                           data: Theme.of(context).copyWith(
                                                               colorScheme: ColorScheme
@@ -225,7 +230,7 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                                                       0xFFcaf0f8),
                                                               backgroundColor:
                                                                   const Color(
-                                                                      0xFF03045e), //change text color of button
+                                                                      0xFF03045e),
                                                               shape:
                                                                   RoundedRectangleBorder(
                                                                 borderRadius:
@@ -264,7 +269,7 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                                                                         .text;
                                                               });
 
-                                                              _login(context);
+                                                              Navigator.pushNamed(context, AppRoutes.login);
                                                             },
                                                           )),
                                                     ])))))
@@ -272,11 +277,6 @@ class _ConfiguraIPState extends State<ConfiguraIP> {
                             ]))))
               ])
             ])));
-  }
-
-  void _login(BuildContext context) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const Login()));
   }
 
   _checkboxRecuerda() {
