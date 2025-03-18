@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bingo/models/ventasconvert.dart';
 import 'package:intl/intl.dart';
 import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/utils/conversiones.dart';
@@ -31,10 +32,11 @@ class CreateBingoPage extends StatefulWidget {
 class _CreateBingoPageState extends State<CreateBingoPage> {
   final DateTime _selectedDate = DateTime.now();
   final pf = Preferencias();
-  Future<List<BingoSala>?>? listaset;
-  List<BingoSala>? listasetresponseList;
+  Future<List<Venta>?>? listaset;
+  List<Venta>? listasetresponseList;
   final ioc = HttpClient();
-  Future<List<BingoSala>?> fetchShows() async {
+
+  Future<List<Venta>?> fetchShows() async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
@@ -55,7 +57,7 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
     if (response.statusCode == 200) {
       setState(() {
         listasetresponseList =
-            bingoSalaFromMap(utf8.decode(response.bodyBytes));
+            ventaFromMap(utf8.decode(response.bodyBytes));
       });
 
       return listasetresponseList;
@@ -85,6 +87,8 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
       setState(() {
         listasetresponseListcartilla =
             cartillaFromJson(utf8.decode(response.bodyBytes));
+
+        //bool exists = listasetresponseListcartilla!.any((element) => element.nombregrupo == );
 
         if (listasetresponseListcartilla!.grupoCartillas! == "") {
           const snackBar = SnackBar(

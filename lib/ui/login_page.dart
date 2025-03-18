@@ -492,8 +492,7 @@ class _LoginPage extends State<LoginPage> {
         pf.setIP = basement;
       }
 
-      String ruta = '${pf.getIp.toString()}/api/Login/PromotorLogin/$usuario/$password';
-      print('SERVICE => $ruta');
+      String ruta = '${pf.getIp.toString()}/api/Login/PromotorLogin/$usuario/$password';      
 
       final uri = Uri.parse(ruta);
       final headers = {'Content-Type': 'application/json'};

@@ -25,22 +25,15 @@ class PaymentWidget extends StatefulWidget {
 }
 
 class _PaymentWidgetState extends State<PaymentWidget> {
-  String searchString = "";
-  String searchStringproduct = "";
-  String detectionInfo = "";
-  final DateTime _selectedDate = DateTime.now();
   final ioc = HttpClient();
   final pf = Preferencias();
-  Future<List<Pago>?>? listaset;
+  Future<List<Pago>?>? listWinners;
   List<Pago>? listasetresponseListpagos = [];
 
-  Future<List<Pago>?> fetchShows() async {
+  Future<List<Pago>?> getWinners() async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
-    String _fecha =
-        "${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}";
-
     final url = Uri.parse(
         "${pf.getIp.toString()}/api/PromotorInterno/GetGanadoresForPromotor/${widget.datosuser!.promotorId}");
 
@@ -65,9 +58,8 @@ class _PaymentWidgetState extends State<PaymentWidget> {
 
   @override
   void initState() {
-    //await pf.initPrefs();
-    listaset = fetchShows();
-    listasetuvt = fetchShowsUVT();
+    listWinners = getWinners();
+    listasetuvt = getAmountUVT();
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {});
@@ -76,91 +68,95 @@ class _PaymentWidgetState extends State<PaymentWidget> {
   @override
   Widget build(BuildContext context) {
     double totaluvt = 0;
+    //double amount = 0;
+    //double sumAward = 0;
+    //double totalPremioAdicional = 0;
     var size = MediaQuery.of(context).size;
-    DateTime maxDate = _selectedDate.add(const Duration(days: 365));
     return Scaffold(
         backgroundColor: const Color(0xFFcaf0f8),
         body: SingleChildScrollView(
             physics: const NeverScrollableScrollPhysics(),
-            child: Stack(
-              children: [
-                const Positioned(
-                  top: -130,
-                  left: -15,
-                  child: Column(
-                    children: [
-                      customBox(),
-                    ],
-                  ),
+            child: Stack(children: [
+              const Positioned(
+                top: -130,
+                left: -15,
+                child: Column(
+                  children: [
+                    customBox(),
+                  ],
                 ),
-                const Positioned(
-                  top: 340,
-                  left: 105,
-                  child: Column(
-                    children: [
-                      customBox2(),
-                    ],
-                  ),
+              ),
+              const Positioned(
+                top: 340,
+                left: 105,
+                child: Column(
+                  children: [
+                    customBox2(),
+                  ],
                 ),
-                Align(
-                    alignment: const AlignmentDirectional(0, 0),
-                    child: Container(
-                        height: size.height,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Align(
-                            alignment: const AlignmentDirectional(0, 0),
-                            child: Padding(
-                                padding: const EdgeInsets.all(32),
-                                child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_back,
-                                                color: const Color(0xFF03045e),
-                                                size: size.width * 0.08),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                          ),
-                                        ],
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(0, 0, 0, 0),
-                                        child: Container(
-                                          height: size.height * 0.1,
-                                          decoration: const BoxDecoration(
-                                            image: DecorationImage(
-                                                image: AssetImage(
-                                                    "assets/images/logo.png"),
-                                                fit: BoxFit.fill),
-                                          ),
-                                          alignment:
-                                              const AlignmentDirectional(0, 0),
+              ),
+              Align(
+                  alignment: const AlignmentDirectional(0, 0),
+                  child: Container(
+                      height: size.height,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Align(
+                          alignment: const AlignmentDirectional(0, 0),
+                          child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.arrow_back,
+                                              color: const Color(0xFF03045e),
+                                              size: size.width * 0.08),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
                                         ),
-                                      ),
-                                      Text(
-                                        'Lista de Ganadores del Bingo'
-                                            .toUpperCase(),
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0, 0, 0, 0),
+                                      child: Container(
+                                        height: size.height * 0.1,
+                                        decoration: const BoxDecoration(
+                                          image: DecorationImage(
+                                              image: AssetImage(
+                                                  "assets/images/logo.png"),
+                                              fit: BoxFit.fill),
                                         ),
+                                        alignment:
+                                            const AlignmentDirectional(0, 0),
                                       ),
-                                      listasetresponseListpagos == null ||
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      'Lista de Ganadores del Bingo'
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter Tight',
+                                        color: Colors.black,
+                                        fontSize: 20,
+                                        letterSpacing: 0.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+
+                                    listasetresponseListpagos == null ||
                                               listasetresponseListpagos!.isEmpty
                                           ? Center(
                                               child: AnimatedTextKit(
@@ -202,6 +198,8 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                     double
                                                         totalPremioAdicional =
                                                         0;
+                                                    double amount = 0;                                                    
+
                                                     if (order
                                                         .detallePremioFigura!
                                                         .first
@@ -221,11 +219,11 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                               value + element);
                                                     }
 
-                                                    double amount = (order
-                                                            .detallePremioFigura!
-                                                            .first
-                                                            .valorPremio! +
-                                                        totalPremioAdicional);
+                                                    amount = (order
+                                                              .detallePremioFigura!
+                                                              .first
+                                                              .valorPremio! +
+                                                          totalPremioAdicional);
 
                                                     return order.bingoId
                                                             .toString()
@@ -248,7 +246,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                           0.94,
                                                                   height:
                                                                       size.height *
-                                                                          0.16,
+                                                                          0.18,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     image:
@@ -260,97 +258,89 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                     ),
                                                                     borderRadius:
                                                                         BorderRadius.circular(
-                                                                            25),
+                                                                            20),
                                                                   ),
                                                                   child:
                                                                       Padding(
                                                                     padding:
                                                                         const EdgeInsetsDirectional
                                                                             .fromSTEB(
-                                                                            20,
-                                                                            0,
-                                                                            20,
+                                                                            10,
+                                                                            5,
+                                                                            10,
                                                                             0),
                                                                     child:
                                                                         Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .max,
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .center,
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .start,
                                                                       children: [
                                                                         Padding(
-                                                                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                                                                0,
-                                                                                0,
-                                                                                0,
-                                                                                10),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                              children: [
-                                                                                Column(
-                                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      '${order.ventaId}'.toUpperCase(),
-                                                                                      style: const TextStyle(
-                                                                                        fontFamily: 'Inter Tight',
-                                                                                        color: Color(0xFFcaf0f8),
-                                                                                        fontSize: 12,
-                                                                                        letterSpacing: 0.0,
-                                                                                        fontWeight: FontWeight.w800,
+                                                                          padding: const EdgeInsetsDirectional
+                                                                              .fromSTEB(
+                                                                              0,
+                                                                              0,
+                                                                              0,
+                                                                              10),
+                                                                          child:
+                                                                              Column(
+                                                                            children: [
+                                                                              Column(
+                                                                                children: [
+                                                                                  Row(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: [
+                                                                                      const Text(
+                                                                                        "MODULO:",
+                                                                                        style: TextStyle(fontFamily: 'Inter Tight', color: Color(0xFFcaf0f8), letterSpacing: 0.0, fontWeight: FontWeight.w800, fontSize: 18),
                                                                                       ),
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                AnimatedButton(
-                                                                                    color: Colors.amber,
-                                                                                    height: size.height * 0.07,
-                                                                                    width: size.width * 0.48,
-                                                                                    duration: 2,
-                                                                                    onPressed: () async {},
-                                                                                    child: Container(
-                                                                                        padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
-                                                                                        child: Center(
-                                                                                            child: Column(
-                                                                                          children: [
-                                                                                            Text(
-                                                                                              "Valor Total:  ${NumberFormat('#,##0', 'en_US').format(amount)}",
-                                                                                              style: TextStyle(
-                                                                                                color: const Color(0xFF0077b6),
-                                                                                                fontSize: size.width * 0.034,
-                                                                                                fontFamily: 'gotic',
-                                                                                                fontWeight: FontWeight.bold,
-                                                                                              ),
-                                                                                            ),
-                                                                                            Text(
-                                                                                              "Valor Premio:  ${NumberFormat('#,##0', 'en_US').format(order.detallePremioFigura!.first.valorPremio)}",
-                                                                                              style: TextStyle(
-                                                                                                color: const Color(0xFF0077b6),
-                                                                                                fontSize: size.width * 0.030,
-                                                                                                fontFamily: 'gotic',
-                                                                                                fontWeight: FontWeight.bold,
-                                                                                              ),
-                                                                                            ),
-                                                                                            Text(
-                                                                                              "Valor Adicionales:  ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional)}",
-                                                                                              style: TextStyle(
-                                                                                                color: const Color(0xFF0077b6),
-                                                                                                fontSize: size.width * 0.030,
-                                                                                                fontFamily: 'gotic',
-                                                                                                fontWeight: FontWeight.bold,
-                                                                                              ),
-                                                                                            )
-                                                                                          ],
-                                                                                        )))),
-                                                                              ],
-                                                                            )),
+                                                                                      const SizedBox(width: 5),
+                                                                                      Text(
+                                                                                        '${order.codigoModulo}',
+                                                                                        style: const TextStyle(fontFamily: 'Inter Tight', color: Color(0xFFcaf0f8), letterSpacing: 0.0, fontWeight: FontWeight.w800, fontSize: 18),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                  const SizedBox(height: 5),
+                                                                                  Row(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: [
+                                                                                      AnimatedButton(
+                                                                                          color: const Color.fromARGB(255, 210, 193, 3), //Colors.amber,
+                                                                                          height: size.height * 0.07,
+                                                                                          width: size.width * 0.48,
+                                                                                          duration: 2,
+                                                                                          onPressed: () async {},
+                                                                                          child: Container(
+                                                                                              padding: const EdgeInsets.only(top: 2, left: 0, right: 0, bottom: 2),
+                                                                                              child: Center(
+                                                                                                  child: Column(
+                                                                                                children: [
+                                                                                                  Text(
+                                                                                                    "Valor Total:  ${NumberFormat('#,##0', 'en_US').format(amount)}",
+                                                                                                    style: TextStyle(
+                                                                                                      color: Colors.black, //const Color(0xFF0077b6),
+                                                                                                      fontSize: size.width * 0.034,
+                                                                                                      fontFamily: 'gotic',
+                                                                                                      fontWeight: FontWeight.bold,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  Text(
+                                                                                                    "Valor Premio:  ${NumberFormat('#,##0', 'en_US').format(order.detallePremioFigura!.first.valorPremio)}",
+                                                                                                    style: TextStyle(
+                                                                                                      color: Colors.black,
+                                                                                                      fontSize: size.width * 0.030,
+                                                                                                      fontFamily: 'gotic',
+                                                                                                      fontWeight: FontWeight.bold,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  Text(
+                                                                                                    "Valor Adicionales:  ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional)}",
+                                                                                                    style: TextStyle(
+                                                                                                      color: Colors.black,
+                                                                                                      fontSize: size.width * 0.030,
+                                                                                                      fontFamily: 'gotic',
+                                                                                                      fontWeight: FontWeight.bold,
+                                                                                                    ))]))))])])])),
                                                                         Row(
                                                                           mainAxisSize:
                                                                               MainAxisSize.max,
@@ -367,10 +357,11 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                                       children: [],
                                                                                     )),
                                                                                 Text(
-                                                                                  "Modulo: ${order.codigoModulo}",
+                                                                                  '${order.ventaId}'.toUpperCase(),
                                                                                   style: const TextStyle(
                                                                                     fontFamily: 'Inter Tight',
                                                                                     color: Color(0xFFcaf0f8),
+                                                                                    fontSize: 12,
                                                                                     letterSpacing: 0.0,
                                                                                     fontWeight: FontWeight.w800,
                                                                                   ),
@@ -385,17 +376,21 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                                   crossAxisAlignment: CrossAxisAlignment.end,
                                                                                   children: [
                                                                                     GestureDetector(
-                                                                                      onTap: listasetresponseListpagos!.isNotEmpty ? () async {
-                                                                                        var size = MediaQuery.of(context).size;
-                                                                                        totaluvt = listasetresponseListpagosuvt!.cantidadUvt! == 0 ? 1 : double.parse(listasetresponseListpagosuvt!.cantidadUvt.toString());
+                                                                                      onTap: listasetresponseListpagos!.isNotEmpty
+                                                                                          ? () async {
+                                                                                              var size = MediaQuery.of(context).size;
+                                                                                              totaluvt = listasetresponseListpagosuvt!.cantidadUvt! == 0 ? 1 : double.parse(listasetresponseListpagosuvt!.cantidadUvt.toString());
 
-                                                                                        collectPrize(context, order, amount, size, totalPremioAdicional, totaluvt);
-                                                                                      } : null,
+                                                                                              collectPrize(context, order, amount, size, totalPremioAdicional, totaluvt);
+                                                                                            }
+                                                                                          : null,
                                                                                       child: InkWell(
-                                                                                        onTap: listasetresponseListpagos!.isNotEmpty ? () {
-                                                                                          totaluvt = listasetresponseListpagosuvt!.cantidadUvt! == 0 ? 1 : double.parse(listasetresponseListpagosuvt!.cantidadUvt.toString());
-                                                                                          collectPrize(context, order, amount, size, totalPremioAdicional, totaluvt);
-                                                                                        } : null,
+                                                                                        onTap: listasetresponseListpagos!.isNotEmpty
+                                                                                            ? () {
+                                                                                                totaluvt = listasetresponseListpagosuvt!.cantidadUvt! == 0 ? 1 : double.parse(listasetresponseListpagosuvt!.cantidadUvt.toString());
+                                                                                                collectPrize(context, order, amount, size, totalPremioAdicional, totaluvt);
+                                                                                              }
+                                                                                            : null,
                                                                                         child: Container(
                                                                                           padding: const EdgeInsets.all(8.0),
                                                                                           decoration: BoxDecoration(
@@ -421,37 +416,14 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                                               Icon(
                                                                                                 Icons.monetization_on_outlined,
                                                                                                 size: size.width * 0.059,
-                                                                                                color: listasetresponseListpagos!.isNotEmpty? Colors.white : Colors.grey[600],
-                                                                                              ),
-                                                                                            ],
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    )
-                                                                                  ],
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                )))
+                                                                                                color: listasetresponseListpagos!.isNotEmpty ? Colors.white : Colors.grey[600],
+                                                                                              )]))))])])])])))))
                                                         : Container();
-                                                  }))),
-                                    ])))))
-              ],
-            )));
+                                                  })))])))))])));                                  
   }
 
-  Future<dynamic> collectPrize(
-      BuildContext context,
-      Pago order,
-      double amount,
-      Size size,
-      double totalPremioAdicional,
-      double totaluvt) {
+  Future<dynamic> collectPrize(BuildContext context, Pago order, double amount,
+      Size size, double totalPremioAdicional, double totaluvt) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -524,8 +496,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                amount >=
-                        (listasetresponseListpagosuvt!.valorUvt! * totaluvt)
+                amount >= (listasetresponseListpagosuvt!.valorUvt! * totaluvt)
                     ? Padding(
                         padding: const EdgeInsets.all(4),
                         child: SizedBox(
@@ -616,14 +587,15 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                             color: const Color(0xFFcaf0f8)),
                       ),
                       onPressed: () async {
-                        await fetchShowsUVT();
+                        await getAmountUVT();
 
                         if (amount >=
                             (listasetresponseListpagosuvt!.valorUvt! *
                                 totaluvt)) {
                           if (dniController.text == "") {
                             const snackBar = SnackBar(
-                                content: Center(child: Text("Ingrese un DNI valido..")));
+                                content: Center(
+                                    child: Text("Ingrese un DNI valido..")));
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           } else {
@@ -635,7 +607,8 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                             await fetchShowscliente();
                             if (listasetresponseListpagoscliente == null) {
                               const snackBar = SnackBar(
-                                  content: Center(child: Text("Ingrese un DNI valido..")));
+                                  content: Center(
+                                      child: Text("Ingrese un DNI valido..")));
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(snackBar);
                             } else {
@@ -643,7 +616,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                       dniController.text &&
                                   listasetresponseListpagoscliente!.doi !=
                                       null) {
-                                await fetchShowsdelete(order);
+                                await registerWinner(order);
                               } else {
                                 await Navigator.push(
                                     context,
@@ -655,11 +628,10 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                             }
                           }
                         } else {
-                          await fetchShowsdelete(order);
+                          await registerWinner(order);
                         }
 
-                        listaset = fetchShows();
-
+                        listWinners = getWinners();
                         setState(() {});
                       },
                     ),
@@ -676,7 +648,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
   Future<Uvt?>? listasetuvt;
   Uvt? listasetresponseListpagosuvt;
 
-  Future<Uvt?> fetchShowsUVT() async {
+  Future<Uvt?> getAmountUVT() async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
@@ -703,6 +675,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
   }
 
   Cliente? listasetresponseListpagoscliente;
+
   Future<Cliente?> fetchShowscliente() async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
@@ -731,7 +704,8 @@ class _PaymentWidgetState extends State<PaymentWidget> {
   }
 
   TextEditingController dniController = TextEditingController(text: "");
-  Future<String> fetchShowsdelete(Pago elemento) async {
+
+  Future<String> registerWinner(Pago elemento) async {
     String jsonBody = json.encode(elemento.toJson());
 
     print(jsonBody);
@@ -748,20 +722,31 @@ class _PaymentWidgetState extends State<PaymentWidget> {
           body: jsonBody);
 
       if (response.statusCode == 200) {
-        const snackBar = SnackBar(content: Center(child: Text("Se ha confirmado el pago..")), backgroundColor: Colors.green,);
+        const snackBar = SnackBar(
+          content: Center(child: Text("Se ha confirmado el pago..")),
+          backgroundColor: Colors.green,
+        );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         Navigator.of(context).pop();
         return "si";
       } else {
         const snackBar = SnackBar(
-            content: Center(child: Center(child: Text("No se ha confirmado el pago. Valide el valor UVT.."))), backgroundColor: Colors.red,);
+          content: Center(
+              child: Center(
+                  child: Text(
+                      "No se ha confirmado el pago. Valide el valor UVT.."))),
+          backgroundColor: Colors.red,
+        );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         throw Exception('Failed to load shows');
       }
     } catch (e) {
       const snackBar = SnackBar(
-          content: Center(child: Center(child: Text("No se ha confirmado el pago valide conexión."))));
+          content: Center(
+              child: Center(
+                  child:
+                      Text("No se ha confirmado el pago valide conexión."))));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       throw Exception('Failed to load shows');

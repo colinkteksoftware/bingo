@@ -20,7 +20,7 @@ class BingoService {
       },
     );
 
-    if (response.statusCode == 200) {      
+    if (response.statusCode == 200) {
       return bingoSalaFromMap(utf8.decode(response.bodyBytes));
     } else {
       throw Exception('Failed to load shows');

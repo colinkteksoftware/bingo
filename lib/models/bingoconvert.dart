@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final show = showFromJson(jsonString);
-
 import 'dart:convert';
 
 List<BingoSala> bingoSalaFromMap(String str) => List<BingoSala>.from(json.decode(str).map((x) => BingoSala.fromMap(x)));
