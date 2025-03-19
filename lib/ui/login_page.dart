@@ -1,11 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-import 'dart:math';
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/ui/bingo_page.dart';
-import 'package:bingo/ui/setting_page.dart';
-import 'package:bingo/ui/user/person_page.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/utils/responsivo.dart';
@@ -172,7 +168,8 @@ class _LoginPage extends State<LoginPage> {
                                                   const EdgeInsetsDirectional
                                                       .fromSTEB(0, 20, 0, 0),
                                               child: Container(
-                                                  height: size.height * 0.2,
+                                                  height: 150,
+                                                  width: 300,
                                                   decoration:
                                                       const BoxDecoration(
                                                     image: DecorationImage(
@@ -346,7 +343,7 @@ class _LoginPage extends State<LoginPage> {
                                                         ),
                                                         child: Center(
                                                           child: Text(
-                                                              'Inicio de sesion',
+                                                              'Inicio de sesión',
                                                               style: TextStyle(
                                                                 color: const Color(
                                                                     0xFFcaf0f8),
@@ -373,12 +370,6 @@ class _LoginPage extends State<LoginPage> {
                                                     width: size.width * 0.3,
                                                     duration: 2,
                                                     onPressed: () async {
-                                                      /*await Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  PersonPage()));*/
-
                                                       await Navigator.pushNamed(
                                                           context,
                                                           AppRoutes.person);
@@ -412,11 +403,6 @@ class _LoginPage extends State<LoginPage> {
                                                     width: size.width * 0.3,
                                                     duration: 2,
                                                     onPressed: () async {
-                                                      /*await Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  const SettingPage()));*/
                                                       await Navigator.pushNamed(
                                                           context,
                                                           AppRoutes.setting);
@@ -446,16 +432,6 @@ class _LoginPage extends State<LoginPage> {
                                                         ))))
                                               ],
                                             ),
-                                            /*const SizedBox(height: 15),
-                                            Text(
-                                              'IP ${ipController.text}',
-                                              style: TextStyle(
-                                                color: const Color(0xFF03045e),
-                                                fontSize: size.width * 0.032,
-                                                fontFamily: 'gotic',
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            )*/
                                           ],
                                         ),
                                       ),
@@ -480,7 +456,8 @@ class _LoginPage extends State<LoginPage> {
 
   List<Sala>? sala;
   final ioc = HttpClient();
-  Future<void> _login(BuildContext context, String usuario, String password) async {
+  Future<void> _login(
+      BuildContext context, String usuario, String password) async {
     try {
       ioc.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
@@ -492,7 +469,8 @@ class _LoginPage extends State<LoginPage> {
         pf.setIP = basement;
       }
 
-      String ruta = '${pf.getIp.toString()}/api/Login/PromotorLogin/$usuario/$password';      
+      String ruta =
+          '${pf.getIp.toString()}/api/Login/PromotorLogin/$usuario/$password';
 
       final uri = Uri.parse(ruta);
       final headers = {'Content-Type': 'application/json'};
@@ -523,8 +501,9 @@ class _LoginPage extends State<LoginPage> {
           datosuser = datosuser;
         });
         if (datosuser != null &&
-            datosuser!.estado == true &&
-            datosuser!.usuario.toString() == usuario.toString().toUpperCase() || 
+                datosuser!.estado == true &&
+                datosuser!.usuario.toString() ==
+                    usuario.toString().toUpperCase() ||
             datosuser!.usuario.toString() == usuario.toString().toLowerCase()) {
           setState(() {
             pf.setUsuario = txtControlerUsuario.text;
@@ -538,9 +517,8 @@ class _LoginPage extends State<LoginPage> {
 
             _loading = true;
           });
-          
-          Navigator.pushNamed(context, AppRoutes.bingo,
-              arguments: datosuser);
+
+          Navigator.pushNamed(context, AppRoutes.bingo, arguments: datosuser);
         } else {
           showAlerta(context, 'Mensaje Informativo',
               'Contraseña Incorrecta Verificar!!');

@@ -16,9 +16,9 @@ import 'package:http/io_client.dart';
 
 class PaymentWidget extends StatefulWidget {
   ModelCliente? datosuser;
+  Bingo? bingo;
 
-  BingoSala? bingo;
-  PaymentWidget({super.key, required this.datosuser});
+  PaymentWidget({super.key, required this.datosuser, required this.bingo});
 
   @override
   State<PaymentWidget> createState() => _PaymentWidgetState();
@@ -67,6 +67,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print('BINGO estado => ${widget.bingo}');
     double totaluvt = 0;
     //double amount = 0;
     //double sumAward = 0;
@@ -237,8 +238,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                         .only(
                                                                         left: 4,
                                                                         right:
-                                                                            4,
-                                                                        top: 0),
+                                                                            4),
                                                                 child:
                                                                     Container(
                                                                   width:
@@ -419,7 +419,8 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                                                                                                 color: listasetresponseListpagos!.isNotEmpty ? Colors.white : Colors.grey[600],
                                                                                               )]))))])])])])))))
                                                         : Container();
-                                                  })))])))))])));                                  
+                                                  }))), const SizedBox(height: 5),
+                                                  ])))))])));                                  
   }
 
   Future<dynamic> collectPrize(BuildContext context, Pago order, double amount,

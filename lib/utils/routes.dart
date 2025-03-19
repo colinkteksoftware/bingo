@@ -38,7 +38,7 @@ class AppRoutes {
         if (datosuser != null) {
           return MaterialPageRoute(
               builder: (_) => BingoPage(
-                    datosuser: datosuser,
+                    datosuser: datosuser
                   ));
         }else {
           return _errorRoute();

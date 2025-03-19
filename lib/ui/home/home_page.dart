@@ -33,8 +33,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final pf = Preferencias();
   final ioc = HttpClient();
-  //Future<List<BingoSala>?>? listaset;
-  //List<BingoSala>? listasetresponseListbingo;
   TextEditingController? qrcodeController = TextEditingController(text: "-1");
 
   @override
@@ -42,40 +40,17 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _controller.text = _value.toString();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      //requestCameraPermission();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {      
       PermissionUtils.requestCameraPermission(context);
       initializeCameras();
     });
   }
 
-  /*Future<void> requestCameraPermission() async {
-    final PermissionStatus status = await Permission.camera.request();
-    if (status.isDenied) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Camera permission'),
-          content: const Text(
-              'Please enable camera access in your device settings.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Ok'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
-      );
-    }
-  }*/
-
   Future<void> initializeCameras() async {
     if (await Permission.camera.isDenied) {
-      //requestCameraPermission();
       PermissionUtils.requestCameraPermission(context);
     }
     if (await Permission.camera.isDenied) {
-      //requestCameraPermission();
       PermissionUtils.requestCameraPermission(context);
     }
     try {} catch (e) {
@@ -84,74 +59,6 @@ class _HomePageState extends State<HomePage> {
       print('Error initializing camera: $e');
     }
   }
-
-  /*Future<List<BingoSala>?> fetchShowsbingo() async {
-    String formattedDate =
-        DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha);
-
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseListbingo =
-            bingoSalaFromMap(utf8.decode(response.bodyBytes));
-        var resultado = listasetresponseListbingo!.firstWhere(
-          (elemento) => elemento.bingo.bingoId == widget.bingo!.bingoId,
-        );
-        print("Elemento encontrado: ${resultado.bingo.bingoId}");
-        setState(() {
-          widget.bingo = resultado.bingo;
-        });
-      });
-
-      return listasetresponseListbingo;
-    } else {
-      throw Exception('Failed to load shows');
-    }
-  }*/
-
-  //final DateTime _selectedDate = DateTime.now();
-
-  //Future<List<Promotor>?>? listasetpromotor;
-  //Promotor? listasetresponseListpromotor;
-
-  /*Future<Promotor?> fetchShows() async {
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/DashboardInterno/GetDashboarPromotor/${widget.datosuser!.promotorId}");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseListpromotor =
-            promotorFromJson(utf8.decode(response.bodyBytes));
-      });
-
-      return listasetresponseListpromotor;
-    } else {
-      throw Exception('Failed to load shows');
-    }
-  }*/
 
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
@@ -319,6 +226,7 @@ class _HomePageState extends State<HomePage> {
                                                                     datosuser:
                                                                         widget
                                                                             .datosuser,
+                                                                    bingo: widget.bingo!
                                                                   );
                                                                 },
                                                               );
@@ -371,7 +279,14 @@ class _HomePageState extends State<HomePage> {
 
                                                               /* fin */
 
-                                                              if (widget.bingo!
+                                                              if (widget.bingo!.estado == 3) {
+                                                                showAlerta(
+                                                                    context,
+                                                                    'Juego Finalizado',
+                                                                    'El bingo ya ha sido finalizado!!!');
+                                                              }
+
+                                                              /*if (widget.bingo!
                                                                           .estado ==
                                                                       2 ||
                                                                   widget.bingo!
@@ -381,7 +296,7 @@ class _HomePageState extends State<HomePage> {
                                                                     context,
                                                                     'Mensaje Informativo',
                                                                     'Para ventas el bingo debe estar en un estado diferente de jugando!!');
-                                                              } else {
+                                                              }*/ else {
                                                                 await showDialog(
                                                                   context:
                                                                       context,

@@ -18,8 +18,9 @@ final ipController = TextEditingController(text: "0.0.0.0");
 // ignore: must_be_immutable
 class BingoPage extends StatefulWidget {
   ModelCliente? datosuser;
+
   BingoPage({super.key, required this.datosuser});
-  
+
   @override
   State<BingoPage> createState() => _BingoPageState();
 }
@@ -39,13 +40,13 @@ class _BingoPageState extends State<BingoPage> {
   void initState() {
     listaset = fetchShows();
     super.initState();
-  }  
-  
+  }
+
   iniciarPreferencias() async {
     await pf.initPrefs();
     ipController.text = pf.getIp;
     setState(() {});
-  }  
+  }
 
   Future<List<BingoSala>?> fetchShows() async {
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
@@ -74,13 +75,13 @@ class _BingoPageState extends State<BingoPage> {
       throw Exception('Failed to load shows');
     }
   }
-  
+
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Color(0xFFcaf0f8), Color(0xFF00b4d8)],
-          stops: [0.3, 0.9]));  
+          stops: [0.3, 0.9]));
 
   @override
   Widget build(BuildContext context) {
@@ -127,32 +128,32 @@ class _BingoPageState extends State<BingoPage> {
                       child: Align(
                           alignment: const AlignmentDirectional(0, 0),
                           child: Padding(
-                              padding: const EdgeInsets.all(32),
+                              padding: const EdgeInsets.only(top: 32),
                               child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Row(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                          CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         IconButton(
-                                          icon: Icon(Icons.arrow_back,
+                                          icon: Icon(Icons.logout,
                                               color: const Color(0xFF03045e),
-                                              size: size.width * 0.08),
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(),
+                                              size: size.width * 0.07),
+                                          onPressed: () => Navigator.pushNamed(
+                                              context, AppRoutes.login),
                                         ),
                                       ],
                                     ),
                                     Padding(
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(
-                                              0, 20, 0, 0),
+                                              30, 10, 30, 0),
                                       child: Container(
-                                        height: size.height * 0.1,
+                                        height: 100,
+                                        width: 300,
                                         decoration: const BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(
@@ -165,7 +166,8 @@ class _BingoPageState extends State<BingoPage> {
                                     ),
                                     const SizedBox(height: 10),
                                     Padding(
-                                        padding: const EdgeInsets.all(2),
+                                        padding: const EdgeInsets.only(
+                                            left: 30, right: 30, bottom: 10),
                                         child: Container(
                                           width: size.width * 0.62,
                                           padding: const EdgeInsets.only(
@@ -206,8 +208,8 @@ class _BingoPageState extends State<BingoPage> {
                                                 borderSide: const BorderSide(
                                                     color: Color(0xFF03045e),
                                                     width: 2.0),
-                                                borderRadius: BorderRadius.circular(
-                                                    10.0),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
                                               ),
                                               focusedBorder:
                                                   const UnderlineInputBorder(
@@ -272,313 +274,318 @@ class _BingoPageState extends State<BingoPage> {
                                         },
                                       ),
                                     ),
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Center(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: () async {
-                                                    await fetchShows();
-                                                    setState(() {
-                                                      _selectedIndex = 0;
-                                                    });
-                                                  },
-                                                  child: Column(children: [
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        border: Border.all(
-                                                          color:
-                                                              _selectedIndex ==
-                                                                      0
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 30, right: 30),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Center(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      await fetchShows();
+                                                      setState(() {
+                                                        _selectedIndex = 0;
+                                                      });
+                                                    },
+                                                    child: Column(children: [
+                                                      Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          border: Border.all(
+                                                            color: _selectedIndex ==
+                                                                    0
+                                                                ? const Color(
+                                                                    0xFF03045e)
+                                                                : Colors.black,
+                                                            width: 2,
+                                                          ),
+                                                          color: _selectedIndex ==
+                                                                  0
+                                                              ? const Color(
+                                                                  0xFF03045e)
+                                                              : Colors
+                                                                  .transparent,
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(12),
+                                                        child: _selectedIndex ==
+                                                                0
+                                                            ? const Icon(
+                                                                Icons.check,
+                                                                color: Color(
+                                                                    0xFFcaf0f8))
+                                                            : const SizedBox(),
+                                                      ),
+                                                      Center(
+                                                          child: Text(
+                                                        "Inactivo",
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: size.width *
+                                                              0.030,
+                                                          fontFamily: 'gotic',
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ))
+                                                    ]),
+                                                  ),
+                                                  const SizedBox(width: 3.5),
+                                                  GestureDetector(
+                                                      onTap: () async {
+                                                        await fetchShows();
+                                                        setState(() {
+                                                          _selectedIndex = 1;
+                                                        });
+                                                      },
+                                                      child: Column(children: [
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: _selectedIndex ==
+                                                                      1
                                                                   ? const Color(
                                                                       0xFF03045e)
                                                                   : Colors
                                                                       .black,
-                                                          width: 2,
-                                                        ),
-                                                        color: _selectedIndex ==
-                                                                0
-                                                            ? const Color(
-                                                                0xFF03045e)
-                                                            : Colors
-                                                                .transparent,
-                                                      ),
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              12),
-                                                      child: _selectedIndex == 0
-                                                          ? const Icon(
-                                                              Icons.check,
-                                                              color: Color(
-                                                                  0xFFcaf0f8))
-                                                          : const SizedBox(),
-                                                    ),
-                                                    Center(
-                                                        child: Text(
-                                                      "Inactivo",
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize:
-                                                            size.width * 0.030,
-                                                        fontFamily: 'gotic',
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ))
-                                                  ]),
-                                                ),
-                                                const SizedBox(width: 3.5),
-                                                GestureDetector(
-                                                    onTap: () async {
-                                                      await fetchShows();
-                                                      setState(() {
-                                                        _selectedIndex = 1;
-                                                      });
-                                                    },
-                                                    child: Column(children: [
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          border: Border.all(
+                                                              width: 2,
+                                                            ),
                                                             color: _selectedIndex ==
                                                                     1
                                                                 ? const Color(
                                                                     0xFF03045e)
-                                                                : Colors.black,
-                                                            width: 2,
+                                                                : Colors
+                                                                    .transparent,
                                                           ),
-                                                          color: _selectedIndex ==
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12),
+                                                          child: _selectedIndex ==
                                                                   1
-                                                              ? const Color(
-                                                                  0xFF03045e)
-                                                              : Colors
-                                                                  .transparent,
+                                                              ? const Icon(
+                                                                  Icons.check,
+                                                                  color: Color(
+                                                                      0xFFcaf0f8))
+                                                              : const SizedBox(),
                                                         ),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12),
-                                                        child: _selectedIndex ==
-                                                                1
-                                                            ? const Icon(
-                                                                Icons.check,
-                                                                color: Color(
-                                                                    0xFFcaf0f8))
-                                                            : const SizedBox(),
-                                                      ),
-                                                      Center(
-                                                          child: Text(
-                                                        "Activo",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: size.width *
-                                                              0.030,
-                                                          fontFamily: 'gotic',
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ))
-                                                    ])),
-                                                const SizedBox(width: 3.5),
-                                                GestureDetector(
-                                                    onTap: () async {
-                                                      await fetchShows();
-                                                      setState(() {
-                                                        _selectedIndex = 2;
-                                                      });
-                                                    },
-                                                    child: Column(children: [
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          border: Border.all(
+                                                        Center(
+                                                            child: Text(
+                                                          "Activo",
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.030,
+                                                            fontFamily: 'gotic',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ))
+                                                      ])),
+                                                  const SizedBox(width: 3.5),
+                                                  GestureDetector(
+                                                      onTap: () async {
+                                                        await fetchShows();
+                                                        setState(() {
+                                                          _selectedIndex = 2;
+                                                        });
+                                                      },
+                                                      child: Column(children: [
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: _selectedIndex ==
+                                                                      2
+                                                                  ? const Color(
+                                                                      0xFF03045e)
+                                                                  : Colors
+                                                                      .black,
+                                                              width: 2,
+                                                            ),
                                                             color: _selectedIndex ==
                                                                     2
                                                                 ? const Color(
                                                                     0xFF03045e)
-                                                                : Colors.black,
-                                                            width: 2,
+                                                                : Colors
+                                                                    .transparent,
                                                           ),
-                                                          color: _selectedIndex ==
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12),
+                                                          child: _selectedIndex ==
                                                                   2
-                                                              ? const Color(
-                                                                  0xFF03045e)
-                                                              : Colors
-                                                                  .transparent,
+                                                              ? const Icon(
+                                                                  Icons.check,
+                                                                  color: Color(
+                                                                      0xFFcaf0f8))
+                                                              : const SizedBox(),
                                                         ),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12),
-                                                        child: _selectedIndex ==
-                                                                2
-                                                            ? const Icon(
-                                                                Icons.check,
-                                                                color: Color(
-                                                                    0xFFcaf0f8))
-                                                            : const SizedBox(),
-                                                      ),
-                                                      Center(
-                                                          child: Text(
-                                                        "Jugando",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: size.width *
-                                                              0.030,
-                                                          fontFamily: 'gotic',
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ))
-                                                    ])),
-                                                const SizedBox(width: 3.5),
-                                                GestureDetector(
-                                                    onTap: () async {
-                                                      await fetchShows();
-                                                      setState(() {
-                                                        _selectedIndex = 3;
-                                                      });
-                                                    },
-                                                    child: Column(children: [
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          border: Border.all(
+                                                        Center(
+                                                            child: Text(
+                                                          "Jugando",
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.030,
+                                                            fontFamily: 'gotic',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ))
+                                                      ])),
+                                                  const SizedBox(width: 3.5),
+                                                  GestureDetector(
+                                                      onTap: () async {
+                                                        await fetchShows();
+                                                        setState(() {
+                                                          _selectedIndex = 3;
+                                                        });
+                                                      },
+                                                      child: Column(children: [
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: _selectedIndex ==
+                                                                      3
+                                                                  ? const Color(
+                                                                      0xFF03045e)
+                                                                  : Colors
+                                                                      .black,
+                                                              width: 2,
+                                                            ),
                                                             color: _selectedIndex ==
                                                                     3
                                                                 ? const Color(
                                                                     0xFF03045e)
-                                                                : Colors.black,
-                                                            width: 2,
+                                                                : Colors
+                                                                    .transparent,
                                                           ),
-                                                          color: _selectedIndex ==
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12),
+                                                          child: _selectedIndex ==
                                                                   3
-                                                              ? const Color(
-                                                                  0xFF03045e)
-                                                              : Colors
-                                                                  .transparent,
+                                                              ? const Icon(
+                                                                  Icons.check,
+                                                                  color: Color(
+                                                                      0xFFcaf0f8))
+                                                              : const SizedBox(),
                                                         ),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12),
-                                                        child: _selectedIndex ==
-                                                                3
-                                                            ? const Icon(
-                                                                Icons.check,
-                                                                color: Color(
-                                                                    0xFFcaf0f8))
-                                                            : const SizedBox(),
-                                                      ),
-                                                      Center(
-                                                          child: Text(
-                                                        "Finalizado",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: size.width *
-                                                              0.030,
-                                                          fontFamily: 'gotic',
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ))
-                                                    ])),
-                                                GestureDetector(
-                                                    onTap: () async {
-                                                      await fetchShows();
-                                                      setState(() {
-                                                        _selectedIndex = 4;
-                                                      });
-                                                    },
-                                                    child: Column(children: [
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          border: Border.all(
+                                                        Center(
+                                                            child: Text(
+                                                          "Finalizado",
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.030,
+                                                            fontFamily: 'gotic',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ))
+                                                      ])),
+                                                  GestureDetector(
+                                                      onTap: () async {
+                                                        await fetchShows();
+                                                        setState(() {
+                                                          _selectedIndex = 4;
+                                                        });
+                                                      },
+                                                      child: Column(children: [
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: _selectedIndex ==
+                                                                      4
+                                                                  ? const Color(
+                                                                      0xFF03045e)
+                                                                  : Colors
+                                                                      .black,
+                                                              width: 2,
+                                                            ),
                                                             color: _selectedIndex ==
                                                                     4
                                                                 ? const Color(
                                                                     0xFF03045e)
-                                                                : Colors.black,
-                                                            width: 2,
+                                                                : Colors
+                                                                    .transparent,
                                                           ),
-                                                          color: _selectedIndex ==
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12),
+                                                          child: _selectedIndex ==
                                                                   4
-                                                              ? const Color(
-                                                                  0xFF03045e)
-                                                              : Colors
-                                                                  .transparent,
+                                                              ? const Icon(
+                                                                  Icons.check,
+                                                                  color: Color(
+                                                                      0xFFcaf0f8))
+                                                              : const SizedBox(),
                                                         ),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12),
-                                                        child: _selectedIndex ==
-                                                                4
-                                                            ? const Icon(
-                                                                Icons.check,
-                                                                color: Color(
-                                                                    0xFFcaf0f8))
-                                                            : const SizedBox(),
-                                                      ),
-                                                      Center(
-                                                          child: Text(
-                                                        "Cancelado",
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: size.width *
-                                                              0.030,
-                                                          fontFamily: 'gotic',
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ))
-                                                    ])),
-                                              ],
+                                                        Center(
+                                                            child: Text(
+                                                          "Cancelado",
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.030,
+                                                            fontFamily: 'gotic',
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ))
+                                                      ])),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          AnimatedButton(
-                                              color: const Color(0xFF03045e),
-                                              height: size.height * 0.05,
-                                              width: size.width * 0.16,
-                                              duration: 2,
-                                              onPressed: () async {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return PaymentWidget(
-                                                      datosuser:
-                                                          widget.datosuser,
-                                                    );
-                                                  },
-                                                );
-                                                setState(() {});
-                                              },
-                                              child: Center(
-                                                  child: Text(
-                                                "Pagos",
-                                                style: TextStyle(
-                                                  color: const Color(
-                                                      0xFFcaf0f8),
-                                                  fontSize:
-                                                      size.width * 0.03,
-                                                  fontFamily: 'gotic',
-                                                  fontWeight:
-                                                      FontWeight.bold,
-                                                ),
-                                              ))),
-                                        ]),
+                                            AnimatedButton(
+                                                color: _selectedIndex == 2 && listasetresponseList?.isNotEmpty == true
+                                                    ? const Color(0xFF03045e)
+                                                    : Colors.grey,
+                                                height: size.height * 0.05,
+                                                width: size.width * 0.16,
+                                                duration: 2,
+                                                onPressed: _selectedIndex == 2
+                                                    ? () {
+                                                        _handlePayments();
+                                                      }
+                                                    : () {},
+                                                child: Center(
+                                                    child: Text(
+                                                  "Pagos",
+                                                  style: TextStyle(
+                                                    color:
+                                                        const Color(0xFFcaf0f8),
+                                                    fontSize: size.width * 0.03,
+                                                    fontFamily: 'gotic',
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ))),
+                                          ]),
+                                    ),
                                     listasetresponseList == null
                                         ? Container()
                                         : SizedBox(
@@ -613,8 +620,8 @@ class _BingoPageState extends State<BingoPage> {
                                                               .contains(
                                                                   _selectedIndex
                                                                       .toString()) &&
-                                                          order.bingo
-                                                              .fecha.month
+                                                          order
+                                                              .bingo.fecha.month
                                                               .toString()
                                                               .toLowerCase()
                                                               .contains(
@@ -623,12 +630,20 @@ class _BingoPageState extends State<BingoPage> {
                                                                       .toString())
                                                       ? GestureDetector(
                                                           onTap: () async {
-                                                            Bingo playing = order.bingo;
-                                                            await Navigator.pushNamed(context, AppRoutes.home, arguments: {
-                                                                      'bingo': playing,
-                                                                      'datosuser':
-                                                                          widget
-                                                                              .datosuser});
+                                                            Bingo playing =
+                                                                order.bingo;
+                                                            await Navigator
+                                                                .pushNamed(
+                                                                    context,
+                                                                    AppRoutes
+                                                                        .home,
+                                                                    arguments: {
+                                                                  'bingo':
+                                                                      playing,
+                                                                  'datosuser':
+                                                                      widget
+                                                                          .datosuser
+                                                                });
                                                             await fetchShows();
                                                           },
                                                           child: Padding(
@@ -842,5 +857,23 @@ class _BingoPageState extends State<BingoPage> {
                     )
                   ]),
             )));
+  }
+
+  void _handlePayments() {
+    _payments();
+  }
+
+  Future<void> _payments() async {
+    print('bingos = > ${bingoSalaToMap(listasetresponseList!)}');
+    if (listasetresponseList?.isNotEmpty == true) {
+      Bingo? playing = listasetresponseList?.first.bingo;
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentWidget(datosuser: widget.datosuser, bingo: playing);
+        },
+      );
+    }
+    setState(() {});
   }
 }
