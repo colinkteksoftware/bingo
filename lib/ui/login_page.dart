@@ -527,13 +527,13 @@ class _LoginPage extends State<LoginPage> {
         _loading = false;
         pf.setpassword = "";
         showAlerta(
-            context, 'Mensaje Informativo', 'Servidor no Responde, Validar!!');
+            context, 'Mensaje Informativo', 'Servidor no Responde, Verifique la configuracion de la ip.');
       }
     } catch (e) {
       _loading = false;
       pf.setpassword = "";
       showAlerta(
-          context, 'Mensaje Informativo', 'Servidor no Responde, Validar!!');
+          context, 'Mensaje Informativo', 'Servidor no Responde, Verifique la configuracion de la ip.');
     }
   }
 
