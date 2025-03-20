@@ -1,426 +1,486 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:bingo/models/uvtconvert.dart';
+import 'package:bingo/providers/winner_provider.dart';
+import 'package:bingo/ui/user/update_user_page.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_button/animated_button.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:bingo/models/modelCliente.dart';
-import 'package:bingo/ui/user/update_user_page.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/models/bingoconvert.dart';
-import 'package:bingo/models/clienteconvert.dart';
 import 'package:bingo/models/pagosconvert.dart';
-import 'package:bingo/models/uvtconvert.dart';
-import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
-import 'package:http/io_client.dart';
+import 'package:provider/provider.dart';
 
 class PaymentWidget extends StatefulWidget {
-  ModelCliente? datosuser;
-  Bingo? bingo;
+  final ModelCliente? datosuser;
+  final Bingo? bingo;
 
-  PaymentWidget({super.key, required this.datosuser, required this.bingo});
+  const PaymentWidget(
+      {super.key, required this.datosuser, required this.bingo});
 
   @override
   State<PaymentWidget> createState() => _PaymentWidgetState();
 }
 
 class _PaymentWidgetState extends State<PaymentWidget> {
-  final ioc = HttpClient();
-  final pf = Preferencias();
-  Future<List<Pago>?>? listWinners;
-  List<Pago>? listasetresponseListpagos = [];
+  @override
+  Widget build(BuildContext context) {
 
-  Future<List<Pago>?> getWinners() async {
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/PromotorInterno/GetGanadoresForPromotor/${widget.datosuser!.promotorId}");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+    return Scaffold(
+      backgroundColor: const Color(0xFFcaf0f8),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Stack(
+          children: [
+            const Positioned(
+              top: -130,
+              left: -15,
+              child: customBox(),
+            ),
+            const Positioned(
+              top: 340,
+              left: 105,
+              child: customBox2(),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Image.asset(
+                        "assets/images/logo.png",
+                        height: 100,
+                        width: 300,
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    Text(
+                      'Lista de Ganadores del Bingo'.toUpperCase(),
+                      style: const TextStyle(
+                        fontFamily: 'Inter Tight',
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    BuildWinnersList(
+                        datosuser: widget.datosuser, bingo: widget.bingo),
+                  ],
+                ),
+              ),
+            ),
+            const BackButtonWidget(),
+          ],
+        ),
+      ),
     );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseListpagos =
-            pagoFromJson(utf8.decode(response.bodyBytes));
-      });
-
-      return listasetresponseListpagos;
-    } else {
-      throw Exception('Failed to load shows');
-    }
   }
+}
+
+class BackButtonWidget extends StatelessWidget {
+  const BackButtonWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    return Positioned(
+      top: 40,
+      left: 16,
+      child: IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          color: const Color(0xFF03045e),
+          size: size.width * 0.08,
+        ),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+    );
+  }
+}
+
+class BuildWinnersList extends StatefulWidget {
+  final ModelCliente? datosuser;
+  final Bingo? bingo;
+  const BuildWinnersList(
+      {super.key, required this.datosuser, required this.bingo});
+
+  @override
+  State<BuildWinnersList> createState() => _BuildWinnersListState();
+}
+
+class _BuildWinnersListState extends State<BuildWinnersList> {
+  Uvt? uvtData;
+  List<Pago>? winnersList;
+  double totaluvt = 0;
+  TextEditingController dniController = TextEditingController();
 
   @override
   void initState() {
-    listWinners = getWinners();
-    listasetuvt = getAmountUVT();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadWinners();
+      await _loadUVT();
+    });
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {});
+  Future<void> _loadWinners() async {
+    var provider = Provider.of<WinnerProvider>(context, listen: false);
+    if (widget.datosuser != null) {
+      final winners = await provider
+          .getWinners(widget.datosuser?.promotorId.toString() ?? '');
+      setState(() {
+        winnersList = winners;
+      });
+    }
+  }
+
+  Future<void> _loadUVT() async {
+    var provider = Provider.of<WinnerProvider>(context, listen: false);
+    final uvt = await provider.getAmountUVT();
+    setState(() {
+      uvtData = uvt;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    print('BINGO estado => ${widget.bingo}');
-    double totaluvt = 0;
-    //double amount = 0;
-    //double sumAward = 0;
-    //double totalPremioAdicional = 0;
     var size = MediaQuery.of(context).size;
-    return Scaffold(
-        backgroundColor: const Color(0xFFcaf0f8),
-        body: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Stack(children: [
-              const Positioned(
-                top: -130,
-                left: -15,
-                child: Column(
-                  children: [
-                    customBox(),
-                  ],
-                ),
-              ),
-              const Positioned(
-                top: 340,
-                left: 105,
-                child: Column(
-                  children: [
-                    customBox2(),
-                  ],
-                ),
-              ),
-              Align(
-                  alignment: const AlignmentDirectional(0, 0),
+
+    return Consumer<WinnerProvider>(
+      builder: (context, winnerProvider, child) {
+        if (winnerProvider.isLoadingWinners) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (winnerProvider.paymentsList == null ||
+            winnerProvider.paymentsList!.isEmpty) {
+          return const Center(
+              child: Text(
+            'No hay ganadores disponibles',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ));
+        }
+
+        return SizedBox(
+          height: size.height,
+          child: ListView.builder(
+            itemCount: winnerProvider.paymentsList!.length,
+            itemBuilder: (context, index) {
+              final order = winnerProvider.paymentsList![index];
+              double totalPremioAdicional = 0;
+              double amount = 0;
+              double totalValorPremio = 0;
+
+              String jsonBody = json.encode(order.toJson());
+              print('Pago pendiente => $jsonBody');
+
+              if (order.detallePremioFigura!.isNotEmpty &&
+                  order.detallePremioFigura?.length == 1) {
+                totalValorPremio =
+                    order.detallePremioFigura!.first.valorPremio ?? 0;
+
+                if (order
+                    .detallePremioFigura!.first.listaAdicionales!.isNotEmpty) {
+                  totalPremioAdicional = order
+                      .detallePremioFigura!.first.listaAdicionales!
+                      .map((adicional) => adicional.premioAdicional as double)
+                      .reduce((value, element) => value + element);
+                }
+              } else {
+                if (order.detallePremioFigura!.length > 1) {
+                  for (var detalle in order.detallePremioFigura!) {
+                    if (detalle.listaAdicionales != null &&
+                        detalle.listaAdicionales!.isNotEmpty) {
+                      totalPremioAdicional += detalle.listaAdicionales!
+                          .map((adicional) =>
+                              adicional.premioAdicional as double)
+                          .reduce((value, element) => value + element);
+                    }
+                  }
+
+                  for (var detalle in order.detallePremioFigura!) {
+                    if (detalle.valorPremio != null) {
+                      totalValorPremio +=
+                          detalle.valorPremio! + totalPremioAdicional;
+                    }
+                  }
+                }
+              }
+
+              amount = totalValorPremio + totalPremioAdicional;
+              /*print('Valor premio => $totalValorPremio');
+              print('Valor Adicional => $totalPremioAdicional');
+              print('Valor total => $amount');*/
+
+              return GestureDetector(
+                onTap: () async {},
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4, right: 4),
                   child: Container(
-                      height: size.height,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                    width: size.width * 0.94,
+                    height: size.height * 0.18,
+                    decoration: BoxDecoration(
+                      image: const DecorationImage(
+                        fit: BoxFit.cover,
+                        image: AssetImage("assets/images/venta.png"),
                       ),
-                      child: Align(
-                          alignment: const AlignmentDirectional(0, 0),
-                          child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(10, 5, 10, 0),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0, 0, 0, 10),
+                            child: Column(
+                              children: [
+                                Column(
                                   children: [
                                     Row(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.center,
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                          MainAxisAlignment.center,
                                       children: [
-                                        IconButton(
-                                          icon: Icon(Icons.arrow_back,
-                                              color: const Color(0xFF03045e),
-                                              size: size.width * 0.08),
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(),
+                                        const Text(
+                                          "MODULO:",
+                                          style: TextStyle(
+                                              fontFamily: 'Inter Tight',
+                                              color: Color(0xFFcaf0f8),
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 18),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          '${order.codigoModulo}',
+                                          style: const TextStyle(
+                                              fontFamily: 'Inter Tight',
+                                              color: Color(0xFFcaf0f8),
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 18),
                                         ),
                                       ],
                                     ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              0, 0, 0, 0),
-                                      child: Container(
-                                        height: size.height * 0.1,
-                                        decoration: const BoxDecoration(
-                                          image: DecorationImage(
-                                              image: AssetImage(
-                                                  "assets/images/logo.png"),
-                                              fit: BoxFit.fill),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        AnimatedButton(
+                                          color: const Color.fromARGB(
+                                              255, 210, 193, 3),
+                                          height: size.height * 0.07,
+                                          width: size.width * 0.48,
+                                          duration: 2,
+                                          onPressed: () async {},
+                                          child: Container(
+                                            padding: const EdgeInsets.only(
+                                                top: 2,
+                                                left: 0,
+                                                right: 0,
+                                                bottom: 2),
+                                            child: Center(
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    "Valor Total: \$${NumberFormat('#,##0', 'en_US').format(amount)}",
+                                                    style: TextStyle(
+                                                      color: Colors
+                                                          .black,
+                                                      fontSize:
+                                                          size.width * 0.034,
+                                                      fontFamily: 'gotic',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "Valor Premio: \$${NumberFormat('#,##0', 'en_US').format(totalValorPremio)}",
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize:
+                                                          size.width * 0.030,
+                                                      fontFamily: 'gotic',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "Valor Adicionales: \$${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional)}",
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize:
+                                                          size.width * 0.030,
+                                                      fontFamily: 'gotic',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                        alignment:
-                                            const AlignmentDirectional(0, 0),
-                                      ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      'Lista de Ganadores del Bingo'
-                                          .toUpperCase(),
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter Tight',
-                                        color: Colors.black,
-                                        fontSize: 20,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0, 0, 0, 5),
+                                      child: Row(
+                                        children: [],
+                                      )),
+                                  Text(
+                                    '${order.ventaId}'.toUpperCase(),
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter Tight',
+                                      color: Color(0xFFcaf0f8),
+                                      fontSize: 12,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w800,
                                     ),
-                                    const SizedBox(height: 5),
-
-                                    listasetresponseListpagos == null ||
-                                              listasetresponseListpagos!.isEmpty
-                                          ? Center(
-                                              child: AnimatedTextKit(
-                                              animatedTexts: [
-                                                TypewriterAnimatedText(
-                                                    'No hay Resultados.',
-                                                    textStyle: const TextStyle(
-                                                      fontSize: 30,
-                                                      color: Colors.white,
-                                                      backgroundColor:
-                                                          Color(0xFF427382),
-                                                    )),
-                                              ],
-                                              isRepeatingAnimation: true,
-                                              repeatForever: true,
-                                              pause: const Duration(
-                                                  milliseconds: 1000),
-                                            ))
-                                          : SizedBox(
-                                              height: size.height * 0.54,
-                                              child: ListView.separated(
-                                                  separatorBuilder: (context,
-                                                          index) =>
-                                                      const Divider(
-                                                        height: 0,
-                                                        color:
-                                                            Color(0xFFcaf0f8),
-                                                        thickness: 0,
-                                                        indent: 0,
-                                                        endIndent: 0,
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: winnerProvider
+                                                .paymentsList!.isNotEmpty
+                                            ? () async {
+                                                var size =
+                                                    MediaQuery.of(context).size;
+                                                setState(() {
+                                                  totaluvt =
+                                                      uvtData!.cantidadUvt! == 0
+                                                          ? 1
+                                                          : double.parse(
+                                                              uvtData!
+                                                                  .cantidadUvt
+                                                                  .toString());
+                                                });
+                                                collectPrize(
+                                                    context,
+                                                    order,
+                                                    amount,
+                                                    size,
+                                                    totalPremioAdicional,
+                                                    totaluvt);
+                                                setState(() {});
+                                              }
+                                            : null,
+                                        child: InkWell(
+                                          onTap: widget.bingo?.estado == 2
+                                              ? () {
+                                                  setState(() {
+                                                    totaluvt = uvtData!
+                                                                .cantidadUvt! ==
+                                                            0
+                                                        ? 1
+                                                        : double.parse(uvtData!
+                                                            .cantidadUvt
+                                                            .toString());
+                                                  });
+                                                  collectPrize(
+                                                      context,
+                                                      order,
+                                                      amount,
+                                                      size,
+                                                      totalPremioAdicional,
+                                                      totaluvt);
+                                                  setState(() {});
+                                                }
+                                              : null,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8.0),
+                                            decoration: BoxDecoration(
+                                              color: widget.bingo?.estado == 2
+                                                  ? Colors.green[600]
+                                                  : Colors.grey[400],
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.all(0),
+                                                  child: Center(
+                                                    child: Text(
+                                                      'Registrar Pago',
+                                                      style: TextStyle(
+                                                        color: widget.bingo
+                                                                    ?.estado ==
+                                                                2
+                                                            ? Colors.white
+                                                            : Colors.grey[600],
+                                                        fontSize:
+                                                            size.width * 0.032,
+                                                        fontFamily: 'gotic',
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
-                                                  itemCount:
-                                                      listasetresponseListpagos!
-                                                          .length,
-                                                  itemBuilder: ((ctx, index) {
-                                                    final order =
-                                                        listasetresponseListpagos![
-                                                            index];
-                                                    double
-                                                        totalPremioAdicional =
-                                                        0;
-                                                    double amount = 0;                                                    
-
-                                                    if (order
-                                                        .detallePremioFigura!
-                                                        .first
-                                                        .listaAdicionales!
-                                                        .isEmpty) {
-                                                    } else {
-                                                      totalPremioAdicional = order
-                                                          .detallePremioFigura!
-                                                          .first
-                                                          .listaAdicionales!
-                                                          .map((adicional) =>
-                                                              adicional
-                                                                      .premioAdicional
-                                                                  as double)
-                                                          .reduce((value,
-                                                                  element) =>
-                                                              value + element);
-                                                    }
-
-                                                    amount = (order
-                                                              .detallePremioFigura!
-                                                              .first
-                                                              .valorPremio! +
-                                                          totalPremioAdicional);
-
-                                                    return order.bingoId
-                                                            .toString()
-                                                            .toLowerCase()
-                                                            .contains("")
-                                                        ? GestureDetector(
-                                                            onTap: () async {},
-                                                            child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .only(
-                                                                        left: 4,
-                                                                        right:
-                                                                            4),
-                                                                child:
-                                                                    Container(
-                                                                  width:
-                                                                      size.width *
-                                                                          0.94,
-                                                                  height:
-                                                                      size.height *
-                                                                          0.18,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    image:
-                                                                        const DecorationImage(
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                      image: AssetImage(
-                                                                          "assets/images/venta.png"),
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            20),
-                                                                  ),
-                                                                  child:
-                                                                      Padding(
-                                                                    padding:
-                                                                        const EdgeInsetsDirectional
-                                                                            .fromSTEB(
-                                                                            10,
-                                                                            5,
-                                                                            10,
-                                                                            0),
-                                                                    child:
-                                                                        Column(
-                                                                      children: [
-                                                                        Padding(
-                                                                          padding: const EdgeInsetsDirectional
-                                                                              .fromSTEB(
-                                                                              0,
-                                                                              0,
-                                                                              0,
-                                                                              10),
-                                                                          child:
-                                                                              Column(
-                                                                            children: [
-                                                                              Column(
-                                                                                children: [
-                                                                                  Row(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                    children: [
-                                                                                      const Text(
-                                                                                        "MODULO:",
-                                                                                        style: TextStyle(fontFamily: 'Inter Tight', color: Color(0xFFcaf0f8), letterSpacing: 0.0, fontWeight: FontWeight.w800, fontSize: 18),
-                                                                                      ),
-                                                                                      const SizedBox(width: 5),
-                                                                                      Text(
-                                                                                        '${order.codigoModulo}',
-                                                                                        style: const TextStyle(fontFamily: 'Inter Tight', color: Color(0xFFcaf0f8), letterSpacing: 0.0, fontWeight: FontWeight.w800, fontSize: 18),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                  const SizedBox(height: 5),
-                                                                                  Row(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                    children: [
-                                                                                      AnimatedButton(
-                                                                                          color: const Color.fromARGB(255, 210, 193, 3), //Colors.amber,
-                                                                                          height: size.height * 0.07,
-                                                                                          width: size.width * 0.48,
-                                                                                          duration: 2,
-                                                                                          onPressed: () async {},
-                                                                                          child: Container(
-                                                                                              padding: const EdgeInsets.only(top: 2, left: 0, right: 0, bottom: 2),
-                                                                                              child: Center(
-                                                                                                  child: Column(
-                                                                                                children: [
-                                                                                                  Text(
-                                                                                                    "Valor Total:  ${NumberFormat('#,##0', 'en_US').format(amount)}",
-                                                                                                    style: TextStyle(
-                                                                                                      color: Colors.black, //const Color(0xFF0077b6),
-                                                                                                      fontSize: size.width * 0.034,
-                                                                                                      fontFamily: 'gotic',
-                                                                                                      fontWeight: FontWeight.bold,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  Text(
-                                                                                                    "Valor Premio:  ${NumberFormat('#,##0', 'en_US').format(order.detallePremioFigura!.first.valorPremio)}",
-                                                                                                    style: TextStyle(
-                                                                                                      color: Colors.black,
-                                                                                                      fontSize: size.width * 0.030,
-                                                                                                      fontFamily: 'gotic',
-                                                                                                      fontWeight: FontWeight.bold,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  Text(
-                                                                                                    "Valor Adicionales:  ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional)}",
-                                                                                                    style: TextStyle(
-                                                                                                      color: Colors.black,
-                                                                                                      fontSize: size.width * 0.030,
-                                                                                                      fontFamily: 'gotic',
-                                                                                                      fontWeight: FontWeight.bold,
-                                                                                                    ))]))))])])])),
-                                                                        Row(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.max,
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.spaceBetween,
-                                                                          children: [
-                                                                            Column(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                                                              children: [
-                                                                                const Padding(
-                                                                                    padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
-                                                                                    child: Row(
-                                                                                      children: [],
-                                                                                    )),
-                                                                                Text(
-                                                                                  '${order.ventaId}'.toUpperCase(),
-                                                                                  style: const TextStyle(
-                                                                                    fontFamily: 'Inter Tight',
-                                                                                    color: Color(0xFFcaf0f8),
-                                                                                    fontSize: 12,
-                                                                                    letterSpacing: 0.0,
-                                                                                    fontWeight: FontWeight.w800,
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                            Column(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              children: [
-                                                                                Column(
-                                                                                  mainAxisSize: MainAxisSize.max,
-                                                                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                                                                  children: [
-                                                                                    GestureDetector(
-                                                                                      onTap: listasetresponseListpagos!.isNotEmpty
-                                                                                          ? () async {
-                                                                                              var size = MediaQuery.of(context).size;
-                                                                                              totaluvt = listasetresponseListpagosuvt!.cantidadUvt! == 0 ? 1 : double.parse(listasetresponseListpagosuvt!.cantidadUvt.toString());
-
-                                                                                              collectPrize(context, order, amount, size, totalPremioAdicional, totaluvt);
-                                                                                            }
-                                                                                          : null,
-                                                                                      child: InkWell(
-                                                                                        onTap: listasetresponseListpagos!.isNotEmpty
-                                                                                            ? () {
-                                                                                                totaluvt = listasetresponseListpagosuvt!.cantidadUvt! == 0 ? 1 : double.parse(listasetresponseListpagosuvt!.cantidadUvt.toString());
-                                                                                                collectPrize(context, order, amount, size, totalPremioAdicional, totaluvt);
-                                                                                              }
-                                                                                            : null,
-                                                                                        child: Container(
-                                                                                          padding: const EdgeInsets.all(8.0),
-                                                                                          decoration: BoxDecoration(
-                                                                                            color: listasetresponseListpagos!.isNotEmpty ? Colors.green[600] : Colors.grey[400],
-                                                                                            borderRadius: BorderRadius.circular(10),
-                                                                                          ),
-                                                                                          child: Row(
-                                                                                            children: [
-                                                                                              Container(
-                                                                                                padding: const EdgeInsets.all(0),
-                                                                                                child: Center(
-                                                                                                  child: Text(
-                                                                                                    'Registrar Pago',
-                                                                                                    style: TextStyle(
-                                                                                                      color: listasetresponseListpagos!.isNotEmpty ? Colors.white : Colors.grey[600],
-                                                                                                      fontSize: size.width * 0.032,
-                                                                                                      fontFamily: 'gotic',
-                                                                                                      fontWeight: FontWeight.bold,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ),
-                                                                                              Icon(
-                                                                                                Icons.monetization_on_outlined,
-                                                                                                size: size.width * 0.059,
-                                                                                                color: listasetresponseListpagos!.isNotEmpty ? Colors.white : Colors.grey[600],
-                                                                                              )]))))])])])])))))
-                                                        : Container();
-                                                  }))), const SizedBox(height: 5),
-                                                  ])))))])));                                  
+                                                    ),
+                                                  ),
+                                                ),
+                                                Icon(
+                                                  Icons
+                                                      .monetization_on_outlined,
+                                                  size: size.width * 0.059,
+                                                  color:
+                                                      widget.bingo?.estado == 2
+                                                          ? Colors.white
+                                                          : Colors.grey[600],
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   Future<dynamic> collectPrize(BuildContext context, Pago order, double amount,
@@ -430,18 +490,21 @@ class _PaymentWidgetState extends State<PaymentWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: const Color(0xFFcaf0f8).withOpacity(1),
-          title: Text(
-            'Desea Registrar este Pago del Modulo: ${order.codigoModulo}',
-            style: const TextStyle(color: Color(0xFF03045e)),
+          title: Center(
+            child: Text(
+              'Desea registrar este pago del modulo: ${order.codigoModulo}',
+              style: const TextStyle(color: Color(0xFF03045e)),
+            ),
           ),
           content: Text(
-            "Valor Total:  ${NumberFormat('#,##0', 'en_US').format(amount)}",
-            style: TextStyle(
-              color: const Color(0xFF0077b6),
-              fontSize: size.width * 0.034,
+            "Valor Total: \n${NumberFormat('#,##0', 'en_US').format(amount)}",
+            style: const TextStyle(
+              color: Color(0xFF0077b6),
+              fontSize: 20,
               fontFamily: 'gotic',
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
           actions: <Widget>[
             Column(
@@ -449,18 +512,18 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                 Column(children: [
                   Text(
                     "Premio: ${order.detallePremioFigura!.first.nombreFigura}",
-                    style: TextStyle(
-                      color: const Color(0xFF0077b6),
-                      fontSize: size.width * 0.024,
+                    style: const TextStyle(
+                      color: Color(0xFF0077b6),
+                      fontSize: 14,
                       fontFamily: 'gotic',
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    "Valor Premio: ${NumberFormat('#,##0', 'en_US').format(order.detallePremioFigura!.first.valorPremio ?? 0)}",
-                    style: TextStyle(
-                      color: const Color(0xFF0077b6),
-                      fontSize: size.width * 0.024,
+                    "Valor Premio: \$ ${NumberFormat('#,##0', 'en_US').format(order.detallePremioFigura!.first.valorPremio ?? 0)}",
+                    style: const TextStyle(
+                      color: Color(0xFF0077b6),
+                      fontSize: 14,
                       fontFamily: 'gotic',
                       fontWeight: FontWeight.bold,
                     ),
@@ -471,33 +534,34 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                   Column(children: [
                     Text(
                       "Premio Adicional: ${adicionales.categoria}",
-                      style: TextStyle(
-                        color: const Color(0xFF0077b6),
-                        fontSize: size.width * 0.024,
+                      style: const TextStyle(
+                        color: Color(0xFF0077b6),
+                        fontSize: 14,
                         fontFamily: 'gotic',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      " Valor Premio:  ${NumberFormat('#,##0', 'en_US').format(adicionales.premioAdicional ?? 0)}",
-                      style: TextStyle(
-                        color: const Color(0xFF0077b6),
-                        fontSize: size.width * 0.024,
+                      "Valor premio: \$ ${NumberFormat('#,##0', 'en_US').format(adicionales.premioAdicional ?? 0)}",
+                      style: const TextStyle(
+                        color: Color(0xFF0077b6),
+                        fontSize: 14,
                         fontFamily: 'gotic',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ]),
                 Text(
-                  "Valor Total Adicionales:  ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional ?? 0)}",
-                  style: TextStyle(
-                    color: const Color(0xFF0077b6),
-                    fontSize: size.width * 0.024,
+                  "Valor total adicionales: \$ ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional ?? 0)}",
+                  style: const TextStyle(
+                    color: Color(0xFF0077b6),
+                    fontSize: 14,
                     fontFamily: 'gotic',
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                amount >= (listasetresponseListpagosuvt!.valorUvt! * totaluvt)
+                const SizedBox(height: 10),
+                amount >= (uvtData!.valorUvt! * totaluvt)
                     ? Padding(
                         padding: const EdgeInsets.all(4),
                         child: SizedBox(
@@ -574,68 +638,67 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                       },
                     ),
                     TextButton(
-                      style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(0.0),
-                          side: const BorderSide(color: Colors.grey),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(0.0),
+                            side: const BorderSide(color: Colors.grey),
+                          ),
+                          backgroundColor: const Color(0xFF03045e),
                         ),
-                        backgroundColor: const Color(0xFF03045e),
-                      ),
-                      child: Text(
-                        'Confirmar ${NumberFormat('#,##0', 'en_US').format(amount ?? 0)}',
-                        style: TextStyle(
-                            fontSize: size.width * 0.03,
-                            color: const Color(0xFFcaf0f8)),
-                      ),
-                      onPressed: () async {
-                        await getAmountUVT();
+                        child: Text(
+                          'Confirmar \$ ${NumberFormat('#,##0', 'en_US').format(amount ?? 0)}',
+                          style: TextStyle(
+                              fontSize: size.width * 0.03,
+                              color: const Color(0xFFcaf0f8)),
+                        ),
+                        onPressed: () async {
+                          double tope = uvtData!.valorUvt! * totaluvt;
+                          //print('TOPE DECLARAR => $tope');
+                          //print('neto => $amount');
 
-                        if (amount >=
-                            (listasetresponseListpagosuvt!.valorUvt! *
-                                totaluvt)) {
-                          if (dniController.text == "") {
-                            const snackBar = SnackBar(
-                                content: Center(
-                                    child: Text("Ingrese un DNI valido..")));
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          } else {
-                            setState(() {
-                              order.clienteId = dniController.text;
-                              //order.detallePremioFigura!.first.estadoPago = 1;
-                            });
-
-                            await fetchShowscliente();
-                            if (listasetresponseListpagoscliente == null) {
+                          if (amount >= tope) {
+                            if (dniController.text == '') {
                               const snackBar = SnackBar(
                                   content: Center(
                                       child: Text("Ingrese un DNI valido..")));
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(snackBar);
                             } else {
-                              if (listasetresponseListpagoscliente!.doi ==
-                                      dniController.text &&
-                                  listasetresponseListpagoscliente!.doi !=
-                                      null) {
-                                await registerWinner(order);
-                              } else {
+                              setState(() {
+                                order.clienteId = dniController.text;
+                                //order.detallePremioFigura!.first.estadoPago = 1;
+                              });
+
+                              WinnerProvider winnerProvider =
+                                  Provider.of<WinnerProvider>(context);
+                              winnerProvider
+                                  .findCustomer(dniController.text.toString());
+
+                              if (winnerProvider.customer != null) {
                                 await Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => UpdateUserPage(
                                           doi: dniController.text),
                                     ));
+                              } else {
+                                const snackBar = SnackBar(
+                                    content: Center(
+                                        child:
+                                            Text("Ingrese un DNI valido..")));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
                               }
                             }
+                          } else {
+                            Provider.of<WinnerProvider>(context, listen: false)
+                                .registerWinner(
+                                    context,
+                                    order,
+                                    widget.datosuser?.promotorId.toString() ??
+                                        '');
                           }
-                        } else {
-                          await registerWinner(order);
-                        }
-
-                        listWinners = getWinners();
-                        setState(() {});
-                      },
-                    ),
+                        }),
                   ],
                 ),
               ],
@@ -645,112 +708,5 @@ class _PaymentWidgetState extends State<PaymentWidget> {
       },
     );
   }
-
-  Future<Uvt?>? listasetuvt;
-  Uvt? listasetresponseListpagosuvt;
-
-  Future<Uvt?> getAmountUVT() async {
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-
-    final url = Uri.parse("${pf.getIp.toString()}/api/ParametroInterno/GetAll");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseListpagosuvt =
-            uvtFromJson(utf8.decode(response.bodyBytes));
-      });
-
-      return listasetresponseListpagosuvt;
-    } else {
-      throw Exception('Failed to load shows');
-    }
-  }
-
-  Cliente? listasetresponseListpagoscliente;
-
-  Future<Cliente?> fetchShowscliente() async {
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/ClienteInterno/GetClienteByDocumento/${dniController.text}");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseListpagoscliente =
-            clienteFromJson(utf8.decode(response.bodyBytes));
-      });
-
-      return listasetresponseListpagoscliente;
-    } else {
-      throw Exception('Failed to load shows');
-    }
-  }
-
-  TextEditingController dniController = TextEditingController(text: "");
-
-  Future<String> registerWinner(Pago elemento) async {
-    String jsonBody = json.encode(elemento.toJson());
-
-    print(jsonBody);
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor");
-    try {
-      final response = await http.put(url,
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonBody);
-
-      if (response.statusCode == 200) {
-        const snackBar = SnackBar(
-          content: Center(child: Text("Se ha confirmado el pago..")),
-          backgroundColor: Colors.green,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        Navigator.of(context).pop();
-        return "si";
-      } else {
-        const snackBar = SnackBar(
-          content: Center(
-              child: Center(
-                  child: Text(
-                      "No se ha confirmado el pago. Valide el valor UVT.."))),
-          backgroundColor: Colors.red,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-        throw Exception('Failed to load shows');
-      }
-    } catch (e) {
-      const snackBar = SnackBar(
-          content: Center(
-              child: Center(
-                  child:
-                      Text("No se ha confirmado el pago valide conexión."))));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-      throw Exception('Failed to load shows');
-    }
-  }
 }
+

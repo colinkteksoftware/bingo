@@ -168,8 +168,8 @@ class _LoginPage extends State<LoginPage> {
                                                   const EdgeInsetsDirectional
                                                       .fromSTEB(0, 20, 0, 0),
                                               child: Container(
-                                                  height: 150,
-                                                  width: 300,
+                                                  height: 100,
+                                                  width: 250,
                                                   decoration:
                                                       const BoxDecoration(
                                                     image: DecorationImage(

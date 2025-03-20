@@ -119,13 +119,13 @@ class _HomePageState extends State<HomePage> {
                         child: Align(
                             alignment: const AlignmentDirectional(0, 0),
                             child: Padding(
-                                padding: const EdgeInsets.all(32),
+                                padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
                                 child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Row(
+                                      Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         mainAxisAlignment:
@@ -141,8 +141,8 @@ class _HomePageState extends State<HomePage> {
                                         ],
                                       ),
                                       Container(
-                                        height: size.height * 0.1,
-                                        width: size.width * 0.5,
+                                        height: 100,//size.height * 0.1,
+                                        width: 250,//size.width * 0.5,
                                         decoration: const BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(

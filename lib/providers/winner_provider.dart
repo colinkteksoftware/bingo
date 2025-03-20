@@ -1,4 +1,6 @@
+import 'package:bingo/models/clienteconvert.dart';
 import 'package:bingo/models/pagosconvert.dart';
+import 'package:bingo/models/uvtconvert.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/io_client.dart';
@@ -6,79 +8,154 @@ import 'dart:convert';
 import 'dart:io';
 
 class WinnerProvider with ChangeNotifier {
-  List<Pago>? listasetresponseListpagos;
-  bool isLoading = false;
+  final pf = Preferencias();
+  final ioc = HttpClient();
+  List<Pago>? paymentsList;
+  Cliente? customer;
+  Uvt? uvt;
+  bool isLoadingWinners = false;
+  Uri url = Uri.parse('');
 
   Future<List<Pago>?> getWinners(String promotorId) async {
-    final pf = Preferencias();
-    isLoading = true;
+    isLoadingWinners = true;
     notifyListeners();
 
     try {
-      final ioc = HttpClient();
-      ioc.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
       final http = IOClient(ioc);
-      final url = Uri.parse(
-        "${pf.getIp.toString()}/api/PromotorInterno/GetGanadoresForPromotor/$promotorId");
+      ioc.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
 
-      final response = await http.get(url, headers: {'Content-Type': 'application/json; charset=UTF-8'});
+      url = Uri.parse(
+          "${pf.getIp.toString()}/api/PromotorInterno/GetGanadoresForPromotor/$promotorId");
+
+      final response = await http.get(url,
+          headers: {'Content-Type': 'application/json; charset=UTF-8'});
 
       if (response.statusCode == 200) {
-        listasetresponseListpagos = pagoFromJson(utf8.decode(response.bodyBytes));
-        print('PAGOS PENDIENTES => ${pagoToJson(listasetresponseListpagos!)}');
-        isLoading = false;
+        paymentsList = pagoFromJson(utf8.decode(response.bodyBytes));
+        //print('PAGOS PENDIENTES => ${pagoToJson(paymentsList!)}');
+        isLoadingWinners = false;
         notifyListeners();
-        return listasetresponseListpagos;
+        return paymentsList;
       } else {
-        isLoading = false;
+        isLoadingWinners = false;
+        paymentsList = [];
         notifyListeners();
         throw Exception('Failed to load winners');
       }
     } catch (error) {
-      isLoading = false;
-      listasetresponseListpagos = [];
+      isLoadingWinners = false;
+      paymentsList = [];
       notifyListeners();
       throw Exception('Failed to load winners: $error');
     }
   }
-}
 
-
-
-/*class WinnerProvider with ChangeNotifier {
-  List<Pago>? listasetresponseListpagos;
-  bool isLoading = false;
-
-  Future<void> getWinners(String promotorId) async {
-    final pf = Preferencias();
-    isLoading = true;
-    notifyListeners();
-
+  Future<Cliente?> findCustomer(String dni) async {
     try {
-      final ioc = HttpClient();
+      ioc.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+
+      final http = IOClient(ioc);
+
+      url = Uri.parse(
+          '${pf.getIp.toString()}/api/ClienteInterno/GetClienteByDocumento/$dni');
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        customer = clienteFromJson(utf8.decode(response.bodyBytes));
+        notifyListeners();
+        return customer;
+      } else {
+        throw Exception('Failed to load customer');
+      }
+    } catch (error) {
+      throw Exception('Failed to load winners: $error');
+    }
+  }
+
+  Future<Uvt?> getAmountUVT() async {
+    try {
       ioc.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
       final http = IOClient(ioc);
 
-      final url = Uri.parse(
-          "${pf.getIp.toString()}/api/PromotorInterno/GetGanadoresForPromotor/$promotorId");
+      url = Uri.parse("${pf.getIp.toString()}/api/ParametroInterno/GetAll");
 
       final response = await http.get(
         url,
-        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
       );
 
       if (response.statusCode == 200) {
-        listasetresponseListpagos = pagoFromJson(utf8.decode(response.bodyBytes));
-        isLoading = false;
+        uvt = uvtFromJson(utf8.decode(response.bodyBytes));
         notifyListeners();
+        return uvt;
       } else {
-        throw Exception('Failed to load winners');
+        throw Exception('Failed to load uvt');
       }
     } catch (error) {
-      isLoading = false;
-      notifyListeners();
-      throw Exception('Failed to load winners: $error');
+      throw Exception('Failed to load uvt: $error');
     }
   }
-}*/
+
+  Future<void> registerWinner(BuildContext context, Pago payment, String promotorId) async {
+    String jsonBody = json.encode(payment.toJson());
+    //print('Pago realizado => $jsonBody');
+
+    //bool exists = payment.detallePremioFigura!.any((element) => element.premioId == );
+
+    ioc.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    final http = IOClient(ioc);
+    final url = Uri.parse(
+        '${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor');
+    try {
+      final response = await http.put(url,
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonBody);
+
+      if (response.statusCode == 200) {
+        const snackBar = SnackBar(
+          content: Center(child: Text("Se ha confirmado el pago..")),
+          backgroundColor: Colors.green,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        Navigator.of(context).pop();
+      } else {
+        const snackBar = SnackBar(
+          content: Center(
+              child: Center(
+                  child: Text(
+                      "No se ha confirmado el pago."))),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        throw Exception('Failed to load shows');
+      }
+    } catch (e) {
+      const snackBar = SnackBar(
+          content: Center(
+              child: Center(
+                  child:
+                      Text("No se ha confirmado el pago valide conexión."))));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      throw Exception('Failed to load shows');
+    }
+
+    await getWinners(promotorId);
+    notifyListeners();
+  }
+}
