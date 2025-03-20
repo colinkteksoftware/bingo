@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bingo/utils/custom_back_button.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:bingo/models/modelCliente.dart';
@@ -33,7 +34,7 @@ class _SaleWidgetState extends State<SaleWidget> {
   Future<List<Venta>?>? listaset;
   List<Venta>? listasetresponseList;
 
-  Future<List<Venta>?> fetchShows() async {
+  Future<List<Venta>?> fetchSales() async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
@@ -52,8 +53,7 @@ class _SaleWidgetState extends State<SaleWidget> {
 
     if (response.statusCode == 200) {
       setState(() {
-        listasetresponseList =
-            ventaFromMap(utf8.decode(response.bodyBytes));
+        listasetresponseList = ventaFromMap(utf8.decode(response.bodyBytes));
 
         listasetresponseList!.sort((a, b) {
           return (b.ventaId ?? 0).compareTo(a.ventaId ?? 0);
@@ -68,8 +68,7 @@ class _SaleWidgetState extends State<SaleWidget> {
 
   @override
   void initState() {
-    //await pf.initPrefs();
-    listaset = fetchShows();
+    listaset = fetchSales();
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {});
@@ -78,8 +77,7 @@ class _SaleWidgetState extends State<SaleWidget> {
   List<BingoSala>? listasetresponseListbingo;
 
   Future<List<BingoSala>?> fetchShowsbingo() async {
-    String formattedDate =
-        DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha);
 
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
@@ -132,7 +130,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                   left: -15,
                   child: Column(
                     children: [
-                      customBox(),
+                      CustomBox(),
                     ],
                   ),
                 ),
@@ -141,7 +139,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                   left: 105,
                   child: Column(
                     children: [
-                      customBox2(),
+                      CustomBox2(),
                     ],
                   ),
                 ),
@@ -162,23 +160,9 @@ class _SaleWidgetState extends State<SaleWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_back,
-                                                color: const Color(0xFF03045e),
-                                                size: size.width * 0.08),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                          ),
-                                        ],
-                                      ),
                                       Container(
-                                        height: size.height * 0.1,
+                                        height: 100,
+                                        width: 250,
                                         decoration: const BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(
@@ -202,13 +186,15 @@ class _SaleWidgetState extends State<SaleWidget> {
                                               _selectedDate = value;
                                             });
 
-                                            listaset = fetchShows();
+                                            listaset = fetchSales();
                                             setState(() {});
                                           },
                                         ),
                                       ),
+                                      const SizedBox(height: 8),
                                       Padding(
-                                          padding: const EdgeInsets.all(4),
+                                          padding: const EdgeInsets.only(
+                                              left: 30, right: 30, bottom: 10),
                                           child: Container(
                                             width: size.width * 0.62,
                                             padding: const EdgeInsets.only(
@@ -222,9 +208,6 @@ class _SaleWidgetState extends State<SaleWidget> {
                                               onChanged: (value) async {
                                                 setState(() {
                                                   detectionInfo = "";
-                                                });
-
-                                                setState(() {
                                                   searchString =
                                                       value.toUpperCase();
                                                 });
@@ -232,9 +215,6 @@ class _SaleWidgetState extends State<SaleWidget> {
                                               onSubmitted: (value) async {
                                                 setState(() {
                                                   detectionInfo = "";
-                                                });
-
-                                                setState(() {
                                                   searchString =
                                                       value.toUpperCase();
                                                 });
@@ -247,11 +227,13 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 enabledBorder:
-                                                    const UnderlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    color: Colors.black,
-                                                    width: 2.0,
-                                                  ),
+                                                    OutlineInputBorder(
+                                                  borderSide: const BorderSide(
+                                                      color: Color(0xFF03045e),
+                                                      width: 2.0),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
                                                 ),
                                                 focusedBorder:
                                                     const UnderlineInputBorder(
@@ -292,7 +274,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                                       listasetresponseList == null
                                           ? Container()
                                           : SizedBox(
-                                              height: size.height * 0.54,
+                                              height: size.height * 0.56,
                                               child: ListView.separated(
                                                   separatorBuilder: (context,
                                                           index) =>
@@ -338,7 +320,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                                         left: 4,
                                                                         right:
                                                                             4,
-                                                                        top: 0),
+                                                                        top: 5),
                                                                 child:
                                                                     Container(
                                                                   width:
@@ -346,7 +328,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                                           0.94,
                                                                   height:
                                                                       size.height *
-                                                                          0.16,
+                                                                          0.18,
                                                                   decoration:
                                                                       BoxDecoration(
                                                                     image:
@@ -407,7 +389,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                                                         : order.tipo == 2
                                                                                             ? Colors.orange
                                                                                             : Colors.amber,
-                                                                                    height: size.height * 0.06,
+                                                                                    height: size.height * 0.05,
                                                                                     width: size.width * 0.3,
                                                                                     duration: 2,
                                                                                     onPressed: () async {},
@@ -430,246 +412,259 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                                               ],
                                                                             )),
                                                                         Row(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.max,
                                                                           mainAxisAlignment:
                                                                               MainAxisAlignment.spaceBetween,
                                                                           children: [
                                                                             Column(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              mainAxisAlignment: MainAxisAlignment.center,
                                                                               children: [
-                                                                                Padding(
-                                                                                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
-                                                                                    child: Row(
-                                                                                      children: [
-                                                                                        Text(
-                                                                                          'Descripción: ${order.ventaId}',
-                                                                                          style: const TextStyle(
-                                                                                            fontFamily: 'Inter',
-                                                                                            color: Color(0xFFcaf0f8),
-                                                                                            letterSpacing: 0.0,
-                                                                                            fontWeight: FontWeight.w200,
-                                                                                          ),
-                                                                                        ),
-                                                                                        order.estado == 0
-                                                                                            ? Container()
-                                                                                            : GestureDetector(
-                                                                                                onTap: () async {
-                                                                                                  var size = MediaQuery.of(context).size;
-                                                                                                  await fetchShowsbingo();
-
-                                                                                                  if (widget.bingo!.estado == 2 || widget.bingo!.estado == 3) {
-                                                                                                    showAlerta(context, 'Mensaje Informativo', 'Para ventas el bingo debe estar en un estado diferente de jugando!!');
-                                                                                                  } else {
-                                                                                                    await showDialog(
-                                                                                                      context: context,
-                                                                                                      builder: (BuildContext context) {
-                                                                                                        return AlertDialog(
-                                                                                                          backgroundColor: const Color(0xFFcaf0f8).withOpacity(1),
-                                                                                                          title: const Text(
-                                                                                                            'Desea editar este registro?',
-                                                                                                            style: TextStyle(color: Color(0xFF03045e)),
-                                                                                                          ),
-                                                                                                          content: const Text('confirmar edición.'),
-                                                                                                          actions: <Widget>[
-                                                                                                            Column(
-                                                                                                              children: [
-                                                                                                                Row(
-                                                                                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                                                                  children: [
-                                                                                                                    TextButton(
-                                                                                                                      style: TextButton.styleFrom(
-                                                                                                                        shape: RoundedRectangleBorder(
-                                                                                                                          borderRadius: BorderRadius.circular(0.0),
-                                                                                                                          side: const BorderSide(color: Colors.grey),
-                                                                                                                        ),
-                                                                                                                        backgroundColor: Colors.red[900],
-                                                                                                                      ),
-                                                                                                                      child: Text(
-                                                                                                                        'Cancelar',
-                                                                                                                        style: TextStyle(fontSize: size.width * 0.03, color: Color(0xFFcaf0f8)),
-                                                                                                                      ),
-                                                                                                                      onPressed: () {
-                                                                                                                        Navigator.of(context).pop();
-                                                                                                                      },
-                                                                                                                    ),
-                                                                                                                    TextButton(
-                                                                                                                      style: TextButton.styleFrom(
-                                                                                                                        shape: RoundedRectangleBorder(
-                                                                                                                          borderRadius: BorderRadius.circular(0.0),
-                                                                                                                          side: const BorderSide(color: Colors.grey),
-                                                                                                                        ),
-                                                                                                                        backgroundColor: const Color(0xFF03045e),
-                                                                                                                      ),
-                                                                                                                      child: Text(
-                                                                                                                        'Confirmar',
-                                                                                                                        style: TextStyle(fontSize: size.width * 0.03, color: const Color(0xFFcaf0f8)),
-                                                                                                                      ),
-                                                                                                                      onPressed: () async {
-                                                                                                                        //   await fetchShowsdelete(order.ventaId.toString());
-                                                                                                                        //   listaset = fetchShows();
-                                                                                                                        await showDialog(
-                                                                                                                          context: context,
-                                                                                                                          builder: (BuildContext context) {
-                                                                                                                            return EditBingo(datosuser: widget.datosuser, bingo: widget.bingo, venta: order);
-                                                                                                                          },
-                                                                                                                        );
-
-                                                                                                                        await fetchShows();
-                                                                                                                        setState(() {});
-                                                                                                                      },
-                                                                                                                    ),
-                                                                                                                  ],
-                                                                                                                ),
-                                                                                                              ],
-                                                                                                            )
-                                                                                                          ],
-                                                                                                        );
-                                                                                                      },
-                                                                                                    );
-                                                                                                  }
-                                                                                                },
-                                                                                                child: Row(
-                                                                                                  children: [
-                                                                                                    Icon(
-                                                                                                      Icons.edit,
-                                                                                                      size: size.width * 0.07,
-                                                                                                      color: const Color(0xFFcaf0f8),
-                                                                                                    ),
-                                                                                                    const Text(
-                                                                                                      "Editar ",
-                                                                                                      style: TextStyle(
-                                                                                                        fontFamily: 'Inter Tight',
-                                                                                                        color: Color(0xFFcaf0f8),
-                                                                                                        letterSpacing: 0.0,
-                                                                                                        fontWeight: FontWeight.w300,
-                                                                                                      ),
-                                                                                                    ),
-                                                                                                  ],
-                                                                                                )),
-                                                                                      ],
-                                                                                    )),
                                                                                 Text(
-                                                                                  'Modulo: ${order.codigoModulo} Valor: \$${order.precioTotalCartilla!.toStringAsFixed(2)}',
-                                                                                  style: const TextStyle(
-                                                                                    fontFamily: 'Inter Tight',
-                                                                                    color: Color(0xFFcaf0f8),
-                                                                                    letterSpacing: 0.0,
-                                                                                    fontWeight: FontWeight.w300,
-                                                                                  ),
+                                                                                  'Modulo: ${order.codigoModulo}',
+                                                                                  style: const TextStyle(fontFamily: 'Inter Tight', color: Color(0xFFcaf0f8), letterSpacing: 0.0, fontWeight: FontWeight.w300, fontSize: 18),
+                                                                                ),
+                                                                                const SizedBox(height: 5),
+                                                                                Text(
+                                                                                  'Valor: \$ ${order.precioTotalCartilla!.toStringAsFixed(2)}',
+                                                                                  style: const TextStyle(fontFamily: 'Inter Tight', color: Color(0xFFcaf0f8), letterSpacing: 0.0, fontWeight: FontWeight.w300, fontSize: 14),
                                                                                 ),
                                                                               ],
                                                                             ),
                                                                             Column(
-                                                                              mainAxisSize: MainAxisSize.max,
+                                                                              mainAxisAlignment: MainAxisAlignment.center,
                                                                               children: [
-                                                                                Column(
-                                                                                  mainAxisSize: MainAxisSize.max,
-                                                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                                                Row(
                                                                                   children: [
-                                                                                    Row(
-                                                                                      children: [
-                                                                                        order.estado == 0
-                                                                                            ? AnimatedButton(
-                                                                                                color: Colors.red,
-                                                                                                height: size.height * 0.03,
-                                                                                                width: size.width * 0.3,
-                                                                                                duration: 2,
-                                                                                                onPressed: () async {},
-                                                                                                child: Container(
-                                                                                                    padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
-                                                                                                    child: Center(
-                                                                                                        child: Text(
-                                                                                                      "Registro eliminado",
-                                                                                                      style: TextStyle(
-                                                                                                        color: const Color(0xFFcaf0f8),
-                                                                                                        fontSize: size.width * 0.032,
-                                                                                                        fontFamily: 'gotic',
-                                                                                                        fontWeight: FontWeight.bold,
-                                                                                                      ),
-                                                                                                    ))))
-                                                                                            : GestureDetector(
-                                                                                                onTap: () async {
-                                                                                                  var size = MediaQuery.of(context).size;
+                                                                                    order.estado == 0
+                                                                                        ? Container()
+                                                                                        : GestureDetector(
+                                                                                            onTap: () async {
+                                                                                              var size = MediaQuery.of(context).size;
+                                                                                              await fetchShowsbingo();
 
-                                                                                                  showDialog(
-                                                                                                    context: context,
-                                                                                                    builder: (BuildContext context) {
-                                                                                                      return AlertDialog(
-                                                                                                        backgroundColor: const Color(0xFFcaf0f8).withOpacity(1),
-                                                                                                        title: const Text(
-                                                                                                          'Desea eliminar este registro?',
-                                                                                                          style: TextStyle(color: Color(0xFF03045e)),
-                                                                                                        ),
-                                                                                                        content: const Text('confirmar eliminación.'),
-                                                                                                        actions: <Widget>[
-                                                                                                          Column(
+                                                                                              if (widget.bingo!.estado == 3) {
+                                                                                                showAlerta(context, 'Mensaje Informativo', 'El bingo ya se ha encuentra finalizado.');
+                                                                                              } else {
+                                                                                                await showDialog(
+                                                                                                  context: context,
+                                                                                                  builder: (BuildContext context) {
+                                                                                                    return AlertDialog(
+                                                                                                      backgroundColor: const Color(0xFFcaf0f8).withOpacity(1),
+                                                                                                      title: const Text(
+                                                                                                        'Desea editar este registro?',
+                                                                                                        style: TextStyle(color: Color(0xFF03045e)),
+                                                                                                      ),
+                                                                                                      content: const Text('confirmar edición.'),
+                                                                                                      actions: <Widget>[
+                                                                                                        Column(
+                                                                                                          children: [
+                                                                                                            Row(
+                                                                                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                                              children: [
+                                                                                                                TextButton(
+                                                                                                                  style: TextButton.styleFrom(
+                                                                                                                    shape: RoundedRectangleBorder(
+                                                                                                                      borderRadius: BorderRadius.circular(0.0),
+                                                                                                                      side: const BorderSide(color: Colors.grey),
+                                                                                                                    ),
+                                                                                                                    backgroundColor: Colors.red[900],
+                                                                                                                  ),
+                                                                                                                  child: Text(
+                                                                                                                    'Cancelar',
+                                                                                                                    style: TextStyle(fontSize: size.width * 0.03, color: Color(0xFFcaf0f8)),
+                                                                                                                  ),
+                                                                                                                  onPressed: () {
+                                                                                                                    Navigator.of(context).pop();
+                                                                                                                  },
+                                                                                                                ),
+                                                                                                                TextButton(
+                                                                                                                  style: TextButton.styleFrom(
+                                                                                                                    shape: RoundedRectangleBorder(
+                                                                                                                      borderRadius: BorderRadius.circular(0.0),
+                                                                                                                      side: const BorderSide(color: Colors.grey),
+                                                                                                                    ),
+                                                                                                                    backgroundColor: const Color(0xFF03045e),
+                                                                                                                  ),
+                                                                                                                  child: Text(
+                                                                                                                    'Confirmar',
+                                                                                                                    style: TextStyle(fontSize: size.width * 0.03, color: const Color(0xFFcaf0f8)),
+                                                                                                                  ),
+                                                                                                                  onPressed: () async {
+                                                                                                                    //   await fetchShowsdelete(order.ventaId.toString());
+                                                                                                                    //   listaset = fetchShows();
+                                                                                                                    await showDialog(
+                                                                                                                      context: context,
+                                                                                                                      builder: (BuildContext context) {
+                                                                                                                        return EditBingo(datosuser: widget.datosuser, bingo: widget.bingo, venta: order);
+                                                                                                                      },
+                                                                                                                    );
+
+                                                                                                                    await fetchSales();
+                                                                                                                    setState(() {});
+                                                                                                                  },
+                                                                                                                ),
+                                                                                                              ],
+                                                                                                            ),
+                                                                                                          ],
+                                                                                                        )
+                                                                                                      ],
+                                                                                                    );
+                                                                                                  },
+                                                                                                );
+                                                                                              }
+                                                                                            },
+                                                                                            child: Container(
+                                                                                              padding: const EdgeInsets.all(5.0),
+                                                                                              decoration: BoxDecoration(
+                                                                                                border: Border.all(
+                                                                                                  color: const Color(0xFFcaf0f8),
+                                                                                                  width: 2.0,
+                                                                                                ),
+                                                                                                borderRadius: BorderRadius.circular(8.0),
+                                                                                              ),
+                                                                                              child: const Row(
+                                                                                                children: [
+                                                                                                  Icon(
+                                                                                                    Icons.edit,
+                                                                                                    size: 22,
+                                                                                                    color: Color(0xFFcaf0f8),
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                    const SizedBox(width: 8),
+                                                                                    order.estado == 0
+                                                                                        ? AnimatedButton(
+                                                                                            color: Colors.red,
+                                                                                            height: size.height * 0.03,
+                                                                                            width: size.width * 0.3,
+                                                                                            duration: 2,
+                                                                                            onPressed: () async {},
+                                                                                            child: Container(
+                                                                                                padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
+                                                                                                child: Center(
+                                                                                                    child: Text(
+                                                                                                  "Registro eliminado",
+                                                                                                  style: TextStyle(
+                                                                                                    color: const Color(0xFFcaf0f8),
+                                                                                                    fontSize: size.width * 0.032,
+                                                                                                    fontFamily: 'gotic',
+                                                                                                    fontWeight: FontWeight.bold,
+                                                                                                  ),
+                                                                                                ))))
+                                                                                        : InkWell(
+                                                                                            onTap: () {
+                                                                                              var size = MediaQuery.of(context).size;
+
+                                                                                              showDialog(
+                                                                                                context: context,
+                                                                                                builder: (BuildContext context) {
+                                                                                                  return AlertDialog(
+                                                                                                    backgroundColor: const Color(0xFFcaf0f8).withOpacity(1),
+                                                                                                    title: const Text(
+                                                                                                      'Desea eliminar este registro?',
+                                                                                                      style: TextStyle(color: Color(0xFF03045e)),
+                                                                                                    ),
+                                                                                                    content: const Text('confirmar eliminación.'),
+                                                                                                    actions: <Widget>[
+                                                                                                      Column(
+                                                                                                        children: [
+                                                                                                          Row(
+                                                                                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                                                                                                             children: [
-                                                                                                              Row(
-                                                                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                                                                                children: [
-                                                                                                                  TextButton(
-                                                                                                                    style: TextButton.styleFrom(
-                                                                                                                      shape: RoundedRectangleBorder(
-                                                                                                                        borderRadius: BorderRadius.circular(0.0),
-                                                                                                                        side: const BorderSide(color: Colors.grey),
-                                                                                                                      ),
-                                                                                                                      backgroundColor: Colors.red[900],
-                                                                                                                    ),
-                                                                                                                    child: Text(
-                                                                                                                      'Cancelar',
-                                                                                                                      style: TextStyle(fontSize: size.width * 0.03, color: Color(0xFFcaf0f8)),
-                                                                                                                    ),
-                                                                                                                    onPressed: () {
-                                                                                                                      Navigator.of(context).pop();
-                                                                                                                    },
+                                                                                                              TextButton(
+                                                                                                                style: TextButton.styleFrom(
+                                                                                                                  shape: RoundedRectangleBorder(
+                                                                                                                    borderRadius: BorderRadius.circular(0.0),
+                                                                                                                    side: const BorderSide(color: Colors.grey),
                                                                                                                   ),
-                                                                                                                  TextButton(
-                                                                                                                    style: TextButton.styleFrom(
-                                                                                                                      shape: RoundedRectangleBorder(
-                                                                                                                        borderRadius: BorderRadius.circular(0.0),
-                                                                                                                        side: const BorderSide(color: Colors.grey),
-                                                                                                                      ),
-                                                                                                                      backgroundColor: const Color(0xFF03045e),
-                                                                                                                    ),
-                                                                                                                    child: Text(
-                                                                                                                      'Confirmar',
-                                                                                                                      style: TextStyle(
-                                                                                                                        fontSize: size.width * 0.03,
-                                                                                                                        color: const Color(0xFFcaf0f8),
-                                                                                                                      ),
-                                                                                                                    ),
-                                                                                                                    onPressed: () async {
-                                                                                                                      await fetchShowsdelete(order.ventaId.toString());
-                                                                                                                      listaset = fetchShows();
-                                                                                                                      setState(() {});
-                                                                                                                    },
+                                                                                                                  backgroundColor: Colors.red[900],
+                                                                                                                ),
+                                                                                                                child: Text(
+                                                                                                                  'Cancelar',
+                                                                                                                  style: TextStyle(fontSize: size.width * 0.03, color: Color(0xFFcaf0f8)),
+                                                                                                                ),
+                                                                                                                onPressed: () {
+                                                                                                                  Navigator.of(context).pop();
+                                                                                                                },
+                                                                                                              ),
+                                                                                                              TextButton(
+                                                                                                                style: TextButton.styleFrom(
+                                                                                                                  shape: RoundedRectangleBorder(
+                                                                                                                    borderRadius: BorderRadius.circular(0.0),
+                                                                                                                    side: const BorderSide(color: Colors.grey),
                                                                                                                   ),
-                                                                                                                ],
+                                                                                                                  backgroundColor: const Color(0xFF03045e),
+                                                                                                                ),
+                                                                                                                child: Text(
+                                                                                                                  'Confirmar',
+                                                                                                                  style: TextStyle(
+                                                                                                                    fontSize: size.width * 0.03,
+                                                                                                                    color: const Color(0xFFcaf0f8),
+                                                                                                                  ),
+                                                                                                                ),
+                                                                                                                onPressed: () async {
+                                                                                                                  await fetchShowsdelete(order.ventaId.toString());
+                                                                                                                  listaset = fetchSales();
+                                                                                                                  setState(() {});
+                                                                                                                },
                                                                                                               ),
                                                                                                             ],
-                                                                                                          )
+                                                                                                          ),
                                                                                                         ],
-                                                                                                      );
-                                                                                                    },
+                                                                                                      )
+                                                                                                    ],
                                                                                                   );
                                                                                                 },
-                                                                                                child: Icon(
-                                                                                                  Icons.delete,
-                                                                                                  size: size.width * 0.059,
+                                                                                              );
+                                                                                            },
+                                                                                            splashColor: Colors.red.withAlpha(30),
+                                                                                            highlightColor: Colors.red.withAlpha(50),
+                                                                                            borderRadius: BorderRadius.circular(20),
+                                                                                            child: Container(
+                                                                                              padding: const EdgeInsets.all(5.0),
+                                                                                              decoration: BoxDecoration(
+                                                                                                borderRadius: BorderRadius.circular(5),
+                                                                                                border: Border.all(
                                                                                                   color: Colors.red,
+                                                                                                  width: 2.0,
                                                                                                 ),
-                                                                                              )
-                                                                                      ],
-                                                                                    )
+                                                                                                boxShadow: [
+                                                                                                  BoxShadow(
+                                                                                                    color: Colors.black.withOpacity(0.1),
+                                                                                                    blurRadius: 5,
+                                                                                                    offset: const Offset(0, 2),
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
+                                                                                              child: const Icon(
+                                                                                                Icons.delete,
+                                                                                                size: 22,
+                                                                                                color: Colors.red,
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
                                                                                   ],
-                                                                                ),
+                                                                                )
                                                                               ],
                                                                             ),
                                                                           ],
+                                                                        ),
+                                                                        Text(
+                                                                          'Descripción: ${order.ventaId}',
+                                                                          style:
+                                                                              const TextStyle(
+                                                                            fontFamily:
+                                                                                'Inter',
+                                                                            color:
+                                                                                Color(0xFFcaf0f8),
+                                                                            letterSpacing:
+                                                                                0.0,
+                                                                            fontWeight:
+                                                                                FontWeight.w200,
+                                                                          ),
                                                                         ),
                                                                       ],
                                                                     ),
@@ -677,7 +672,8 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                                 )))
                                                         : Container();
                                                   }))),
-                                    ])))))
+                                    ]))))),
+                const BackButtonWidget(),
               ],
             )));
   }
@@ -686,8 +682,8 @@ class _SaleWidgetState extends State<SaleWidget> {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
-    final url =
-        Uri.parse('${pf.getIp.toString()}/api/PromotorInterno/Delete/$elemento');
+    final url = Uri.parse(
+        '${pf.getIp.toString()}/api/PromotorInterno/Delete/$elemento');
 
     final response = await http.delete(
       url,
@@ -697,14 +693,18 @@ class _SaleWidgetState extends State<SaleWidget> {
     );
 
     if (response.statusCode == 200) {
-      const snackBar =
-          SnackBar(content: Center(child: Text("Se ha confirmado la eliminación..")), backgroundColor: Colors.green,);
+      const snackBar = SnackBar(
+        content: Center(child: Text("Se ha confirmado la eliminación..")),
+        backgroundColor: Colors.green,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
       return "si";
     } else {
-      const snackBar =
-          SnackBar(content: Center(child: Text("No se ha confirmado la eliminación..")), backgroundColor: Colors.red,);
+      const snackBar = SnackBar(
+        content: Center(child: Text("No se ha confirmado la eliminación..")),
+        backgroundColor: Colors.red,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
       throw Exception('Failed to load shows');

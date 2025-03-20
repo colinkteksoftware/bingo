@@ -68,21 +68,21 @@ class _SettingPageState extends State<SettingPage> {
                                 Container(
                                   decoration: boxDecoration,
                                 ),
-                                Positioned(
+                                const Positioned(
                                   top: -130,
                                   left: -15,
                                   child: Column(
                                     children: [
-                                      customBox3(),
+                                      CustomBox3(),
                                     ],
                                   ),
                                 ),
-                                Positioned(
+                                const Positioned(
                                   top: 340,
                                   left: 105,
                                   child: Column(
                                     children: [
-                                      customBox4(),
+                                      CustomBox4(),
                                     ],
                                   ),
                                 ),

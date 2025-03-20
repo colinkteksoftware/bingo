@@ -6,12 +6,12 @@ import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/models/pagosconvert.dart';
 import 'package:bingo/models/uvtconvert.dart';
+import 'package:bingo/utils/custom_back_button.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/io_client.dart';
 
 class UvtWidget extends StatefulWidget {
-
   ModelCliente? datosuser;
 
   UvtWidget({super.key, required this.datosuser});
@@ -48,7 +48,8 @@ class _UvtWidgetState extends State<UvtWidget> {
 
     if (response.statusCode == 200) {
       setState(() {
-        listasetresponseListpagos = uvtFromJson(utf8.decode(response.bodyBytes));
+        listasetresponseListpagos =
+            uvtFromJson(utf8.decode(response.bodyBytes));
       });
 
       return listasetresponseListpagos;
@@ -76,21 +77,21 @@ class _UvtWidgetState extends State<UvtWidget> {
             physics: const NeverScrollableScrollPhysics(),
             child: Stack(
               children: [
-                Positioned(
+                const Positioned(
                   top: -130,
                   left: -15,
                   child: Column(
                     children: [
-                      customBox(),
+                      CustomBox(),
                     ],
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   top: 340,
                   left: 105,
                   child: Column(
                     children: [
-                      customBox2(),
+                      CustomBox2(),
                     ],
                   ),
                 ),
@@ -110,24 +111,10 @@ class _UvtWidgetState extends State<UvtWidget> {
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_back,
-                                                color: const Color(0xFF03045e),
-                                                size: size.width * 0.08),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                          ),
-                                        ],
-                                      ),
+                                    children: [                                      
                                       Container(
-                                        height: size.height * 0.1,
+                                        height: 100,
+                                        width: 250,
                                         decoration: const BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(
@@ -137,6 +124,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                         alignment:
                                             const AlignmentDirectional(0, 0),
                                       ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         'Valor Parametros UVT'.toUpperCase(),
                                         style: const TextStyle(
@@ -147,6 +135,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
+                                      const SizedBox(height: 8),
                                       listasetresponseListpagos == null
                                           ? Container()
                                           : SizedBox(
@@ -200,26 +189,29 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 children: [
-                                                                  Text(
-                                                                    'Contrato: ${listasetresponseListpagos!.contrato}'
-                                                                        .toUpperCase(),
-                                                                    style:
-                                                                        const TextStyle(
-                                                                      fontFamily:
-                                                                          'Inter Tight',
-                                                                      color: Color(
-                                                                          0xFFcaf0f8),
-                                                                      fontSize:
-                                                                          12,
-                                                                      letterSpacing:
-                                                                          0.0,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w300,
+                                                                  Center(
+                                                                    child: Text(
+                                                                      'Contrato: ${listasetresponseListpagos!.contrato}'
+                                                                          .toUpperCase(),
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        fontFamily:
+                                                                            'Inter Tight',
+                                                                        color: Color(
+                                                                            0xFFcaf0f8),
+                                                                        fontSize:
+                                                                            12,
+                                                                        letterSpacing:
+                                                                            0.0,
+                                                                        fontWeight:
+                                                                            FontWeight.w800,
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ],
                                                               ),
+                                                              const SizedBox(
+                                                                  height: 8),
                                                               Padding(
                                                                   padding:
                                                                       const EdgeInsetsDirectional
@@ -237,7 +229,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                           color: Colors
                                                                               .amber,
                                                                           height: size.height *
-                                                                              0.07,
+                                                                              0.08,
                                                                           width: size.width *
                                                                               0.48,
                                                                           duration:
@@ -245,7 +237,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                           onPressed:
                                                                               () async {},
                                                                           child: Container(
-                                                                              padding: const EdgeInsets.only(top: 0, left: 0, right: 0, bottom: 0),
+                                                                              padding: const EdgeInsets.only(top: 5),
                                                                               child: Center(
                                                                                   child: Column(
                                                                                 children: [
@@ -294,7 +286,10 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                             .max,
                                                                     crossAxisAlignment:
                                                                         CrossAxisAlignment
-                                                                            .start,
+                                                                            .center,
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
                                                                     children: [
                                                                       const Padding(
                                                                           padding: EdgeInsetsDirectional.fromSTEB(
@@ -317,8 +312,9 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                           letterSpacing:
                                                                               0.0,
                                                                           fontWeight:
-                                                                              FontWeight.w300,
+                                                                              FontWeight.w600,
                                                                         ),
+                                                                        textAlign: TextAlign.center,
                                                                       ),
                                                                     ],
                                                                   ),
@@ -342,7 +338,8 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                           ),
                                                         ),
                                                       ))))
-                                    ])))))
+                                    ]))))),
+                                    const BackButtonWidget(),
               ],
             )));
   }
@@ -363,14 +360,18 @@ class _UvtWidgetState extends State<UvtWidget> {
         body: jsonBody);
 
     if (response.statusCode == 200) {
-      const snackBar =
-          SnackBar(content: Center(child: Text("Se ha confirmado la eliminación..")), backgroundColor: Colors.green,);
+      const snackBar = SnackBar(
+        content: Center(child: Text("Se ha confirmado la eliminación..")),
+        backgroundColor: Colors.green,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
       return "si";
     } else {
-      const snackBar =
-          SnackBar(content: Center(child: Text("No se ha confirmado la eliminación..")), backgroundColor: Colors.red,);
+      const snackBar = SnackBar(
+        content: Center(child: Text("No se ha confirmado la eliminación..")),
+        backgroundColor: Colors.red,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
       throw Exception('Failed to load shows');

@@ -203,21 +203,21 @@ class _EditBingoState extends State<EditBingo> {
         body: SingleChildScrollView(
             physics: const NeverScrollableScrollPhysics(),
             child: Stack(children: [
-              Positioned(
+              const Positioned(
                 top: -130,
                 left: -15,
                 child: Column(
                   children: [
-                    customBox(),
+                    CustomBox(),
                   ],
                 ),
               ),
-              Positioned(
+              const Positioned(
                 top: 340,
                 left: 105,
                 child: Column(
                   children: [
-                    customBox2(),
+                    CustomBox2(),
                   ],
                 ),
               ),

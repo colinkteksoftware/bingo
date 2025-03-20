@@ -38,21 +38,21 @@ class _PromotorPageState extends State<PromotorPage> {
         backgroundColor: const Color(0xFFe7e8e9),
         body: Stack(
           children: [
-            Positioned(
+            const Positioned(
               top: -130,
               left: -15,
               child: Column(
                 children: [
-                  customBox(),
+                  CustomBox(),
                 ],
               ),
             ),
-            Positioned(
+            const Positioned(
               top: 340,
               left: 105,
               child: Column(
                 children: [
-                  customBox2(),
+                  CustomBox2(),
                 ],
               ),
             ),

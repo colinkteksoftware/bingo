@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:bingo/models/uvtconvert.dart';
 import 'package:bingo/providers/winner_provider.dart';
 import 'package:bingo/ui/user/update_user_page.dart';
+import 'package:bingo/utils/custom_back_button.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:bingo/models/modelCliente.dart';
@@ -25,7 +26,6 @@ class PaymentWidget extends StatefulWidget {
 class _PaymentWidgetState extends State<PaymentWidget> {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: const Color(0xFFcaf0f8),
       body: SingleChildScrollView(
@@ -35,12 +35,20 @@ class _PaymentWidgetState extends State<PaymentWidget> {
             const Positioned(
               top: -130,
               left: -15,
-              child: customBox(),
+              child: Column(
+                children: [
+                  CustomBox(),
+                ],
+              ),
             ),
             const Positioned(
               top: 340,
               left: 105,
-              child: customBox2(),
+              child: Column(
+                children: [
+                  CustomBox2(),
+                ],
+              ),
             ),
             Align(
               alignment: Alignment.topCenter,
@@ -54,7 +62,7 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                       child: Image.asset(
                         "assets/images/logo.png",
                         height: 100,
-                        width: 300,
+                        width: 250,
                         fit: BoxFit.fill,
                       ),
                     ),
@@ -77,27 +85,6 @@ class _PaymentWidgetState extends State<PaymentWidget> {
             const BackButtonWidget(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class BackButtonWidget extends StatelessWidget {
-  const BackButtonWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    return Positioned(
-      top: 40,
-      left: 16,
-      child: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: const Color(0xFF03045e),
-          size: size.width * 0.08,
-        ),
-        onPressed: () => Navigator.of(context).pop(),
       ),
     );
   }
@@ -295,8 +282,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                                   Text(
                                                     "Valor Total: \$${NumberFormat('#,##0', 'en_US').format(amount)}",
                                                     style: TextStyle(
-                                                      color: Colors
-                                                          .black,
+                                                      color: Colors.black,
                                                       fontSize:
                                                           size.width * 0.034,
                                                       fontFamily: 'gotic',
@@ -709,4 +695,3 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
     );
   }
 }
-

@@ -4,15 +4,14 @@ import 'dart:io';
 import 'package:animated_button/animated_button.dart';
 import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/utils/background.dart';
-import 'package:bingo/models/bingoconvert.dart';
 import 'package:bingo/models/clienteconvert.dart';
 import 'package:bingo/models/pagosconvert.dart';
+import 'package:bingo/utils/custom_back_button.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/io_client.dart';
 
 class CustomerWidget extends StatefulWidget {
-
   ModelCliente? datosuser;
 
   CustomerWidget({super.key, required this.datosuser});
@@ -29,9 +28,10 @@ class _CustomerWidgetState extends State<CustomerWidget> {
   final ioc = HttpClient();
   final pf = Preferencias();
   Future<Cliente?>? listaset;
-  Cliente? listasetresponseListpagos;
+  Cliente? customer;
+  bool finded = false;
 
-  Future<Cliente?> fetchShows() async {
+  Future<Cliente?> findByDocument() async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
@@ -47,11 +47,21 @@ class _CustomerWidgetState extends State<CustomerWidget> {
     );
 
     if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseListpagos = clienteFromJson(utf8.decode(response.bodyBytes));
-      });
+      Cliente data = clienteFromJson(utf8.decode(response.bodyBytes));
 
-      return listasetresponseListpagos;
+      if (data.clienteId != 0) {
+        setState(() {
+          customer = data;
+          finded = true;
+        });
+      } else {
+        setState(() {
+          customer = null;
+          finded = false;
+        });
+      }
+
+      return customer;
     } else {
       throw Exception('Failed to load shows');
     }
@@ -75,21 +85,21 @@ class _CustomerWidgetState extends State<CustomerWidget> {
             physics: const NeverScrollableScrollPhysics(),
             child: Stack(
               children: [
-                Positioned(
+                const Positioned(
                   top: -130,
                   left: -15,
                   child: Column(
                     children: [
-                      customBox(),
+                      CustomBox(),
                     ],
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   top: 340,
                   left: 105,
                   child: Column(
                     children: [
-                      customBox2(),
+                      CustomBox2(),
                     ],
                   ),
                 ),
@@ -110,26 +120,12 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_back,
-                                                color: const Color(0xFF03045e),
-                                                size: size.width * 0.08),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                          ),
-                                        ],
-                                      ),
                                       Padding(
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0, 0, 0, 0),
                                         child: Container(
-                                          height: size.height * 0.1,
+                                          height: 100,
+                                          width: 250,
                                           decoration: const BoxDecoration(
                                             image: DecorationImage(
                                                 image: AssetImage(
@@ -140,6 +136,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                               const AlignmentDirectional(0, 0),
                                         ),
                                       ),
+                                      const SizedBox(height: 8),
                                       Text(
                                         'Cliente'.toUpperCase(),
                                         style: const TextStyle(
@@ -150,17 +147,42 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      Padding(
-                                          padding: const EdgeInsets.all(4),
-                                          child: SizedBox(
-                                            width: size.width * 0.62,
-                                            height: size.height * 0.06,
-                                            child: TextFormField(
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .center,
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .center,
+                                        children: [
+                                          SizedBox(
+                                            width: size.width * 0.58,
+                                            height: size.height * 0.08,
+                                            child: TextField(
                                               controller: dniController,
                                               style: TextStyle(
                                                 color: const Color(0xFF424242),
                                                 fontSize: size.width * 0.04,
                                               ),
+                                              onChanged: (value) async {
+                                                setState(() {
+                                                  detectionInfo = "";
+                                                });
+
+                                                setState(() {
+                                                  searchString =
+                                                      value.toUpperCase();
+                                                });
+                                              },
+                                              onSubmitted: (value) async {
+                                                setState(() {
+                                                  detectionInfo = "";
+                                                });
+
+                                                setState(() {
+                                                  searchString =
+                                                      value.toUpperCase();
+                                                });
+                                              },
                                               decoration: InputDecoration(
                                                 floatingLabelStyle: TextStyle(
                                                   color:
@@ -169,11 +191,14 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 enabledBorder:
-                                                    const UnderlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                    color: Colors.black,
+                                                    OutlineInputBorder(
+                                                  borderSide: const BorderSide(
+                                                    color: Color(0xFF03045e),
                                                     width: 2.0,
                                                   ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
                                                 ),
                                                 focusedBorder:
                                                     const UnderlineInputBorder(
@@ -196,7 +221,9 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                     width: 2.0,
                                                   ),
                                                 ),
-                                                labelText: "Ingrese DNI",
+                                                labelText: detectionInfo.isEmpty
+                                                    ? "Buscar"
+                                                    : detectionInfo,
                                                 labelStyle: TextStyle(
                                                   color:
                                                       const Color(0xFF424242),
@@ -208,47 +235,83 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                     const Color(0xFFcaf0f8),
                                               ),
                                             ),
-                                          )),
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(0.0),
-                                            side: const BorderSide(
-                                                color: Colors.grey),
                                           ),
-                                          backgroundColor:
-                                              const Color(0xFF03045e),
-                                        ),
-                                        child: Text(
-                                          'Confirmar',
-                                          style: TextStyle(
-                                              fontSize: size.width * 0.03,
-                                              color: const Color(0xFFcaf0f8)),
-                                        ),
-                                        onPressed: () async {
-                                          if (dniController.text == "") {
-                                            const snackBar = SnackBar(
-                                                content: Center(
-                                                  child: Text(
-                                                      "Ingrese un DNI valido.."),
-                                                ));
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(snackBar);
-                                          } else {
-                                            setState(() {
-                                              //order.detallePremioFigura!.first.estadoPago = 1;
-                                            });
+                                          const SizedBox(
+                                              width:
+                                                  5),
+                                          InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                listaset = null;
+                                                finded = false;
+                                              });
 
-                                            listaset = fetchShows();
-                                            setState(() {});
-                                          }
+                                              if (dniController.text == "") {
+                                                const snackBar = SnackBar(
+                                                  content: Center(
+                                                    child: Text(
+                                                        "Ingrese un DNI valido.."),
+                                                  ),
+                                                );
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(snackBar);
+                                              } else {
+                                                setState(() {
+                                                  listaset = findByDocument();
+                                                });
 
-                                          setState(() {});
-                                        },
-                                      ),
-                                      listasetresponseListpagos == null
-                                          ? Container()
+                                                setState(() {
+                                                  // order.detallePremioFigura!.first.estadoPago = 1;
+                                                });
+                                              }
+
+                                              setState(() {});
+                                            },
+                                            splashColor:
+                                                Colors.blue.withAlpha(30),
+                                            highlightColor:
+                                                Colors.blue.withAlpha(50),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                border: Border.all(
+                                                  color:
+                                                      const Color(0xFF03045e),
+                                                  width: 2.0,
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withOpacity(0.1),
+                                                    blurRadius: 5,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const Icon(
+                                                Icons.search,
+                                                size: 20.0,
+                                                color: Color(0xFF03045e),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),                                      
+                                      !finded && customer == null
+                                          ? const Center(
+                                              child: Text(
+                                                'Cliente no encontrado',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFF03045e),
+                                                    fontSize: 20),
+                                              ),
+                                            )
                                           : SizedBox(
                                               height: size.height * 0.24,
                                               child: GestureDetector(
@@ -307,7 +370,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Nombre:  ${listasetresponseListpagos!.nombres}",
+                                                                                  "Nombre:  ${customer?.nombres ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -322,7 +385,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Apellidos:  ${listasetresponseListpagos!.apellidos}",
+                                                                                  "Apellidos:  ${customer?.apellidos ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -337,7 +400,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Documento:  ${listasetresponseListpagos!.doi}",
+                                                                                  "Documento:  ${customer?.doi ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -352,7 +415,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Documento:  ${listasetresponseListpagos!.doi}",
+                                                                                  "Documento:  ${customer?.doi ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -367,7 +430,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Telefono:  ${listasetresponseListpagos!.telefono}",
+                                                                                  "Telefono:  ${customer?.telefono ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -382,7 +445,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Correo:  ${listasetresponseListpagos!.email}",
+                                                                                  "Correo:  ${customer?.email ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -397,7 +460,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                                               mainAxisAlignment: MainAxisAlignment.start,
                                                                               children: [
                                                                                 Text(
-                                                                                  "Direccion:  ${listasetresponseListpagos!.direccion}",
+                                                                                  "Direccion:  ${customer?.direccion ?? ''}",
                                                                                   style: TextStyle(
                                                                                     color: const Color(0xFF0077b6),
                                                                                     fontSize: size.width * 0.034,
@@ -414,12 +477,14 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                           ),
                                                         ),
                                                       ))))
-                                    ])))))
+                                    ]))))),
+                const BackButtonWidget(),
               ],
             )));
   }
 
   TextEditingController dniController = TextEditingController(text: "");
+
   Future<String> fetchShowsdelete(Pago elemento) async {
     String jsonBody = json.encode(elemento.toJson());
     ioc.badCertificateCallback =
@@ -435,14 +500,18 @@ class _CustomerWidgetState extends State<CustomerWidget> {
         body: jsonBody);
 
     if (response.statusCode == 200) {
-      const snackBar =
-          SnackBar(content: Center(child: Text("Se ha confirmado la eliminación..")), backgroundColor: Colors.green,);
+      const snackBar = SnackBar(
+        content: Center(child: Text("Se ha confirmado la eliminación..")),
+        backgroundColor: Colors.green,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
       return "si";
     } else {
-      const snackBar =
-          SnackBar(content: Center(child: Text("No se ha confirmado la Eliminación..")), backgroundColor: Colors.red,);
+      const snackBar = SnackBar(
+        content: Center(child: Text("No se ha confirmado la Eliminación..")),
+        backgroundColor: Colors.red,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
       throw Exception('Failed to load shows');

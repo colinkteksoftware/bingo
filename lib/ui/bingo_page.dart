@@ -101,7 +101,7 @@ class _BingoPageState extends State<BingoPage> {
                 left: -15,
                 child: Column(
                   children: [
-                    customBox(),
+                    CustomBox(),
                   ],
                 ),
               ),
@@ -110,7 +110,7 @@ class _BingoPageState extends State<BingoPage> {
                 left: 105,
                 child: Column(
                   children: [
-                    customBox2(),
+                    CustomBox2(),
                   ],
                 ),
               ),

@@ -18,21 +18,21 @@ class Background extends StatelessWidget {
         Container(
           decoration: boxDecoration,
         ),
-        Positioned(
+        const Positioned(
           top: -130,
           left: -15,
           child: Column(
             children: [
-              customBox(),
+              CustomBox(),
             ],
           ),
         ),
-        Positioned(
+        const Positioned(
           top: 340,
           left: 105,
           child: Column(
             children: [
-              customBox2(),
+              CustomBox2(),
             ],
           ),
         ),
@@ -41,8 +41,8 @@ class Background extends StatelessWidget {
   }
 }
 
-class customBox extends StatelessWidget {
-  const customBox({super.key});
+class CustomBox extends StatelessWidget {
+  const CustomBox({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +61,8 @@ class customBox extends StatelessWidget {
   }
 }
 
-class customBox2 extends StatelessWidget {
-  const customBox2({super.key});
+class CustomBox2 extends StatelessWidget {
+  const CustomBox2({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +81,9 @@ class customBox2 extends StatelessWidget {
   }
 }
 
-class customBox3 extends StatelessWidget {
+class CustomBox3 extends StatelessWidget {
+  const CustomBox3({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Transform.rotate(
@@ -99,7 +101,9 @@ class customBox3 extends StatelessWidget {
   }
 }
 
-class customBox4 extends StatelessWidget {
+class CustomBox4 extends StatelessWidget {
+  const CustomBox4({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Transform.rotate(

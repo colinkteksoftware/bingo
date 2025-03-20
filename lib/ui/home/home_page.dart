@@ -10,6 +10,7 @@ import 'package:animated_button/animated_button.dart';
 import 'package:bingo/ui/home/widgets/headers_options.dart';
 import 'package:bingo/models/bingoconvert.dart';
 import 'package:bingo/utils/camera_permission.dart';
+import 'package:bingo/utils/custom_back_button.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:bingo/models/modelCliente.dart';
@@ -40,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _controller.text = _value.toString();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {      
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       PermissionUtils.requestCameraPermission(context);
       initializeCameras();
     });
@@ -95,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                   left: -15,
                   child: Column(
                     children: [
-                      customBox(),
+                      CustomBox(),
                     ],
                   ),
                 ),
@@ -104,7 +105,7 @@ class _HomePageState extends State<HomePage> {
                   left: 105,
                   child: Column(
                     children: [
-                      customBox2(),
+                      CustomBox2(),
                     ],
                   ),
                 ),
@@ -119,30 +120,15 @@ class _HomePageState extends State<HomePage> {
                         child: Align(
                             alignment: const AlignmentDirectional(0, 0),
                             child: Padding(
-                                padding: const EdgeInsets.only(left: 32, right: 32, top: 10),
+                                padding: const EdgeInsets.all(32),
                                 child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.arrow_back,
-                                                color: const Color(0xFF03045e),
-                                                size: size.width * 0.08),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                          ),
-                                        ],
-                                      ),
+                                    children: [                                      
                                       Container(
-                                        height: 100,//size.height * 0.1,
-                                        width: 250,//size.width * 0.5,
+                                        height: 100,
+                                        width: 250,
                                         decoration: const BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(
@@ -223,11 +209,11 @@ class _HomePageState extends State<HomePage> {
                                                                     (BuildContext
                                                                         context) {
                                                                   return PaymentWidget(
-                                                                    datosuser:
-                                                                        widget
-                                                                            .datosuser,
-                                                                    bingo: widget.bingo!
-                                                                  );
+                                                                      datosuser:
+                                                                          widget
+                                                                              .datosuser,
+                                                                      bingo: widget
+                                                                          .bingo!);
                                                                 },
                                                               );
                                                               setState(() {});
@@ -279,7 +265,9 @@ class _HomePageState extends State<HomePage> {
 
                                                               /* fin */
 
-                                                              if (widget.bingo!.estado == 3) {
+                                                              if (widget.bingo!
+                                                                      .estado ==
+                                                                  3) {
                                                                 showAlerta(
                                                                     context,
                                                                     'Juego Finalizado',
@@ -296,7 +284,8 @@ class _HomePageState extends State<HomePage> {
                                                                     context,
                                                                     'Mensaje Informativo',
                                                                     'Para ventas el bingo debe estar en un estado diferente de jugando!!');
-                                                              }*/ else {
+                                                              }*/
+                                                              else {
                                                                 await showDialog(
                                                                   context:
                                                                       context,
@@ -699,29 +688,26 @@ class _HomePageState extends State<HomePage> {
 
                                                                   /* inicio */
 
-                                                              Center(
-                                                                child: isLoading
-                                                                    ? const CircularProgressIndicator()
-                                                                    : errorMessage !=
-                                                                            null
-                                                                        ? Text(
-                                                                            errorMessage!)
-                                                                        : bingoList == null ||
-                                                                                bingoList.isEmpty
-                                                                            ? const Text('No hay bingo disponibles')
-                                                                            : ListView.builder(
-                                                                                itemCount: bingoList.length,
-                                                                                itemBuilder: (context, index) {
-                                                                                  final bingoSala = bingoList[index];
-                                                                                  return ListTile(
-                                                                                    title: Text('ID: ${bingoSala.bingo.bingoId}'),
-                                                                                    subtitle: Text('${bingoSala.bingo.fecha}'),
-                                                                                  );
-                                                                                },
-                                                                              ),
-                                                              );
+                                                                  Center(
+                                                                    child: isLoading
+                                                                        ? const CircularProgressIndicator()
+                                                                        : errorMessage != null
+                                                                            ? Text(errorMessage!)
+                                                                            : bingoList == null || bingoList.isEmpty
+                                                                                ? const Text('No hay bingo disponibles')
+                                                                                : ListView.builder(
+                                                                                    itemCount: bingoList.length,
+                                                                                    itemBuilder: (context, index) {
+                                                                                      final bingoSala = bingoList[index];
+                                                                                      return ListTile(
+                                                                                        title: Text('ID: ${bingoSala.bingo.bingoId}'),
+                                                                                        subtitle: Text('${bingoSala.bingo.fecha}'),
+                                                                                      );
+                                                                                    },
+                                                                                  ),
+                                                                  );
 
-                                                              /* fin */
+                                                                  /* fin */
 
                                                                   if (widget.bingo!
                                                                               .estado ==
@@ -885,7 +871,8 @@ class _HomePageState extends State<HomePage> {
                                                             actualizarElementos,
                                                       ))
                                                   : Container())),
-                                    ])))))
+                                    ]))))),
+                const BackButtonWidget(),
               ],
             )),
           )),
