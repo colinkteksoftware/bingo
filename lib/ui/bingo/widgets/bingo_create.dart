@@ -558,10 +558,10 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                         onPressed: () async {
                           var size = MediaQuery.of(context).size;
                           await fetchShowsbingo();
-                          if (widget.bingo!.estado == 2 ||
+                          if (/*widget.bingo!.estado == 2 ||*/
                               widget.bingo!.estado == 3) {
                             showAlerta(context, 'Mensaje Informativo',
-                                'Para ventas el bingo debe estar en un estado diferente de jugando!!');
+                                'El bingo ya se ha finalizado');
                           } else {
                             if (_selectedIndex == 0 ||
                                 _selectedIndex == 2 ||

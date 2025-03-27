@@ -107,7 +107,8 @@ class WinnerProvider with ChangeNotifier {
     }
   }
 
-  Future<void> registerWinner(BuildContext context, Pago payment, String promotorId) async {
+  Future<void> registerWinner(
+      BuildContext context, Pago payment, String promotorId) async {
     String jsonBody = json.encode(payment.toJson());
     //print('Pago realizado => $jsonBody');
 
@@ -116,15 +117,19 @@ class WinnerProvider with ChangeNotifier {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
+
     final url = Uri.parse(
         '${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor');
+
+    /*print('URL WINNER => $url');
+    print('DATA WINNER => $jsonBody');*/
     try {
       final response = await http.put(url,
           headers: {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonBody);
-
+      //print('RESPONSE CODE => ${response.statusCode}');
       if (response.statusCode == 200) {
         const snackBar = SnackBar(
           content: Center(child: Text("Se ha confirmado el pago..")),
@@ -135,9 +140,7 @@ class WinnerProvider with ChangeNotifier {
       } else {
         const snackBar = SnackBar(
           content: Center(
-              child: Center(
-                  child: Text(
-                      "No se ha confirmado el pago."))),
+              child: Center(child: Text("No se ha confirmado el pago."))),
           backgroundColor: Colors.red,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);

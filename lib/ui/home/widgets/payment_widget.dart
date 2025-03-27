@@ -204,9 +204,8 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
               print('Valor total => $amount');*/
 
               return GestureDetector(
-                onTap: () async {},
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 4, right: 4),
+                  padding: const EdgeInsets.only(left: 4, right: 4, bottom: 5),
                   child: Container(
                     width: size.width * 0.94,
                     height: size.height * 0.18,
@@ -269,7 +268,27 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                           height: size.height * 0.07,
                                           width: size.width * 0.48,
                                           duration: 2,
-                                          onPressed: () async {},
+                                          onPressed: () async {
+                                            print('ESTADO BINGO => ${widget.bingo?.estado}');
+                                            if (widget.bingo?.estado == 2) {
+                                              setState(() {
+                                                totaluvt =
+                                                    uvtData!.cantidadUvt! == 0
+                                                        ? 1
+                                                        : double.parse(uvtData!
+                                                            .cantidadUvt
+                                                            .toString());
+                                              });
+                                              collectPrize(
+                                                  context,
+                                                  order,
+                                                  amount,
+                                                  size,
+                                                  totalPremioAdicional,
+                                                  totaluvt);
+                                              setState(() {});
+                                            }
+                                          },
                                           child: Container(
                                             padding: const EdgeInsets.only(
                                                 top: 2,
@@ -357,31 +376,8 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
+                                      //print('INFO BINGO => ${widget.bingo}');
                                       GestureDetector(
-                                        onTap: winnerProvider
-                                                .paymentsList!.isNotEmpty
-                                            ? () async {
-                                                var size =
-                                                    MediaQuery.of(context).size;
-                                                setState(() {
-                                                  totaluvt =
-                                                      uvtData!.cantidadUvt! == 0
-                                                          ? 1
-                                                          : double.parse(
-                                                              uvtData!
-                                                                  .cantidadUvt
-                                                                  .toString());
-                                                });
-                                                collectPrize(
-                                                    context,
-                                                    order,
-                                                    amount,
-                                                    size,
-                                                    totalPremioAdicional,
-                                                    totaluvt);
-                                                setState(() {});
-                                              }
-                                            : null,
                                         child: InkWell(
                                           onTap: widget.bingo?.estado == 2
                                               ? () {
@@ -407,7 +403,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                           child: Container(
                                             padding: const EdgeInsets.all(8.0),
                                             decoration: BoxDecoration(
-                                              color: widget.bingo?.estado == 2
+                                              color: widget.bingo?.estado != 3
                                                   ? Colors.green[600]
                                                   : Colors.grey[400],
                                               borderRadius:
@@ -423,8 +419,8 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                                       'Registrar Pago',
                                                       style: TextStyle(
                                                         color: widget.bingo
-                                                                    ?.estado ==
-                                                                2
+                                                                    ?.estado !=
+                                                                3
                                                             ? Colors.white
                                                             : Colors.grey[600],
                                                         fontSize:
@@ -441,7 +437,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                                       .monetization_on_outlined,
                                                   size: size.width * 0.059,
                                                   color:
-                                                      widget.bingo?.estado == 2
+                                                      widget.bingo?.estado != 3
                                                           ? Colors.white
                                                           : Colors.grey[600],
                                                 )

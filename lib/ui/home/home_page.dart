@@ -273,18 +273,6 @@ class _HomePageState extends State<HomePage> {
                                                                     'Juego Finalizado',
                                                                     'El bingo ya ha sido finalizado!!!');
                                                               }
-
-                                                              /*if (widget.bingo!
-                                                                          .estado ==
-                                                                      2 ||
-                                                                  widget.bingo!
-                                                                          .estado ==
-                                                                      3) {
-                                                                showAlerta(
-                                                                    context,
-                                                                    'Mensaje Informativo',
-                                                                    'Para ventas el bingo debe estar en un estado diferente de jugando!!');
-                                                              }*/
                                                               else {
                                                                 await showDialog(
                                                                   context:
@@ -709,16 +697,16 @@ class _HomePageState extends State<HomePage> {
 
                                                                   /* fin */
 
-                                                                  if (widget.bingo!
+                                                                  if (/*widget.bingo!
                                                                               .estado ==
-                                                                          2 ||
+                                                                          2 ||*/
                                                                       widget.bingo!
                                                                               .estado ==
                                                                           3) {
                                                                     showAlerta(
                                                                       context,
                                                                       'Mensaje Informativo',
-                                                                      'Para ventas el bingo debe estar en un estado diferente de jugando!!',
+                                                                      'El bingo ya se encuentra finalizado',
                                                                     );
                                                                   } else {
                                                                     qrcodeController!
