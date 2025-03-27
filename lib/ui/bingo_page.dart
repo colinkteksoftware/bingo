@@ -1,16 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:bingo/services/bingo_service.dart';
 import 'package:bingo/ui/home/widgets/payment_widget.dart';
 import 'package:bingo/models/bingoconvert.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/routes.dart';
-import 'package:intl/intl.dart';
 import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/ui/user/update_person_page.dart';
-import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_button/animated_button.dart';
-import 'package:http/io_client.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
 
 final ipController = TextEditingController(text: "0.0.0.0");
@@ -26,29 +23,44 @@ class BingoPage extends StatefulWidget {
 }
 
 class _BingoPageState extends State<BingoPage> {
-  final pf = Preferencias();
+  //final pf = Preferencias();
   final ioc = HttpClient();
-  Future<List<BingoSala>?>? listaset;
-  List<BingoSala>? listasetresponseList;
+  //Future<List<BingoSala>?>? listaset;
+  //List<BingoSala>? listasetresponseList;
   DateTime _selectedDate = DateTime.now();
   String searchString = "";
   String searchStringproduct = "";
   String detectionInfo = "";
   int _selectedIndex = 0;
 
+  late List<Bingo> bingosList = [];
+
   @override
   void initState() {
-    listaset = fetchShows();
+    //listaset = fetchShows();
+    //bingosList = BingoService().getBingosAvailaibles();
+    loadBingos();
     super.initState();
   }
 
-  iniciarPreferencias() async {
+  Future<void> loadBingos() async {
+    try {
+      List<Bingo> bingos = await BingoService().getBingosAvailaibles();
+      setState(() {
+        bingosList = bingos;
+      });
+    } catch (e) {
+      print('Error al cargar los bingos: $e');
+    }
+  }
+
+  /*iniciarPreferencias() async {
     await pf.initPrefs();
     ipController.text = pf.getIp;
     setState(() {});
-  }
+  }*/
 
-  Future<List<BingoSala>?> fetchShows() async {
+  /*Future<List<BingoSala>?> fetchShows() async {
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
@@ -74,7 +86,7 @@ class _BingoPageState extends State<BingoPage> {
     } else {
       throw Exception('Failed to load shows');
     }
-  }
+  }*/
 
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
@@ -260,8 +272,8 @@ class _BingoPageState extends State<BingoPage> {
                                             _selectedDate = value;
                                           });
 
-                                          await fetchShows();
-                                          listasetresponseList!.sort((a, b) {
+                                          //await fetchShows();
+                                          /*listasetresponseList!.sort((a, b) {
                                             int diffA = (a.bingo.fecha.day -
                                                     _selectedDate.day)
                                                 .abs();
@@ -270,6 +282,9 @@ class _BingoPageState extends State<BingoPage> {
                                                 .abs();
                                             return diffA.compareTo(diffB);
                                           });
+                                          setState(() {});*/
+
+                                          orderBingosByDate([], _selectedDate);
                                           setState(() {});
                                         },
                                       ),
@@ -288,7 +303,8 @@ class _BingoPageState extends State<BingoPage> {
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () async {
-                                                      await fetchShows();
+                                                      //await fetchShows();
+                                                      await loadBingos();
                                                       setState(() {
                                                         _selectedIndex = 0;
                                                       });
@@ -342,7 +358,8 @@ class _BingoPageState extends State<BingoPage> {
                                                   const SizedBox(width: 3.5),
                                                   GestureDetector(
                                                       onTap: () async {
-                                                        await fetchShows();
+                                                        ///await fetchShows();
+                                                        await loadBingos();
                                                         setState(() {
                                                           _selectedIndex = 1;
                                                         });
@@ -397,7 +414,8 @@ class _BingoPageState extends State<BingoPage> {
                                                   const SizedBox(width: 3.5),
                                                   GestureDetector(
                                                       onTap: () async {
-                                                        await fetchShows();
+                                                        //await fetchShows();
+                                                        await loadBingos();
                                                         setState(() {
                                                           _selectedIndex = 2;
                                                         });
@@ -452,7 +470,8 @@ class _BingoPageState extends State<BingoPage> {
                                                   const SizedBox(width: 3.5),
                                                   GestureDetector(
                                                       onTap: () async {
-                                                        await fetchShows();
+                                                        //await fetchShows();
+                                                        await loadBingos();
                                                         setState(() {
                                                           _selectedIndex = 3;
                                                         });
@@ -506,7 +525,8 @@ class _BingoPageState extends State<BingoPage> {
                                                       ])),
                                                   GestureDetector(
                                                       onTap: () async {
-                                                        await fetchShows();
+                                                        //await fetchShows();
+                                                        await loadBingos();
                                                         setState(() {
                                                           _selectedIndex = 4;
                                                         });
@@ -560,9 +580,11 @@ class _BingoPageState extends State<BingoPage> {
                                                       ])),
                                                 ],
                                               ),
-                                            ),
+                                            ),                                            
                                             AnimatedButton(
-                                                color: _selectedIndex == 2 && listasetresponseList?.isNotEmpty == true
+                                                color: _selectedIndex == 2 /*&&
+                                                        bingosList.isNotEmpty ==
+                                                            true*/
                                                     ? const Color(0xFF03045e)
                                                     : Colors.grey,
                                                 height: size.height * 0.05,
@@ -572,7 +594,9 @@ class _BingoPageState extends State<BingoPage> {
                                                     ? () {
                                                         _handlePayments();
                                                       }
-                                                    : () {},
+                                                    : () {
+                                                      
+                                                    },
                                                 child: Center(
                                                     child: Text(
                                                   "Pagos",
@@ -586,8 +610,9 @@ class _BingoPageState extends State<BingoPage> {
                                                 ))),
                                           ]),
                                     ),
-                                    listasetresponseList == null
-                                        ? Container()
+                                    bingosList.isEmpty
+                                        ? const Center(
+                                            child: CircularProgressIndicator())
                                         : SizedBox(
                                             height: size.height * 0.44,
                                             child: ListView.separated(
@@ -600,28 +625,25 @@ class _BingoPageState extends State<BingoPage> {
                                                       indent: 0,
                                                       endIndent: 0,
                                                     ),
-                                                itemCount: listasetresponseList!
-                                                    .length,
+                                                itemCount: bingosList.length,
                                                 itemBuilder: ((ctx, index) {
                                                   final order =
-                                                      listasetresponseList![
-                                                          index];
+                                                      bingosList[index];
 
-                                                  return order.bingo.fecha.year
+                                                  return order.fecha.year
                                                               .toString()
                                                               .toLowerCase()
                                                               .contains(
                                                                   _selectedDate
                                                                       .year
                                                                       .toString()) &&
-                                                          order.bingo.estado
+                                                          order.estado
                                                               .toString()
                                                               .toLowerCase()
                                                               .contains(
                                                                   _selectedIndex
                                                                       .toString()) &&
-                                                          order
-                                                              .bingo.fecha.month
+                                                          order.fecha.month
                                                               .toString()
                                                               .toLowerCase()
                                                               .contains(
@@ -631,7 +653,7 @@ class _BingoPageState extends State<BingoPage> {
                                                       ? GestureDetector(
                                                           onTap: () async {
                                                             Bingo playing =
-                                                                order.bingo;
+                                                                order;
                                                             await Navigator
                                                                 .pushNamed(
                                                                     context,
@@ -644,7 +666,8 @@ class _BingoPageState extends State<BingoPage> {
                                                                       widget
                                                                           .datosuser
                                                                 });
-                                                            await fetchShows();
+                                                            //await fetchShows();
+                                                            await loadBingos();
                                                           },
                                                           child: Padding(
                                                               padding:
@@ -740,7 +763,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                                   ),
                                                                                 ),
                                                                                 Text(
-                                                                                  '${order.bingo.bingoId}'.toUpperCase(),
+                                                                                  '${order.bingoId}'.toUpperCase(),
                                                                                   style: TextStyle(
                                                                                     fontFamily: 'Cera Pro',
                                                                                     color: Colors.white,
@@ -754,7 +777,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                           ],
                                                                         ),
                                                                         Text(
-                                                                          "Descripción: ${order.bingo.descripcion}",
+                                                                          "Descripción: ${order.descripcion}",
                                                                           style:
                                                                               TextStyle(
                                                                             fontFamily:
@@ -778,7 +801,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                                 child: Column(
                                                                                   children: [
                                                                                     Text(
-                                                                                      'Valor c/u \$${order.bingo.precioPorCartilla.toStringAsFixed(2)}',
+                                                                                      'Valor c/u \$${order.precioPorCartilla.toStringAsFixed(2)}',
                                                                                       style: TextStyle(
                                                                                         fontFamily: 'Cera Pro',
                                                                                         color: Colors.white,
@@ -788,7 +811,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                                       ),
                                                                                     ),
                                                                                     Text(
-                                                                                      'Valor Total \$${(order.bingo.precioPorCartilla * 6).toStringAsFixed(2)}',
+                                                                                      'Valor Total \$${(order.precioPorCartilla * 6).toStringAsFixed(2)}',
                                                                                       style: TextStyle(
                                                                                         fontFamily: 'Cera Pro',
                                                                                         color: Colors.white,
@@ -800,7 +823,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                                   ],
                                                                                 )),
                                                                             Text(
-                                                                              order.bingo.fecha.toString().substring(0, 16),
+                                                                              order.fecha.toString().substring(0, 16),
                                                                               style: TextStyle(
                                                                                 fontFamily: 'Gilroy',
                                                                                 color: Colors.white,
@@ -818,7 +841,8 @@ class _BingoPageState extends State<BingoPage> {
                                                               )),
                                                         )
                                                       : Container();
-                                                })))
+                                                })),
+                                          )
                                   ]))))),
             ])),
         floatingActionButton: GestureDetector(
@@ -859,14 +883,24 @@ class _BingoPageState extends State<BingoPage> {
             )));
   }
 
+  List<BingoSala> orderBingosByDate(
+      List<BingoSala> listaBingos, DateTime selectedDate) {
+    listaBingos.sort((a, b) {
+      int diffA = (a.bingo.fecha.day - selectedDate.day).abs();
+      int diffB = (b.bingo.fecha.day - selectedDate.day).abs();
+      return diffA.compareTo(diffB);
+    });
+    return listaBingos;
+  }
+
   void _handlePayments() {
     _payments();
   }
 
   Future<void> _payments() async {
-    print('bingos = > ${bingoSalaToMap(listasetresponseList!)}');
-    if (listasetresponseList?.isNotEmpty == true) {
-      Bingo? playing = listasetresponseList?.first.bingo;
+    print('pagos = > $bingosList');
+    if (bingosList.isNotEmpty == true) {
+      Bingo? playing = bingosList.first;
       await showDialog(
         context: context,
         builder: (BuildContext context) {

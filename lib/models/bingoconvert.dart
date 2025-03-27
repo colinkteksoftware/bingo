@@ -1,24 +1,29 @@
 import 'dart:convert';
 
+import 'package:bingo/models/modelpremio.dart';
+
 List<BingoSala> bingoSalaFromMap(String str) => List<BingoSala>.from(json.decode(str).map((x) => BingoSala.fromMap(x)));
 
 String bingoSalaToMap(List<BingoSala> data) => json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
 
 class BingoSala {
     Bingo bingo;
+    List<Premio> premios;
  
     BingoSala({
-        required this.bingo   
+        required this.bingo,
+        required this.premios   
     });
 
     factory BingoSala.fromMap(Map<String, dynamic> json) => BingoSala(
         bingo: Bingo.fromMap(json["bingo"]),
-
-    );
+        premios: List<Premio>.from(json["premios"].map((x) => Premio.fromMap(x))),
+      );
 
     Map<String, dynamic> toMap() => {
-        "bingo": bingo.toMap()
-    };
+        "bingo": bingo.bingoToMap(),
+        "premios": List<dynamic>.from(premios.map((x) => x.toMap())),
+      };
 }
 
 class Bingo {
@@ -56,7 +61,7 @@ class Bingo {
         estado: json["estado"],
     );
 
-    Map<String, dynamic> toMap() => {
+    Map<String, dynamic> bingoToMap() => {
         "bingoId": bingoId,
         "fecha": fecha.toIso8601String(),
         "descripcion": descripcion,

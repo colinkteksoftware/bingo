@@ -9,13 +9,13 @@ class HomeProvider with ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   
-  Future<void> loadBingoShows(DateTime bingoFecha, String ip) async {
+  Future<void> loadBingoShows(DateTime bingoFecha) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      bingoList = await _bingoService.fetchShowsBingo(bingoFecha, ip);
+      bingoList = await _bingoService.fetchShowBingos(bingoFecha);
       isLoading = false;
     } catch (e) {
       errorMessage = 'Failed to load bingo shows: $e';

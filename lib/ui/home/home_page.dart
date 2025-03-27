@@ -11,7 +11,6 @@ import 'package:bingo/ui/home/widgets/headers_options.dart';
 import 'package:bingo/models/bingoconvert.dart';
 import 'package:bingo/utils/camera_permission.dart';
 import 'package:bingo/utils/custom_back_button.dart';
-import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:bingo/models/modelCliente.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -32,8 +31,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final pf = Preferencias();
-  final ioc = HttpClient();
+  
   TextEditingController? qrcodeController = TextEditingController(text: "-1");
 
   @override
