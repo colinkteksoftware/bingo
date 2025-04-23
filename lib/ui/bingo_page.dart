@@ -14,8 +14,9 @@ final ipController = TextEditingController(text: "0.0.0.0");
 
 // ignore: must_be_immutable
 class BingoPage extends StatefulWidget {
-  ModelCliente? datosuser;
 
+  ModelCliente? datosuser;
+  
   BingoPage({super.key, required this.datosuser});
 
   @override
@@ -23,10 +24,7 @@ class BingoPage extends StatefulWidget {
 }
 
 class _BingoPageState extends State<BingoPage> {
-  //final pf = Preferencias();
   final ioc = HttpClient();
-  //Future<List<BingoSala>?>? listaset;
-  //List<BingoSala>? listasetresponseList;
   DateTime _selectedDate = DateTime.now();
   String searchString = "";
   String searchStringproduct = "";
@@ -37,8 +35,6 @@ class _BingoPageState extends State<BingoPage> {
 
   @override
   void initState() {
-    //listaset = fetchShows();
-    //bingosList = BingoService().getBingosAvailaibles();
     loadBingos();
     super.initState();
   }
@@ -46,47 +42,16 @@ class _BingoPageState extends State<BingoPage> {
   Future<void> loadBingos() async {
     try {
       List<Bingo> bingos = await BingoService().getBingosAvailaibles();
-      setState(() {
-        bingosList = bingos;
-      });
+      if (bingos.isNotEmpty) {
+        BingoService().updateBingoState(bingos);
+        setState(() {
+          bingosList = bingos;
+        });
+      }
     } catch (e) {
       print('Error al cargar los bingos: $e');
     }
   }
-
-  /*iniciarPreferencias() async {
-    await pf.initPrefs();
-    ipController.text = pf.getIp;
-    setState(() {});
-  }*/
-
-  /*Future<List<BingoSala>?> fetchShows() async {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-    await iniciarPreferencias();
-    final url = Uri.parse(
-        "${ipController.text}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate");
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        listasetresponseList =
-            bingoSalaFromMap(utf8.decode(response.bodyBytes));
-      });
-      setState(() {});
-      return listasetresponseList;
-    } else {
-      throw Exception('Failed to load shows');
-    }
-  }*/
 
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
@@ -284,14 +249,14 @@ class _BingoPageState extends State<BingoPage> {
                                           });
                                           setState(() {});*/
 
-                                          orderBingosByDate([], _selectedDate);
+                                          orderBingosByDate(_selectedDate);
                                           setState(() {});
                                         },
                                       ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.only(
-                                          left: 30, right: 30),
+                                          left: 30, top: 5, right: 30),
                                       child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -301,6 +266,130 @@ class _BingoPageState extends State<BingoPage> {
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: [
+                                                  /*Center(
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        // Aquí agregamos el ListView horizontal para los estados
+                                                        Container(
+                                                          height:
+                                                              60, // Altura del selector
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                                  vertical: 10),
+                                                          child:
+                                                              ListView.builder(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            itemCount: bingoStates
+                                                                .length, // bingoStates tiene los nombres de los estados
+                                                            itemBuilder:
+                                                                (context,
+                                                                    index) {
+                                                              return GestureDetector(
+                                                                onTap: () {
+                                                                  setState(() {
+                                                                    _selectedIndex =
+                                                                        index; // Cambiar el índice seleccionado
+                                                                  });
+                                                                },
+                                                                child:
+                                                                    Container(
+                                                                  margin: EdgeInsets
+                                                                      .symmetric(
+                                                                          horizontal:
+                                                                              8),
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                              10),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: _selectedIndex ==
+                                                                            index
+                                                                        ? Color(
+                                                                            0xFF03045e) // Color azul para el estado seleccionado
+                                                                        : Colors
+                                                                            .transparent,
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(8),
+                                                                    border:
+                                                                        Border
+                                                                            .all(
+                                                                      color: _selectedIndex ==
+                                                                              index
+                                                                          ? Color(
+                                                                              0xFF03045e) // Borde azul para el estado seleccionado
+                                                                          : Colors
+                                                                              .black,
+                                                                      width: 2,
+                                                                    ),
+                                                                  ),
+                                                                  child: Center(
+                                                                    child: Text(
+                                                                      bingoStates[
+                                                                          index], // Mostrar el nombre del estado
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: _selectedIndex ==
+                                                                                index
+                                                                            ? Color(0xFFcaf0f8) // Texto blanco cuando está seleccionado
+                                                                            : Colors.black, // Texto negro para los demás
+                                                                        fontSize:
+                                                                            size.width *
+                                                                                0.03,
+                                                                        fontFamily:
+                                                                            'gotic',
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+
+                                                  // Aquí está tu AnimatedButton
+                                                  AnimatedButton(
+                                                    color: _selectedIndex == 2
+                                                        ? const Color(
+                                                            0xFF03045e) // Color azul cuando el estado seleccionado es 2
+                                                        : Colors.grey,
+                                                    height: size.height * 0.05,
+                                                    width: size.width * 0.16,
+                                                    duration: 2,
+                                                    onPressed:
+                                                        _selectedIndex == 2
+                                                            ? () {
+                                                                print(
+                                                                    'pagos desde bingo');
+                                                                _handlePayments(); // Llamada al método para procesar pagos
+                                                              }
+                                                            : () {},
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Pagos",
+                                                        style: TextStyle(
+                                                          color: const Color(
+                                                              0xFFcaf0f8),
+                                                          fontSize:
+                                                              size.width * 0.03,
+                                                          fontFamily: 'gotic',
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),*/
+
                                                   GestureDetector(
                                                     onTap: () async {
                                                       //await fetchShows();
@@ -580,9 +669,10 @@ class _BingoPageState extends State<BingoPage> {
                                                       ])),
                                                 ],
                                               ),
-                                            ),                                            
+                                            ),
                                             AnimatedButton(
-                                                color: _selectedIndex == 2 /*&&
+                                                color: _selectedIndex ==
+                                                        2 /*&&
                                                         bingosList.isNotEmpty ==
                                                             true*/
                                                     ? const Color(0xFF03045e)
@@ -592,11 +682,11 @@ class _BingoPageState extends State<BingoPage> {
                                                 duration: 2,
                                                 onPressed: _selectedIndex == 2
                                                     ? () {
+                                                        print(
+                                                            'pagos desde bingo');
                                                         _handlePayments();
                                                       }
-                                                    : () {
-                                                      
-                                                    },
+                                                    : () {},
                                                 child: Center(
                                                     child: Text(
                                                   "Pagos",
@@ -682,7 +772,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                         0.9,
                                                                 height:
                                                                     size.height *
-                                                                        0.18,
+                                                                        0.19,
                                                                 decoration:
                                                                     BoxDecoration(
                                                                   borderRadius:
@@ -883,14 +973,13 @@ class _BingoPageState extends State<BingoPage> {
             )));
   }
 
-  List<BingoSala> orderBingosByDate(
-      List<BingoSala> listaBingos, DateTime selectedDate) {
-    listaBingos.sort((a, b) {
-      int diffA = (a.bingo.fecha.day - selectedDate.day).abs();
-      int diffB = (b.bingo.fecha.day - selectedDate.day).abs();
+  List<Bingo> orderBingosByDate(DateTime selectedDate) {
+    bingosList.sort((a, b) {
+      int diffA = (a.fecha.day - selectedDate.day).abs();
+      int diffB = (b.fecha.day - selectedDate.day).abs();
       return diffA.compareTo(diffB);
     });
-    return listaBingos;
+    return bingosList;
   }
 
   void _handlePayments() {
@@ -898,7 +987,9 @@ class _BingoPageState extends State<BingoPage> {
   }
 
   Future<void> _payments() async {
-    print('pagos = > $bingosList');
+    for (var bingo in bingosList) {
+      print('pagos = > ${bingo.bingoToMap()}');
+    }
     if (bingosList.isNotEmpty == true) {
       Bingo? playing = bingosList.first;
       await showDialog(

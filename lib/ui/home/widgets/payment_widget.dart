@@ -4,6 +4,7 @@ import 'package:bingo/models/uvtconvert.dart';
 import 'package:bingo/providers/winner_provider.dart';
 import 'package:bingo/services/bingo_service.dart';
 import 'package:bingo/ui/user/update_user_page.dart';
+import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/utils/custom_back_button.dart';
 import 'package:intl/intl.dart';
 import 'package:animated_button/animated_button.dart';
@@ -27,6 +28,7 @@ class PaymentWidget extends StatefulWidget {
 
 class _PaymentWidgetState extends State<PaymentWidget> {
   late StreamSubscription<List<Bingo>> _bingoSubscription;
+  final bingoService = BingoService();
   List<Widget> widgets = [];
   List<Bingo> bingos = [];
   int bingoState = -1;
@@ -34,42 +36,126 @@ class _PaymentWidgetState extends State<PaymentWidget> {
   @override
   void initState() {
     super.initState();
-
-    _bingoSubscription = BingoService().bingoStream.listen((updatedBingos) {
-      setState(() {
-        bingos = updatedBingos;
-        bingoState = _getBingoStateById(widget.bingo?.bingoId ?? 0);
-        print('ESTADO BINGO PAGOS => $bingoState');
-      });
-    });
+    getStatusBingo();
+    loadBingos();    
   }
 
-  int _getBingoStateById(int bingoId) {
-    final bingo = bingos.firstWhere(
-      (bingo) => bingo.bingoId == bingoId,
-      orElse: () => Bingo(
-          bingoId: 0,
-          fecha: DateTime.now(),
-          descripcion: '',
-          precioPorCartilla: 0,
-          presupuestoPremio: 0,
-          tipoBalotario: 0,
-          tipoOrigen: 0,
-          tipo: '',
-          estado: -1),
+  Future<void> loadBingos() async {
+    try {
+      List<Bingo> loadedBingos = await bingoService.getBingosAvailaibles();
+      if (loadedBingos.isNotEmpty) {
+        setState(() {
+          bingos = loadedBingos;
+          bingoState = getBingoStateById(widget.bingo?.bingoId ?? 0, bingos);
+        });
+        bingoService.updateBingoState(loadedBingos);
+      }
+    } catch (e) {
+      print('Error al cargar los bingos: $e');
+    }
+  }
+
+  void getStatusBingo() {
+    _bingoSubscription = bingoService.bingoStream.listen(
+      (updatedBingos) {
+        if (mounted) {
+          setState(() {
+            bingos = updatedBingos;
+            bingoState = getBingoStateById(widget.bingo?.bingoId ?? 0, bingos);
+          });
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          print('Error en el stream: $error');
+        }
+      },
     );
-    return bingo.estado;
   }
 
   @override
   void dispose() {
-    super.dispose();
     _bingoSubscription.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (bingoState == 2) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFcaf0f8),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Stack(
+            children: [
+              const Positioned(
+                top: -130,
+                left: -15,
+                child: Column(
+                  children: [
+                    CustomBox(),
+                  ],
+                ),
+              ),
+              const Positioned(
+                top: 340,
+                left: 105,
+                child: Column(
+                  children: [
+                    CustomBox2(),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Image.asset(
+                          "assets/images/logo.png",
+                          height: 100,
+                          width: 250,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      Text(
+                        'Lista de Ganadores del Bingo'.toUpperCase(),
+                        style: const TextStyle(
+                          fontFamily: 'Inter Tight',
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      BuildWinnersList(
+                          datosuser: widget.datosuser, bingo: widget.bingo)
+                    ],
+                  ),
+                ),
+              ),
+              const BackButtonWidget(),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return const WinnerNoFound();
+    }
+  }
+}
+
+class WinnerNoFound extends StatelessWidget {
+  const WinnerNoFound({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFcaf0f8),
       body: SingleChildScrollView(
@@ -119,10 +205,13 @@ class _PaymentWidgetState extends State<PaymentWidget> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),                    
-                    BuildWinnersList(
-                        datosuser: widget.datosuser, bingo: widget.bingo)
-                    ],
+                    const SizedBox(height: 16),
+                    const Center(
+                        child: Text(
+                      'No hay pagos pendientes',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ))
+                  ],
                 ),
               ),
             ),
@@ -131,76 +220,6 @@ class _PaymentWidgetState extends State<PaymentWidget> {
         ),
       ),
     );
-  } else {
-    Navigator.of(context).pop();
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pagos'),
-      ),
-      body: Container(),
-    );
-  }    
-    /*return Scaffold(
-      backgroundColor: const Color(0xFFcaf0f8),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Stack(
-          children: [
-            const Positioned(
-              top: -130,
-              left: -15,
-              child: Column(
-                children: [
-                  CustomBox(),
-                ],
-              ),
-            ),
-            const Positioned(
-              top: 340,
-              left: 105,
-              child: Column(
-                children: [
-                  CustomBox2(),
-                ],
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Image.asset(
-                        "assets/images/logo.png",
-                        height: 100,
-                        width: 250,
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                    Text(
-                      'Lista de Ganadores del Bingo'.toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: 'Inter Tight',
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),                    
-                    BuildWinnersList(
-                        datosuser: widget.datosuser, bingo: widget.bingo)
-                    ],
-                ),
-              ),
-            ),
-            const BackButtonWidget(),
-          ],
-        ),
-      ),
-    );*/
   }
 }
 
@@ -219,14 +238,33 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
   List<Pago>? winnersList;
   double totaluvt = 0;
   TextEditingController dniController = TextEditingController();
+  int bingoState = -1;
+  List<Bingo> bingos = [];
 
   @override
   void initState() {
     super.initState();
+    loadBingos();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadWinners();
       await _loadUVT();
     });
+  }
+
+  Future<void> loadBingos() async {
+    final bingoService = BingoService();
+    try {
+      List<Bingo> loadedBingos = await bingoService.getBingosAvailaibles();
+      if (loadedBingos.isNotEmpty) {
+        setState(() {
+          bingos = loadedBingos;
+          bingoState = getBingoStateById(widget.bingo?.bingoId ?? 0, bingos);
+        });
+        BingoService().updateBingoState(loadedBingos);
+      }
+    } catch (e) {
+      print('Error al cargar los bingos: $e');
+    }
   }
 
   Future<void> _loadWinners() async {
@@ -275,22 +313,22 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
               double totalPremioAdicional = 0;
               double amount = 0;
               double totalValorPremio = 0;
-
-              String jsonBody = json.encode(order.toJson());
-              print('Pago pendiente => $jsonBody');
-
+              /*String jsonBody = json.encode(order.toJson());
+              print('Pago pendiente => $jsonBody');*/
               if (order.detallePremioFigura!.isNotEmpty &&
                   order.detallePremioFigura?.length == 1) {
                 totalValorPremio =
                     order.detallePremioFigura!.first.valorPremio ?? 0;
 
                 if (order
-                    .detallePremioFigura!.first.listaAdicionales!.isNotEmpty) {
+                    .detallePremioFigura!.first.listaAdicionales!.isNotEmpty) {                      
                   totalPremioAdicional = order
                       .detallePremioFigura!.first.listaAdicionales!
                       .map((adicional) => adicional.premioAdicional as double)
-                      .reduce((value, element) => value + element);
+                      .reduce((value, element) => value + element);                      
                 }
+                /*print('premio adicional => $totalPremioAdicional');
+                print('premio => $totalValorPremio');*/
               } else {
                 if (order.detallePremioFigura!.length > 1) {
                   for (var detalle in order.detallePremioFigura!) {
@@ -299,30 +337,31 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                       totalPremioAdicional += detalle.listaAdicionales!
                           .map((adicional) =>
                               adicional.premioAdicional as double)
-                          .reduce((value, element) => value + element);
+                          .reduce((value, element) => value + element);                          
                     }
                   }
+                  //print('valor premio adicional => $totalPremioAdicional');
 
                   for (var detalle in order.detallePremioFigura!) {
-                    if (detalle.valorPremio != null) {
+                    if (detalle.valorPremio != null && detalle.isTipoGrupo == true) {
                       totalValorPremio +=
-                          detalle.valorPremio! + totalPremioAdicional;
+                          detalle.valorPremio ?? 0; //+ totalPremioAdicional;
+                    }else{
+                      totalPremioAdicional += detalle.valorPremio ?? 0;
                     }
                   }
+                  //print('valor premio => $totalPremioAdicional');
                 }
               }
 
               amount = totalValorPremio + totalPremioAdicional;
-              /*print('Valor premio => $totalValorPremio');
-              print('Valor Adicional => $totalPremioAdicional');
-              print('Valor total => $amount');*/
 
               return GestureDetector(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 4, right: 4, bottom: 5),
                   child: Container(
                     width: size.width * 0.94,
-                    height: size.height * 0.18,
+                    height: size.height * 0.20,
                     decoration: BoxDecoration(
                       image: const DecorationImage(
                         fit: BoxFit.cover,
@@ -379,13 +418,11 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                         AnimatedButton(
                                           color: const Color.fromARGB(
                                               255, 210, 193, 3),
-                                          height: size.height * 0.07,
+                                          height: size.height * 0.08,
                                           width: size.width * 0.48,
                                           duration: 2,
                                           onPressed: () async {
-                                            print(
-                                                'ESTADO BINGO => ${widget.bingo?.estado}');
-                                            if (widget.bingo?.estado == 2) {
+                                            if (bingoState == 2) {
                                               setState(() {
                                                 totaluvt =
                                                     uvtData!.cantidadUvt! == 0
@@ -399,6 +436,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                                   order,
                                                   amount,
                                                   size,
+                                                  totalValorPremio,
                                                   totalPremioAdicional,
                                                   totaluvt);
                                               setState(() {});
@@ -491,10 +529,9 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      //print('INFO BINGO => ${widget.bingo}');
                                       GestureDetector(
                                         child: InkWell(
-                                          onTap: widget.bingo?.estado == 2
+                                          onTap: bingoState == 2
                                               ? () {
                                                   setState(() {
                                                     totaluvt = uvtData!
@@ -510,6 +547,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                                       order,
                                                       amount,
                                                       size,
+                                                      totalValorPremio,
                                                       totalPremioAdicional,
                                                       totaluvt);
                                                   setState(() {});
@@ -581,7 +619,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
   }
 
   Future<dynamic> collectPrize(BuildContext context, Pago order, double amount,
-      Size size, double totalPremioAdicional, double totaluvt) {
+      Size size, double totalValorPremio, double totalPremioAdicional, double totaluvt) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -617,7 +655,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                     ),
                   ),
                   Text(
-                    "Valor Premio: \$ ${NumberFormat('#,##0', 'en_US').format(order.detallePremioFigura!.first.valorPremio ?? 0)}",
+                    "Valor Premio: \$ ${NumberFormat('#,##0', 'en_US').format(totalValorPremio)}",
                     style: const TextStyle(
                       color: Color(0xFF0077b6),
                       fontSize: 14,
@@ -649,7 +687,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                     ),
                   ]),
                 Text(
-                  "Valor total adicionales: \$ ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional ?? 0)}",
+                  "Valor total adicionales: \$ ${NumberFormat('#,##0', 'en_US').format(totalPremioAdicional)}",
                   style: const TextStyle(
                     color: Color(0xFF0077b6),
                     fontSize: 14,
@@ -750,9 +788,6 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                         ),
                         onPressed: () async {
                           double tope = uvtData!.valorUvt! * totaluvt;
-                          //print('TOPE DECLARAR => $tope');
-                          //print('neto => $amount');
-
                           if (amount >= tope) {
                             if (dniController.text == '') {
                               const snackBar = SnackBar(

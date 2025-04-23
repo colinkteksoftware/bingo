@@ -1,5 +1,6 @@
 import 'package:bingo/app.dart';
 import 'package:bingo/providers/home_provider.dart';
+import 'package:bingo/providers/payment_provider.dart';
 import 'package:bingo/providers/winner_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => WinnerProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentProvider())
       ],
       child: Builder(builder: (context) {
         final mediaQueryData = MediaQuery.of(context);

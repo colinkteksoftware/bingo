@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:bingo/providers/home_provider.dart';
+import 'package:bingo/services/bingo_service.dart';
 import 'package:bingo/ui/bingo/widgets/bingo_create.dart';
 import 'package:bingo/ui/home/widgets/customer_widget.dart';
 import 'package:bingo/ui/home/widgets/payment_widget.dart';
@@ -31,18 +32,52 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
+  final bingoService = BingoService();
+  List<Bingo> bingos = [];
+  int bingoState = -1;
   TextEditingController? qrcodeController = TextEditingController(text: "-1");
 
   @override
   void initState() {
     super.initState();
     _controller.text = _value.toString();
-
+    loadBingos();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       PermissionUtils.requestCameraPermission(context);
       initializeCameras();
     });
+  }
+
+  Future<void> loadBingos() async {
+    try {
+      List<Bingo> loadedBingos = await bingoService.getBingosAvailaibles();
+      if (loadedBingos.isNotEmpty) {
+        setState(() {
+          bingos = loadedBingos;
+          bingoState = _getBingoStateById(widget.bingo?.bingoId ?? 0);
+        });
+        BingoService().updateBingoState(loadedBingos);
+      }
+    } catch (e) {
+      print('Error al cargar los bingos: $e');
+    }
+  }
+
+  int _getBingoStateById(int bingoId) {
+    final bingo = bingos.firstWhere(
+      (bingo) => bingo.bingoId == bingoId,
+      orElse: () => Bingo(
+          bingoId: 0,
+          fecha: DateTime.now(),
+          descripcion: '',
+          precioPorCartilla: 0,
+          presupuestoPremio: 0,
+          tipoBalotario: 0,
+          tipoOrigen: 0,
+          tipo: '',
+          estado: -1),
+    );
+    return bingo.estado;
   }
 
   Future<void> initializeCameras() async {
@@ -123,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                                     mainAxisSize: MainAxisSize.max,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
-                                    children: [                                      
+                                    children: [
                                       Container(
                                         height: 100,
                                         width: 250,
@@ -263,15 +298,16 @@ class _HomePageState extends State<HomePage> {
 
                                                               /* fin */
 
-                                                              if (widget.bingo!
+                                                              /*if (widget.bingo!
                                                                       .estado ==
+                                                                  3) {*/
+                                                              if (bingoState ==
                                                                   3) {
                                                                 showAlerta(
                                                                     context,
                                                                     'Juego Finalizado',
                                                                     'El bingo ya ha sido finalizado!!!');
-                                                              }
-                                                              else {
+                                                              } else {
                                                                 await showDialog(
                                                                   context:
                                                                       context,
@@ -654,11 +690,13 @@ class _HomePageState extends State<HomePage> {
                                                           ),
                                                         ),
                                                       ),
-                                                      widget.bingo!.estado ==
+                                                      /*widget.bingo!.estado ==
                                                                   1 ||
                                                               widget.bingo!
                                                                       .estado ==
-                                                                  2
+                                                                  2*/
+                                                      bingoState == 1 ||
+                                                              bingoState == 2
                                                           ? Padding(
                                                               padding:
                                                                   const EdgeInsets
@@ -695,12 +733,14 @@ class _HomePageState extends State<HomePage> {
 
                                                                   /* fin */
 
-                                                                  if (/*widget.bingo!
+                                                                  /*if (/*widget.bingo!
                                                                               .estado ==
                                                                           2 ||*/
                                                                       widget.bingo!
                                                                               .estado ==
-                                                                          3) {
+                                                                          3) {*/
+                                                                  if (bingoState ==
+                                                                      3) {
                                                                     showAlerta(
                                                                       context,
                                                                       'Mensaje Informativo',
@@ -744,10 +784,15 @@ class _HomePageState extends State<HomePage> {
                                                                     }
                                                                   }
                                                                 },
-                                                                child: widget.bingo!.estado ==
+                                                                child: bingoState ==
+                                                                            1 ||
+                                                                        bingoState ==
+                                                                            2
+
+                                                                    /*widget.bingo!.estado ==
                                                                             1 ||
                                                                         widget.bingo!.estado ==
-                                                                            2
+                                                                            2*/
                                                                     ? Column(
                                                                         crossAxisAlignment:
                                                                             CrossAxisAlignment.center,
@@ -766,9 +811,10 @@ class _HomePageState extends State<HomePage> {
                                                                     : const SizedBox(),
                                                               ),
                                                             )
-                                                          : widget.bingo!
+                                                          : bingoState == 3
+                                                          /*widget.bingo!
                                                                       .estado ==
-                                                                  3
+                                                                  3*/
                                                               ? Padding(
                                                                   padding: const EdgeInsets
                                                                       .only(
@@ -795,9 +841,10 @@ class _HomePageState extends State<HomePage> {
                                                                     ],
                                                                   ),
                                                                 )
-                                                              : widget.bingo!
+                                                              : bingoState == 3
+                                                              /*widget.bingo!
                                                                           .estado ==
-                                                                      3
+                                                                      3*/
                                                                   ? Padding(
                                                                       padding: const EdgeInsets
                                                                           .only(

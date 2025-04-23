@@ -28,6 +28,8 @@ class BingoService {
   // Actualizar la lista de bingos
   void updateBingoState(List<Bingo> updatedBingos) {
     _bingos = updatedBingos;
+    //print('Actualizando BingoState con ${_bingos.length} bingos');
+    //print('BINGOS => ${_bingos.toString()}');
     _bingoController.sink.add(_bingos);
   }
 
@@ -48,7 +50,6 @@ class BingoService {
     //final http = IOClient(ioc);
     final url = Uri.parse(
         '${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate');
-    print('IP CONNECTED => ${pf.getIp.toString()}');
 
     try {
       final response = await ioc.get(
@@ -59,6 +60,10 @@ class BingoService {
       );
 
       if (response.statusCode == 200) {
+        final List<BingoSala> data =
+            bingoSalaFromMap(utf8.decode(response.bodyBytes));
+        _bingos = data.map((bingoSala) => bingoSala.bingo).toList();
+        updateBingoState(_bingos);
         return bingoSalaFromMap(utf8.decode(response.bodyBytes));
       } else {
         throw Exception('Failed to load shows');
@@ -77,9 +82,7 @@ class BingoService {
     final http = IOClient(httpcli);
     final url = Uri.parse(
         "${pf.getIp}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate");
-
-    print('IP CONNECTED => ${pf.getIp.toString()}');
-
+    //print('SEARCH BINGOS...');
     try {
       final response = await http.get(
         url,
@@ -91,9 +94,9 @@ class BingoService {
       if (response.statusCode == 200) {
         final List<BingoSala> data =
             bingoSalaFromMap(utf8.decode(response.bodyBytes));
-        return data
-            .map((bingoSala) => bingoSala.bingo)
-            .toList();
+        _bingos = data.map((bingoSala) => bingoSala.bingo).toList();
+        updateBingoState(_bingos);
+        return _bingos;
       } else {
         print('Failed to load shows');
         return [];

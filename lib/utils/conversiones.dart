@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 /* import 'dart:ui'; */
+import 'package:bingo/models/bingoconvert.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -218,10 +219,10 @@ void showAlerta(BuildContext context, String titulo, String mensaje) {
             children: [
               Image.asset(
                 'assets/images/logo.png',
-                height: 60,          
+                height: 60,
                 //color: Colors.white,
               ),
-              const SizedBox(height:10),
+              const SizedBox(height: 10),
               Text(
                 titulo,
                 style: TextStyle(
@@ -332,6 +333,34 @@ String tituloMenu(int opcion) {
   }
   return im;
 }
+
+int getBingoStateById(int bingoId, bingos) {
+  /*for (var bingo in bingos) {
+      print('pagos = > ${bingo.bingoToMap()}');
+    }*/
+  final bingo = bingos.firstWhere(
+    (bingo) => bingo.bingoId == bingoId,
+    orElse: () => Bingo(
+        bingoId: 0,
+        fecha: DateTime.now(),
+        descripcion: '',
+        precioPorCartilla: 0,
+        presupuestoPremio: 0,
+        tipoBalotario: 0,
+        tipoOrigen: 0,
+        tipo: '',
+        estado: -1),
+  );
+  return bingo.estado;
+}
+
+List<String> bingoStates = [
+  'Inactivo',
+  'Activo',
+  'Jugando',
+  'Finalizado',
+  'Cancelado'
+];
 
 Image imageFromBase64String(String base64String) {
   return Image.memory(base64Decode(base64String));
