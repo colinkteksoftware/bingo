@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
           tipo: '',
           estado: -1),
     );
-    return bingo.estado;
+    return bingo.estado ?? 0;
   }
 
   Future<void> initializeCameras() async {
@@ -640,7 +640,7 @@ class _HomePageState extends State<HomePage> {
                                                                         25,
                                                                         0),
                                                                 child: Text(
-                                                                  'Valor \$${widget.bingo!.precioPorCartilla.toStringAsFixed(2)}',
+                                                                  'Valor \$${widget.bingo?.precioPorCartilla?.toStringAsFixed(2)}',
                                                                   style:
                                                                       TextStyle(
                                                                     fontFamily:

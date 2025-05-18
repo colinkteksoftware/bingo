@@ -56,8 +56,7 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
 
     if (response.statusCode == 200) {
       setState(() {
-        listasetresponseList =
-            ventaFromMap(utf8.decode(response.bodyBytes));
+        listasetresponseList = ventaFromMap(utf8.decode(response.bodyBytes));
       });
 
       return listasetresponseList;
@@ -92,7 +91,10 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
 
         if (listasetresponseListcartilla!.grupoCartillas! == "") {
           const snackBar = SnackBar(
-              content: Center(child: Text("No Hay Cartillas disponibles para la venta..")), backgroundColor: Colors.red,);
+            content: Center(
+                child: Text("No Hay Cartillas disponibles para la venta..")),
+            backgroundColor: Colors.red,
+          );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else {
           var jsonData =
@@ -109,16 +111,16 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
           _preciofinal.text = "0";
           for (var cantidadunique in _reponsevalores) {
             if (cantidadunique.text == "1" && _selectedIndex == 0) {
-              finalito = finalito + widget.bingo!.precioPorCartilla;
+              double precio = widget.bingo?.precioPorCartilla ?? 0;
+              finalito = finalito + precio;
               _preciofinal.text = finalito.toStringAsFixed(2);
             }
             if (cantidadunique.text == "1" && _selectedIndex == 2) {
               double contador = 0;
 
               contador = double.parse(_controller.text) + 1;
-
-              finalito =
-                  finalito + (widget.bingo!.precioPorCartilla * contador);
+              double precio = widget.bingo?.precioPorCartilla ?? 0;
+              finalito = finalito + (precio * contador);
               _preciofinal.text = finalito.toStringAsFixed(2);
             }
           }
@@ -156,15 +158,16 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
     _preciofinal.text = "0";
     for (var cantidadunique in _reponsevalores) {
       if (cantidadunique.text == "1" && _selectedIndex == 0) {
-        finalito = finalito + widget.bingo!.precioPorCartilla;
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + precio;
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
       if (cantidadunique.text == "1" && _selectedIndex == 2) {
         double contador = 0;
 
         contador = double.parse(_controller.text) + 1;
-
-        finalito = finalito + (widget.bingo!.precioPorCartilla * contador);
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + (precio * contador);
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
     }
@@ -181,15 +184,16 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
     _preciofinal.text = "0";
     for (var cantidadunique in _reponsevalores) {
       if (cantidadunique.text == "1" && _selectedIndex == 0) {
-        finalito = finalito + widget.bingo!.precioPorCartilla;
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + precio;
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
       if (cantidadunique.text == "1" && _selectedIndex == 2) {
         double contador = 0;
 
         contador = double.parse(_controller.text) + 1;
-
-        finalito = finalito + (widget.bingo!.precioPorCartilla * contador);
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + (precio * contador);
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
     }
@@ -206,11 +210,19 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
   List<BingoSala>? listasetresponseListbingo;
 
   Future<List<BingoSala>?> fetchShowsbingo() async {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha);
+
+    String formattedDate = '';
+    formattedDate = widget.bingo!.fecha != null
+        ? DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha!)
+        : '';
 
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
+
+    if (formattedDate == '') {
+      formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
 
     final url = Uri.parse(
         "${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate");
@@ -306,16 +318,16 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                     _preciofinal.text = "0";
                     for (var cantidadunique in _reponsevalores) {
                       if (cantidadunique.text == "1" && _selectedIndex == 0) {
-                        finalito = finalito + widget.bingo!.precioPorCartilla;
+                        double precio = widget.bingo?.precioPorCartilla ?? 0;
+                        finalito = finalito + precio;
                         _preciofinal.text = finalito.toStringAsFixed(2);
                       }
                       if (cantidadunique.text == "1" && _selectedIndex == 2) {
                         double contador = 0;
 
                         contador = double.parse(_controller.text) + 1;
-
-                        finalito = finalito +
-                            (widget.bingo!.precioPorCartilla * contador);
+                        double precio = widget.bingo?.precioPorCartilla ?? 0;
+                        finalito = finalito + (precio * contador);
                         _preciofinal.text = finalito.toStringAsFixed(2);
                       }
                     }
@@ -361,16 +373,16 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                       _preciofinal.text = "0";
                       for (var cantidadunique in _reponsevalores) {
                         if (cantidadunique.text == "1" && _selectedIndex == 0) {
-                          finalito = finalito + widget.bingo!.precioPorCartilla;
+                          double precio = widget.bingo?.precioPorCartilla ?? 0;
+                          finalito = finalito + precio;
                           _preciofinal.text = finalito.toStringAsFixed(2);
                         }
                         if (cantidadunique.text == "1" && _selectedIndex == 2) {
                           double contador = 0;
 
                           contador = double.parse(_controller.text) + 1;
-
-                          finalito = finalito +
-                              (widget.bingo!.precioPorCartilla * contador);
+                          double precio = widget.bingo?.precioPorCartilla ?? 0;
+                          finalito = finalito + (precio * contador);
                           _preciofinal.text = finalito.toStringAsFixed(2);
                         }
                       }
@@ -415,16 +427,16 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                       _preciofinal.text = "0";
                       for (var cantidadunique in _reponsevalores) {
                         if (cantidadunique.text == "1" && _selectedIndex == 0) {
-                          finalito = finalito + widget.bingo!.precioPorCartilla;
+                          double precio = widget.bingo?.precioPorCartilla ?? 0;
+                          finalito = finalito + precio;
                           _preciofinal.text = finalito.toStringAsFixed(2);
                         }
                         if (cantidadunique.text == "1" && _selectedIndex == 2) {
                           double contador = 0;
 
                           contador = double.parse(_controller.text) + 1;
-
-                          finalito = finalito +
-                              (widget.bingo!.precioPorCartilla * contador);
+                          double precio = widget.bingo?.precioPorCartilla ?? 0;
+                          finalito = finalito + (precio * contador);
                           _preciofinal.text = finalito.toStringAsFixed(2);
                         }
                       }
@@ -511,8 +523,9 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                                 for (var cantidadunique in _reponsevalores) {
                                   if (cantidadunique.text == "1" &&
                                       _selectedIndex == 0) {
-                                    finalito = finalito +
-                                        widget.bingo!.precioPorCartilla;
+                                    double precio =
+                                        widget.bingo?.precioPorCartilla ?? 0;
+                                    finalito = finalito + precio;
                                     _preciofinal.text =
                                         finalito.toStringAsFixed(2);
                                   }
@@ -522,10 +535,9 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
 
                                     contador =
                                         double.parse(_controller.text) + 1;
-
-                                    finalito = finalito +
-                                        (widget.bingo!.precioPorCartilla *
-                                            contador);
+                                    double precio =
+                                        widget.bingo?.precioPorCartilla ?? 0;
+                                    finalito = finalito + (precio * contador);
                                     _preciofinal.text =
                                         finalito.toStringAsFixed(2);
                                   }
@@ -774,8 +786,9 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                         for (var cantidadunique in cantidad) {
                           if (cantidadunique.text == "1" &&
                               _selectedIndex == 0) {
-                            finalito =
-                                finalito + widget.bingo!.precioPorCartilla;
+                            double precio =
+                                widget.bingo?.precioPorCartilla ?? 0;
+                            finalito = finalito + precio;
                             _preciofinal.text = finalito.toStringAsFixed(2);
                           }
                           if (cantidadunique.text == "1" &&
@@ -783,9 +796,9 @@ class _CreateBingoPageState extends State<CreateBingoPage> {
                             double contador = 0;
 
                             contador = double.parse(_controller.text) + 1;
-
-                            finalito = finalito +
-                                (widget.bingo!.precioPorCartilla * contador);
+                            double precio =
+                                widget.bingo?.precioPorCartilla ?? 0;
+                            finalito = finalito + (precio * contador);
                             _preciofinal.text = finalito.toStringAsFixed(2);
                           }
                         }

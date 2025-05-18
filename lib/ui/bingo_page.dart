@@ -719,11 +719,13 @@ class _BingoPageState extends State<BingoPage> {
                                                 itemBuilder: ((ctx, index) {
                                                   final order =
                                                       bingosList[index];
+                                                  
+                                                  String year = order.fecha?.year
+                                                              .toString().toLowerCase() ?? '';
+                                                  String month = order.fecha?.month
+                                                              .toString().toLowerCase() ?? '';
 
-                                                  return order.fecha.year
-                                                              .toString()
-                                                              .toLowerCase()
-                                                              .contains(
+                                                  return year.contains(
                                                                   _selectedDate
                                                                       .year
                                                                       .toString()) &&
@@ -733,10 +735,7 @@ class _BingoPageState extends State<BingoPage> {
                                                               .contains(
                                                                   _selectedIndex
                                                                       .toString()) &&
-                                                          order.fecha.month
-                                                              .toString()
-                                                              .toLowerCase()
-                                                              .contains(
+                                                          month.contains(
                                                                   _selectedDate
                                                                       .month
                                                                       .toString())
@@ -891,7 +890,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                                 child: Column(
                                                                                   children: [
                                                                                     Text(
-                                                                                      'Valor c/u \$${order.precioPorCartilla.toStringAsFixed(2)}',
+                                                                                      'Valor c/u \$${order.precioPorCartilla?.toStringAsFixed(2) ?? 0}',
                                                                                       style: TextStyle(
                                                                                         fontFamily: 'Cera Pro',
                                                                                         color: Colors.white,
@@ -901,7 +900,7 @@ class _BingoPageState extends State<BingoPage> {
                                                                                       ),
                                                                                     ),
                                                                                     Text(
-                                                                                      'Valor Total \$${(order.precioPorCartilla * 6).toStringAsFixed(2)}',
+                                                                                      'Valor Total \$${(order.precioPorCartilla ?? 0 * 6).toStringAsFixed(2)}',
                                                                                       style: TextStyle(
                                                                                         fontFamily: 'Cera Pro',
                                                                                         color: Colors.white,
@@ -975,8 +974,8 @@ class _BingoPageState extends State<BingoPage> {
 
   List<Bingo> orderBingosByDate(DateTime selectedDate) {
     bingosList.sort((a, b) {
-      int diffA = (a.fecha.day - selectedDate.day).abs();
-      int diffB = (b.fecha.day - selectedDate.day).abs();
+      int diffA = (a.fecha?.day ?? 0 - selectedDate.day).abs();
+      int diffB = (b.fecha?.day ?? 0 - selectedDate.day).abs();
       return diffA.compareTo(diffB);
     });
     return bingosList;

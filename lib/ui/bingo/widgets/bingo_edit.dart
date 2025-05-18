@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:bingo/models/modelCliente.dart';
+import 'package:bingo/models/pagosconvert.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/models/cartillaconvert.dart';
@@ -52,8 +53,7 @@ class _EditBingoState extends State<EditBingo> {
 
     if (response.statusCode == 200) {
       setState(() {
-        listasetresponseList =
-            ventaFromMap(utf8.decode(response.bodyBytes));
+        listasetresponseList = ventaFromMap(utf8.decode(response.bodyBytes));
       });
       await fetchShowscartilla();
       setState(() {});
@@ -81,7 +81,8 @@ class _EditBingoState extends State<EditBingo> {
 
     if (response.statusCode == 200) {
       setState(() {
-        listasetresponseListcartilla = cartillaFromJson(utf8.decode(response.bodyBytes));
+        listasetresponseListcartilla =
+            cartillaFromJson(utf8.decode(response.bodyBytes));
 
         var jsonData =
             jsonDecode(listasetresponseListcartilla!.grupoCartillas!);
@@ -97,16 +98,16 @@ class _EditBingoState extends State<EditBingo> {
           _preciofinal.text = "0";
           for (var cantidadunique in _reponsevalores) {
             if (cantidadunique.text == "1" && _selectedIndex == 0) {
-              finalito = finalito + widget.bingo!.precioPorCartilla;
+              double precio = widget.bingo?.precioPorCartilla ?? 0;
+              finalito = finalito + precio;
               _preciofinal.text = finalito.toStringAsFixed(2);
             }
             if (cantidadunique.text == "1" && _selectedIndex == 2) {
               double contador = 0;
 
               contador = double.parse(_controller.text) + 1;
-
-              finalito =
-                  finalito + (widget.bingo!.precioPorCartilla * contador);
+              double precio = widget.bingo?.precioPorCartilla ?? 0;
+              finalito = finalito + (precio * contador);
               _preciofinal.text = finalito.toStringAsFixed(2);
             }
           }
@@ -125,7 +126,7 @@ class _EditBingoState extends State<EditBingo> {
     _controller.text = widget.venta.multiplicado.toString();
     valores();
     listaset = fetchShows();
-    listasetcartilla = fetchShowscartilla();    
+    listasetcartilla = fetchShowscartilla();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {});
   }
@@ -146,16 +147,16 @@ class _EditBingoState extends State<EditBingo> {
     _preciofinal.text = "0";
     for (var cantidadunique in _reponsevalores) {
       if (cantidadunique.text == "1" && _selectedIndex == 0) {
-        finalito = finalito + widget.bingo!.precioPorCartilla;
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + precio;
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
       if (cantidadunique.text == "1" && _selectedIndex == 2) {
         double contador = 0;
 
         contador = double.parse(_controller.text) + 1;
-
-        finalito =
-            finalito + (widget.bingo!.precioPorCartilla * contador);
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + (precio * contador);
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
     }
@@ -172,16 +173,16 @@ class _EditBingoState extends State<EditBingo> {
     _preciofinal.text = "0";
     for (var cantidadunique in _reponsevalores) {
       if (cantidadunique.text == "1" && _selectedIndex == 0) {
-        finalito = finalito + widget.bingo!.precioPorCartilla;
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + precio;
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
       if (cantidadunique.text == "1" && _selectedIndex == 2) {
         double contador = 0;
 
         contador = double.parse(_controller.text) + 1;
-
-        finalito =
-            finalito + (widget.bingo!.precioPorCartilla * contador);
+        double precio = widget.bingo?.precioPorCartilla ?? 0;
+        finalito = finalito + (precio * contador);
         _preciofinal.text = finalito.toStringAsFixed(2);
       }
     }
@@ -346,9 +347,10 @@ class _EditBingoState extends State<EditBingo> {
                                                 if (cantidadunique.text ==
                                                         "1" &&
                                                     _selectedIndex == 0) {
-                                                  finalito = finalito +
-                                                      widget.bingo!
-                                                          .precioPorCartilla;
+                                                  double precio = widget.bingo
+                                                          ?.precioPorCartilla ??
+                                                      0;
+                                                  finalito = finalito + precio;
                                                   _preciofinal.text = finalito
                                                       .toStringAsFixed(2);
                                                 }
@@ -360,11 +362,11 @@ class _EditBingoState extends State<EditBingo> {
                                                   contador = double.parse(
                                                           _controller.text) +
                                                       1;
-
+                                                  double precio = widget.bingo
+                                                          ?.precioPorCartilla ??
+                                                      0;
                                                   finalito = finalito +
-                                                      (widget.bingo!
-                                                              .precioPorCartilla *
-                                                          contador);
+                                                      (precio * contador);
                                                   _preciofinal.text = finalito
                                                       .toStringAsFixed(2);
                                                 }
@@ -419,9 +421,11 @@ class _EditBingoState extends State<EditBingo> {
                                                   if (cantidadunique.text ==
                                                           "1" &&
                                                       _selectedIndex == 0) {
-                                                    finalito = finalito +
-                                                        widget.bingo!
-                                                            .precioPorCartilla;
+                                                    double precio = widget.bingo
+                                                            ?.precioPorCartilla ??
+                                                        0;
+                                                    finalito =
+                                                        finalito + precio;
                                                     _preciofinal.text = finalito
                                                         .toStringAsFixed(2);
                                                   }
@@ -433,11 +437,11 @@ class _EditBingoState extends State<EditBingo> {
                                                     contador = double.parse(
                                                             _controller.text) +
                                                         1;
-
+                                                    double precio = widget.bingo
+                                                            ?.precioPorCartilla ??
+                                                        0;
                                                     finalito = finalito +
-                                                        (widget.bingo!
-                                                                .precioPorCartilla *
-                                                            contador);
+                                                        (precio * contador);
                                                     _preciofinal.text = finalito
                                                         .toStringAsFixed(2);
                                                   }
@@ -492,9 +496,11 @@ class _EditBingoState extends State<EditBingo> {
                                                   if (cantidadunique.text ==
                                                           "1" &&
                                                       _selectedIndex == 0) {
-                                                    finalito = finalito +
-                                                        widget.bingo!
-                                                            .precioPorCartilla;
+                                                    double precio = widget.bingo
+                                                            ?.precioPorCartilla ??
+                                                        0;
+                                                    finalito =
+                                                        finalito + precio;
                                                     _preciofinal.text = finalito
                                                         .toStringAsFixed(2);
                                                   }
@@ -506,11 +512,11 @@ class _EditBingoState extends State<EditBingo> {
                                                     contador = double.parse(
                                                             _controller.text) +
                                                         1;
-
+                                                    double precio = widget.bingo
+                                                            ?.precioPorCartilla ??
+                                                        0;
                                                     finalito = finalito +
-                                                        (widget.bingo!
-                                                                .precioPorCartilla *
-                                                            contador);
+                                                        (precio * contador);
                                                     _preciofinal.text = finalito
                                                         .toStringAsFixed(2);
                                                   }
@@ -632,10 +638,13 @@ class _EditBingoState extends State<EditBingo> {
                                                                     "1" &&
                                                                 _selectedIndex ==
                                                                     0) {
-                                                              finalito = finalito +
-                                                                  widget
-                                                                      .bingo!                                                                      
-                                                                      .precioPorCartilla;
+                                                              double precio = widget
+                                                                      .bingo
+                                                                      ?.precioPorCartilla ??
+                                                                  0;
+                                                              finalito =
+                                                                  finalito +
+                                                                      precio;
                                                               _preciofinal
                                                                       .text =
                                                                   finalito
@@ -654,11 +663,12 @@ class _EditBingoState extends State<EditBingo> {
                                                                       _controller
                                                                           .text) +
                                                                   1;
-
+                                                              double precio = widget
+                                                                      .bingo
+                                                                      ?.precioPorCartilla ??
+                                                                  0;
                                                               finalito = finalito +
-                                                                  (widget
-                                                                          .bingo!
-                                                                          .precioPorCartilla *
+                                                                  (precio *
                                                                       contador);
                                                               _preciofinal
                                                                       .text =
@@ -735,9 +745,29 @@ class _EditBingoState extends State<EditBingo> {
                                                       }
                                                     }
 
-                                                    await fetchShowsupdate(
-                                                        body, context);
-                                                    listaset = fetchShows();
+                                                    final pago = Pago();
+                                                    pago.ventaId =
+                                                        widget.venta.ventaId;
+                                                    pago.bingoId =
+                                                        widget.bingo!.bingoId;
+                                                    pago.clienteId = '';
+                                                    pago.promotorId = widget
+                                                        .datosuser!.promotorId;
+                                                    pago.codigoModulo = widget
+                                                        .venta.codigoModulo;
+                                                    pago.multiplicado =
+                                                        int.parse(
+                                                            _controller.text);
+                                                    pago.tipo =
+                                                        _selectedIndex + 1;
+                                                    pago.ventasDetalle = body;
+
+                                                    final success =
+                                                        await postSale(
+                                                            pago, context);
+                                                    if (success) {
+                                                      listaset = fetchShows();
+                                                    }
                                                   }
                                                 }
                                                 setState(() {});
@@ -751,7 +781,7 @@ class _EditBingoState extends State<EditBingo> {
                                                           bottom: 0),
                                                   child: Center(
                                                       child: Text(
-                                                    "Valor Venta: ${_preciofinal.text}",
+                                                    "Valor Venta: ${convertirdinerosindecimales(_preciofinal.text)}",
                                                     style: TextStyle(
                                                       color: const Color(
                                                           0xFFcaf0f8),
@@ -767,8 +797,7 @@ class _EditBingoState extends State<EditBingo> {
             ])));
   }
 
-  Future<String> fetchShowsupdate(
-      List<Map<String, int>> elemento, BuildContext context) async {
+  Future<bool> postSale(Pago pago, BuildContext context) async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
@@ -776,7 +805,7 @@ class _EditBingoState extends State<EditBingo> {
 //     .take(cantidadMaxima) // Limitar a los primeros N elementos
 //     .map((numero) => {"cartillaId": numero})
 //     .toList();
-//
+
     print(jsonEncode({
       "ventaId": widget.venta.ventaId,
       "bingoId": widget.bingo!.bingoId,
@@ -785,40 +814,52 @@ class _EditBingoState extends State<EditBingo> {
       "codigoModulo": widget.venta.codigoModulo,
       "multiplicado": _controller.text,
       "tipo": _selectedIndex + 1,
-      "ventasDetalle": elemento
+      //"ventasDetalle": elemento
     }));
 
-    final url =
-        Uri.parse('${pf.getIp.toString()}/api/PromotorInterno/UpdateVentaManual');
+    try {
+      final url = Uri.parse(
+          '${pf.getIp.toString()}/api/PromotorInterno/UpdateVentaManual');
 
-    final response = await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "ventaId": widget.venta.ventaId,
-          "bingoId": widget.bingo!.bingoId,
-          "clienteId": 0,
-          "promotorId": widget.datosuser!.promotorId,
-          "codigoModulo": widget.venta.codigoModulo,
-          "multiplicado": _controller.text,
-          "tipo": _selectedIndex + 1,
-          "ventasDetalle": elemento
-        }));
+      final response = await http.post(url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({pago}));
+      /*body: jsonEncode({
+            "ventaId": widget.venta.ventaId,
+            "bingoId": widget.bingo!.bingoId,
+            "clienteId": 0,
+            "promotorId": widget.datosuser!.promotorId,
+            "codigoModulo": widget.venta.codigoModulo,
+            "multiplicado": _controller.text,
+            "tipo": _selectedIndex + 1,
+            "ventasDetalle": elemento
+          }));*/
 
-    if (response.statusCode == 200) {
-      _controller.text = "0";
-      const snackBar =
-          SnackBar(content: Center(child: Text("Se ha confirmado la actualización..")), backgroundColor: Colors.green,);
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      Navigator.of(context).pop();
-      Navigator.of(context).pop();
+      if (response.statusCode == 200) {
+        _controller.text = "0";
+        const snackBar = SnackBar(
+          content: Center(child: Text("Se ha confirmado la actualización..")),
+          backgroundColor: Colors.green,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
 
-      return "si";
-    } else {
-      const snackBar =
-          SnackBar(content: Center(child: Text("No se ha confirmado la actualización..")), backgroundColor: Colors.red,);
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      //     Navigator.of(context).pop();
-      throw Exception('Failed to load shows');
+        return true;
+      } else {
+        const snackBar = SnackBar(
+          content:
+              Center(child: Text("No se ha confirmado la actualización..")),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        //     Navigator.of(context).pop();
+        ///throw Exception('Failed to load shows');
+        return false;
+      }
+    } catch (e) {
+      print('Failed to load shows => ${e.toString()}');
+      return false;
     }
   }
 
@@ -886,23 +927,21 @@ class _EditBingoState extends State<EditBingo> {
                           value = true;
                         }
                       });
-                  
+
                       double finalito = 0.0;
                       _preciofinal.text = "0";
                       for (var cantidadunique in cantidad) {
                         if (cantidadunique.text == "1" && _selectedIndex == 0) {
-                          finalito =
-                              finalito + widget.bingo!.precioPorCartilla;
+                          double precio = widget.bingo?.precioPorCartilla ?? 0;
+                          finalito = finalito + precio;
                           _preciofinal.text = finalito.toStringAsFixed(2);
                         }
                         if (cantidadunique.text == "1" && _selectedIndex == 2) {
                           double contador = 0;
-                  
+
                           contador = double.parse(_controller.text) + 1;
-                  
-                          finalito = finalito +
-                              (widget.bingo!.precioPorCartilla *
-                                  contador);
+                          double precio = widget.bingo?.precioPorCartilla ?? 0;
+                          finalito = finalito + (precio * contador);
                           _preciofinal.text = finalito.toStringAsFixed(2);
                         }
                       }

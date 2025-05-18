@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+
+
 List<Pago> pagoFromJson(String str) => List<Pago>.from(json.decode(str).map((x) => Pago.fromJson(x)));
 
 String pagoToJson(List<Pago> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
@@ -15,7 +17,11 @@ class Pago {
     int? cartillaId;
     String? codigoModulo;
     List<DetallePremioFigura>? detallePremioFigura;
-
+    int? promotorId;
+    int? multiplicado;
+    int? tipo;
+    List<Map<String, int>>? ventasDetalle;
+      
     Pago({
         this.clienteId,
         this.bingoId,
@@ -23,6 +29,10 @@ class Pago {
         this.cartillaId,
         this.codigoModulo,
         this.detallePremioFigura,
+        this.promotorId,
+        this.multiplicado,
+        this.tipo,
+        this.ventasDetalle
     });
 
     factory Pago.fromJson(Map<String, dynamic> json) => Pago(
@@ -32,6 +42,10 @@ class Pago {
         cartillaId: json["cartillaId"],
         codigoModulo: json["codigoModulo"],
         detallePremioFigura: json["detallePremioFigura"] == null ? [] : List<DetallePremioFigura>.from(json["detallePremioFigura"]!.map((x) => DetallePremioFigura.fromJson(x))),
+        promotorId: json['promotorId'],
+        multiplicado: json['multiplicado'],
+        tipo: json['tipo'],
+        ventasDetalle: json['ventasDetalle']
     );
 
     Map<String, dynamic> toJson() => {
@@ -41,6 +55,10 @@ class Pago {
         "cartillaId": cartillaId,
         "codigoModulo": codigoModulo,
         "detallePremioFigura": detallePremioFigura == null ? [] : List<dynamic>.from(detallePremioFigura!.map((x) => x.toJson())),
+        "promotorId": promotorId,
+        "multiplicado": multiplicado,
+        "tipo": tipo,
+        "ventasDetalle": ventasDetalle
     };
 }
 

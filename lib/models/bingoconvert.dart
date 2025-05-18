@@ -27,26 +27,26 @@ class BingoSala {
 }
 
 class Bingo {
-  int bingoId;
-  DateTime fecha;
-  String descripcion;
-  double precioPorCartilla;
-  int presupuestoPremio;
-  int tipoBalotario;
-  int tipoOrigen;
-  String tipo;
-  int estado;
+  int? bingoId;
+  DateTime? fecha;
+  String? descripcion;
+  double? precioPorCartilla;
+  int? presupuestoPremio;
+  int? tipoBalotario;
+  int? tipoOrigen;
+  String? tipo;
+  int? estado;
 
   Bingo({
-    required this.bingoId,
-    required this.fecha,
-    required this.descripcion,
-    required this.precioPorCartilla,
-    required this.presupuestoPremio,
-    required this.tipoBalotario,
-    required this.tipoOrigen,
-    required this.tipo,
-    required this.estado,
+    this.bingoId,
+    this.fecha,
+    this.descripcion,
+    this.precioPorCartilla,
+    this.presupuestoPremio,
+    this.tipoBalotario,
+    this.tipoOrigen,
+    this.tipo,
+    this.estado,
   });
 
   factory Bingo.fromMap(Map<String, dynamic> json) => Bingo(
@@ -63,7 +63,7 @@ class Bingo {
 
   Map<String, dynamic> bingoToMap() => {
         "bingoId": bingoId,
-        "fecha": fecha.toIso8601String(),
+        "fecha": fecha?.toIso8601String(),
         "descripcion": descripcion,
         "precioPorCartilla": precioPorCartilla,
         "presupuestoPremio": presupuestoPremio,

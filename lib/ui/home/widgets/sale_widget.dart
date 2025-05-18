@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:bingo/services/bingo_service.dart';
 import 'package:bingo/utils/custom_back_button.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as sdf;
 import 'package:animated_button/animated_button.dart';
 import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/ui/bingo/widgets/bingo_edit.dart';
@@ -25,14 +27,50 @@ class SaleWidget extends StatefulWidget {
 }
 
 class _SaleWidgetState extends State<SaleWidget> {
+  final ioc = HttpClient();
+  final pf = Preferencias();
+  DateTime _selectedDate = DateTime.now();
+
   String searchString = '';
   String searchStringproduct = '';
   String detectionInfo = '';
-  DateTime _selectedDate = DateTime.now();
-  final ioc = HttpClient();
-  final pf = Preferencias();
   Future<List<Venta>?>? listaset;
   List<Venta>? listasetresponseList;
+  List<BingoSala>? listasetresponseListbingo;
+  late List<Bingo> bingosList = [];
+
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    listaset = fetchSales();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {});
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      List<Bingo> bingos = await BingoService().getBingosAvailaibles();
+      Bingo? found = bingos.firstWhere(
+        (bingo) => bingo.bingoId == widget.bingo?.bingoId,
+        orElse: () => Bingo(),
+      );
+
+      if (found.estado == 3) {
+        _timer?.cancel();
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   Future<List<Venta>?> fetchSales() async {
     ioc.badCertificateCallback =
@@ -66,25 +104,22 @@ class _SaleWidgetState extends State<SaleWidget> {
     }
   }
 
-  @override
-  void initState() {
-    listaset = fetchSales();
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {});
-  }
-
-  List<BingoSala>? listasetresponseListbingo;
-
   Future<List<BingoSala>?> fetchShowsbingo() async {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha);
+    String formattedDate = '';
+    formattedDate = widget.bingo!.fecha != null
+        ? sdf.DateFormat('yyyy-MM-dd').format(widget.bingo!.fecha!)
+        : '';
 
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
 
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate");
+    if (formattedDate == '') {
+      formattedDate = sdf.DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+
+    Uri url = Uri.parse(
+          "${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll?Estado=1&FechaInicio=$formattedDate");
 
     final response = await http.get(
       url,
