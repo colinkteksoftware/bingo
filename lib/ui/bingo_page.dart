@@ -14,9 +14,8 @@ final ipController = TextEditingController(text: "0.0.0.0");
 
 // ignore: must_be_immutable
 class BingoPage extends StatefulWidget {
-
   ModelCliente? datosuser;
-  
+
   BingoPage({super.key, required this.datosuser});
 
   @override
@@ -30,6 +29,7 @@ class _BingoPageState extends State<BingoPage> {
   String searchStringproduct = "";
   String detectionInfo = "";
   int _selectedIndex = 0;
+  final List<String> tabs = ['Inactivo', 'Activo', 'Jugando', 'Finalizado', 'Cancelado'];
 
   late List<Bingo> bingosList = [];
 
@@ -389,7 +389,6 @@ class _BingoPageState extends State<BingoPage> {
                                                       ),
                                                     ),
                                                   ),*/
-
                                                   GestureDetector(
                                                     onTap: () async {
                                                       //await fetchShows();
@@ -719,16 +718,21 @@ class _BingoPageState extends State<BingoPage> {
                                                 itemBuilder: ((ctx, index) {
                                                   final order =
                                                       bingosList[index];
-                                                  
-                                                  String year = order.fecha?.year
-                                                              .toString().toLowerCase() ?? '';
-                                                  String month = order.fecha?.month
-                                                              .toString().toLowerCase() ?? '';
+
+                                                  String year = order
+                                                          .fecha?.year
+                                                          .toString()
+                                                          .toLowerCase() ??
+                                                      '';
+                                                  String month = order
+                                                          .fecha?.month
+                                                          .toString()
+                                                          .toLowerCase() ??
+                                                      '';
 
                                                   return year.contains(
-                                                                  _selectedDate
-                                                                      .year
-                                                                      .toString()) &&
+                                                              _selectedDate.year
+                                                                  .toString()) &&
                                                           order.estado
                                                               .toString()
                                                               .toLowerCase()
@@ -736,9 +740,9 @@ class _BingoPageState extends State<BingoPage> {
                                                                   _selectedIndex
                                                                       .toString()) &&
                                                           month.contains(
-                                                                  _selectedDate
-                                                                      .month
-                                                                      .toString())
+                                                              _selectedDate
+                                                                  .month
+                                                                  .toString())
                                                       ? GestureDetector(
                                                           onTap: () async {
                                                             Bingo playing =
