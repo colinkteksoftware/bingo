@@ -22,6 +22,9 @@ class BingoService {
   // Lista de bingos (puedes obtenerlos de una API o base de datos)
   List<Bingo> _bingos = [];
 
+  // Obtener el estado actual de los bingos
+  List<Bingo> get getBingos => _bingos;
+
   // Getter para el Stream
   Stream<List<Bingo>> get bingoStream => _bingoController.stream;
 
@@ -32,9 +35,6 @@ class BingoService {
     //print('BINGOS => ${_bingos.toString()}');
     _bingoController.sink.add(_bingos);
   }
-
-  // Obtener el estado actual de los bingos
-  List<Bingo> get getBingos => _bingos;
 
   // Cerrar el StreamController cuando ya no se necesite
   void dispose() {
@@ -113,4 +113,6 @@ class BingoService {
     final jsonData = json.decode(str) as List;
     return jsonData.map((item) => BingoSala.fromMap(item)).toList();
   }
+
+  
 }
