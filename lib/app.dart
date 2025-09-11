@@ -24,7 +24,7 @@ class _AppState extends State<App> {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Sistema Bingo',      
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRoutes.generateRoute,
     );
   }

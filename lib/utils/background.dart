@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 
 class Background extends StatelessWidget {
@@ -92,7 +93,7 @@ class CustomBox3 extends StatelessWidget {
           height: 330,
           width: 500,
           decoration: BoxDecoration(
-              color: const Color(0xFF03045e),
+              color: primaryBlue,
               borderRadius: BorderRadius.circular(40),
               gradient: const LinearGradient(
                   colors: [Color(0xFFcaf0f8), Color(0xFF0077b6)],
@@ -112,7 +113,7 @@ class CustomBox4 extends StatelessWidget {
           height: 390,
           width: 300,
           decoration: BoxDecoration(
-              color: const Color(0xFF03045e),
+              color: primaryBlue,
               borderRadius: BorderRadius.circular(40),
               gradient: const LinearGradient(
                   colors: [Color(0xFFcaf0f8), Color(0xFF0077b6)],

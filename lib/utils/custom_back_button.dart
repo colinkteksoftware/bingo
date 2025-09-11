@@ -1,3 +1,4 @@
+import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 
 class BackButtonWidget extends StatelessWidget {
@@ -12,10 +13,12 @@ class BackButtonWidget extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           Icons.arrow_back,
-          color: const Color(0xFF03045e),
+          color: primaryBlue,
           size: size.width * 0.08,
         ),
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: () async {
+          Navigator.of(context).pop();
+        } 
       ),
     );
   }

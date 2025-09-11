@@ -15,14 +15,16 @@ class Premio {
     required this.figuraId,
   });
 
-  factory Premio.fromMap(Map<String, dynamic> json) => Premio(
-        bingoPremioDetalleId: json["bingoPremioDetalleId"],
-        premioId: json["premioId"],
-        descripcion: json["descripcion"],
-        valor: json["valor"],
-        figuraGrupodetalleId: json["figuraGrupodetalleId"],
-        figuraId: json["figuraId"],
-      );
+  factory Premio.fromMap(Map<String, dynamic> json) {
+    return Premio(
+      bingoPremioDetalleId: json["bingoPremioDetalleId"],
+      premioId: json["premioId"],
+      descripcion: json["descripcion"],
+      valor: json["valor"],
+      figuraGrupodetalleId: json["figuraGrupodetalleId"],
+      figuraId: json["figuraId"],
+    );
+  } 
 
   Map<String, dynamic> toMap() => {
         "bingoPremioDetalleId": bingoPremioDetalleId,

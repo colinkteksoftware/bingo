@@ -3,17 +3,18 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/models/personaconvert.dart';
+import 'package:bingo/core/data/models/personaconvert.dart';
 import 'package:bingo/ui/login_page.dart';
 import 'package:bingo/utils/background.dart';
+import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
 //import 'package:bingo/mainjuegos';
-import 'package:bingo/models/chatconvert.dart';
-import 'package:bingo/models/clasesmovil.dart';
-import 'package:bingo/models/modelCliente.dart';
+import 'package:bingo/core/data/models/chatconvert.dart';
+import 'package:bingo/core/data/models/clasesmovil.dart';
+import 'package:bingo/core/data/models/modelPromotor.dart';
 
 //import 'package:bingo/ui/tablaHorizontalMenu.dart';
 
@@ -26,52 +27,33 @@ Future<List<Persona>?>? chats;
 Persona? listchat;
 
 class UpdatePersonPage extends StatefulWidget {
-  ModelCliente? datosuser;
-  UpdatePersonPage({super.key, required this.datosuser});
+  //ModelPromotor? datosuser;
+  const UpdatePersonPage({super.key, /*required this.datosuser*/});
   @override
   State<UpdatePersonPage> createState() => _UpdatePersonPageState();
 }
 
-class _UpdatePersonPageState extends State<UpdatePersonPage> {
-  //ModelCliente _modelGanadoresDisplay = new ModelCliente(
-  //idCliente:0,
-//contrato:"",
-//id_sala_nube:0,
-//NomClie:"",
-//Apeclie:"",
-//FechaNacimiento:null,
-//Sexo:1,
-//Correo:"",
-//clave:"",
-//Telefono:"",
-//Dni:"",
-//Nacionalidad:"",
-//PuntosRedimibles:0,
-//PuntosCupones:0,
-//PuntosJugables:0,
-//FechaRegistro:null,
-//Fecha_UltimaVisita:null,
-//Estado:1
-  //);
+class _UpdatePersonPageState extends State<UpdatePersonPage> {  
 
   @override
   void initState() {
-    nomClieController.text = widget.datosuser!.nombres!;
+
+    //se necesita cargar la info de sharedferences para los datos del vendedor o promotor
+
+    /*nomClieController.text = widget.datosuser!.nombres!;
     apeclieController.text = widget.datosuser!.apellidos!;
 
     dniController.text = widget.datosuser!.doi!;
     telefonoController.text = widget.datosuser!.telefono!;
     correoController.text = widget.datosuser!.usuario!;
     claveController.text;
-    estatus = widget.datosuser!.estado!;
+    estatus = widget.datosuser!.estado!;*/
     iniciarPreferencias();
     super.initState();
   }
 
   void iniciarPreferencias() async {
-    await pf.initPrefs();
     ipController.text = pf.getIp;
-
     setState(() {});
   }
 
@@ -95,10 +77,10 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
   final estadoController = TextEditingController();
 
   Future<Persona> fetchPost(int status, String dni) async {
-    final pf = new Preferencias();
+    final pf = Preferencias();
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
-    final http = new IOClient(ioc);
+    final http = IOClient(ioc);
     final url = Uri.parse("${ipController.text}/Apicentral/api/Clientes/ConsultaCliente/${pf.getCodigoSala}/$dni");
 
     var respuesta = await http.get(url);
@@ -164,7 +146,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
       );
     } catch (e) {
       // En caso de error en la decodificación, muestra una imagen de respaldo
-      print('Error decoding base64 image: $e');
+      //print('Error decoding base64 image: $e');
       return Image.network(
         'https://images.unsplash.com/photo-1519985176271-adb1088fa94c?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=a0c8d632e977f94e5d312d9893258f59&auto=format&fit=crop&w=1355&q=80',
         fit: BoxFit.cover,
@@ -338,7 +320,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -424,7 +406,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -511,7 +493,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -643,7 +625,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                                         'Por favor ingrese su clave o cambiela',
                                                                         style: TextStyle(
                                                                             color:
-                                                                                Color(0xFF03045e)),
+                                                                                primaryBlue),
                                                                       ),
                                                                       content: Text(
                                                                           'Ingresa clave'),
@@ -660,7 +642,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                                                       borderRadius: BorderRadius.circular(0.0),
                                                                                       side: const BorderSide(color: Colors.grey),
                                                                                     ),
-                                                                                    backgroundColor: Color(0xFF03045e),
+                                                                                    backgroundColor: primaryBlue,
                                                                                   ),
                                                                                   child: Text(
                                                                                     'Confirmar',
@@ -729,7 +711,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                             ListTileControlAffinity
                                                                 .leading,
                                                         activeColor:
-                                                            Color(0xFF03045e),
+                                                            primaryBlue,
                                                         title: Text(
                                                           estatus
                                                               ? "Activado:"
@@ -804,7 +786,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
                                                                                   borderRadius: BorderRadius.circular(0.0),
                                                                                   side: const BorderSide(color: Colors.grey),
                                                                                 ),
-                                                                                backgroundColor: Color(0xFF03045e),
+                                                                                backgroundColor: primaryBlue,
                                                                               ),
                                                                               child: Text(
                                                                                 'Confirmar',
@@ -847,7 +829,6 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = new IOClient(ioc);
-    await pf.initPrefs();
 
     try {
       String ruta;
@@ -863,7 +844,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
           headers: headers,
           encoding: encoding,
           body: jsonEncode({
-            "promotorId": widget.datosuser!.promotorId,
+            //"promotorId": widget.datosuser!.promotorId,
             "nombres": nomClieController.text,
             "apellidos": apeclieController.text,
             "tipoDocumento": 11,
@@ -922,7 +903,7 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
           headers: headers,
           encoding: encoding,
           body: jsonEncode({
-            "promotorId": widget.datosuser!.promotorId,
+            //"promotorId": widget.datosuser!.promotorId,
             "nombres": nomClieController.text,
             "apellidos": apeclieController.text,
             "tipoDocumento": 11,

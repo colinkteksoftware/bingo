@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 /* import 'dart:ui'; */
-import 'package:bingo/models/bingoconvert.dart';
+import 'package:bingo/core/data/models/bingo.dart';
+import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -226,7 +227,7 @@ void showAlerta(BuildContext context, String titulo, String mensaje) {
               Text(
                 titulo,
                 style: TextStyle(
-                  color: const Color(0xFF03045e),
+                  color: primaryBlue,
                   fontSize: size.width * 0.032,
                   fontFamily: 'gotic',
                   fontWeight: FontWeight.bold,
@@ -237,7 +238,7 @@ void showAlerta(BuildContext context, String titulo, String mensaje) {
           content: Text(
             mensaje,
             style: TextStyle(
-              color: const Color(0xFF03045e),
+              color: primaryBlue,
               fontSize: size.width * 0.032,
               fontFamily: 'gotic',
               fontWeight: FontWeight.bold,
@@ -247,7 +248,7 @@ void showAlerta(BuildContext context, String titulo, String mensaje) {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: const Color(0xFF03045e),
+                backgroundColor: primaryBlue,
                 disabledForegroundColor: Colors.grey.withOpacity(0.38),
                 disabledBackgroundColor: Colors.grey.withOpacity(0.12),
               ),
@@ -334,7 +335,7 @@ String tituloMenu(int opcion) {
   return im;
 }
 
-int getBingoStateById(int bingoId, bingos) {
+/*int getBingoStateById(int bingoId, bingos) {
   /*for (var bingo in bingos) {
       print('pagos = > ${bingo.bingoToMap()}');
     }*/
@@ -342,7 +343,7 @@ int getBingoStateById(int bingoId, bingos) {
     (bingo) => bingo.bingoId == bingoId,
     orElse: () => Bingo(
         bingoId: 0,
-        fecha: DateTime.now(),
+        fecha: DateTime.now().toIso8601String(),
         descripcion: '',
         precioPorCartilla: 0,
         presupuestoPremio: 0,
@@ -352,7 +353,7 @@ int getBingoStateById(int bingoId, bingos) {
         estado: -1),
   );
   return bingo.estado;
-}
+}*/
 
 List<String> bingoStates = [
   'Inactivo',
@@ -372,4 +373,26 @@ Uint8List dataFromBase64String(String base64String) {
 
 String base64String(Uint8List data) {
   return base64Encode(data);
+}
+
+final Map<int, Widget> segments = {
+  0: const Text('Inactivo'),
+  1: const Text('Activo'),
+  2: const Text('Jugando'),
+  3: const Text('Finalizado'),
+  4: const Text('Cancelado')
+};
+
+String dateFormatted(String date) {
+  DateTime dateTime = DateTime.parse(date);
+  return DateFormat('dd/MM/yyyy').format(dateTime);
+}
+
+String dateApiFormatted(DateTime date) {
+  //DateTime dateTime = DateTime.parse(date);
+  return DateFormat('yyyy-MM-dd').format(date);
+}
+
+String moneyFormatted(double amount) {
+  return '\$${NumberFormat('#,##0', 'en_US').format(amount)}';
 }

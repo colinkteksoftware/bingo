@@ -3,17 +3,18 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/models/personaconvert.dart';
+import 'package:bingo/core/data/models/personaconvert.dart';
 import 'package:bingo/ui/login_page.dart';
 import 'package:bingo/utils/background.dart';
+import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
 //import 'package:bingo/mainjuegos';
-import 'package:bingo/models/chatconvert.dart';
-import 'package:bingo/models/clasesmovil.dart';
-import 'package:bingo/models/modelCliente.dart';
+import 'package:bingo/core/data/models/chatconvert.dart';
+import 'package:bingo/core/data/models/clasesmovil.dart';
+import 'package:bingo/core/data/models/modelPromotor.dart';
 
 //import 'package:bingo/ui/tablaHorizontalMenu.dart';
 
@@ -63,9 +64,7 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   void iniciarPreferencias() async {
-    await pf.initPrefs();
     ipController.text = pf.getIp;
-
     setState(() {});
   }
 
@@ -83,7 +82,7 @@ class _PersonPageState extends State<PersonPage> {
   final puntosCuponesController = TextEditingController(text: "0");
   final puntosJugablesController = TextEditingController(text: "0");
   final fechaRegistroController = TextEditingController();
-  final fecha_UltimaVisitaController = TextEditingController();
+  final fechaUltimaVisitaController = TextEditingController();
   final estadoController = TextEditingController();
   final ipController = TextEditingController(text: "0.0.0.0");
   final ioc = HttpClient();
@@ -122,7 +121,7 @@ class _PersonPageState extends State<PersonPage> {
           puntosCuponesController.text = listchat!.puntosCupones!.toString();
           puntosJugablesController.text = listchat!.puntosJugables!.toString();
           fechaRegistroController.text = listchat!.fechaRegistro!.toString();
-          fecha_UltimaVisitaController.text =
+          fechaUltimaVisitaController.text =
               listchat!.fechaUltimaVisita!.toString();
           estadoController.text = listchat!.estado!.toString();
         });
@@ -285,7 +284,7 @@ class _PersonPageState extends State<PersonPage> {
                                                                 .fromSTEB(0, 12,
                                                                     0, 24),
                                                         child: Text(
-                                                            'Registra los datos para crear  tu cuenta.',
+                                                            'Registra los datos para crear tu cuenta.',
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style: TextStyle(
@@ -306,7 +305,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -392,7 +391,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -478,7 +477,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -565,7 +564,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -651,7 +650,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -737,7 +736,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -822,7 +821,7 @@ class _PersonPageState extends State<PersonPage> {
                                                       ),
                                                       AnimatedButton(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           height: size.height *
                                                               0.05,
                                                           width:

@@ -26,3 +26,5 @@ const fondoProfile = Color(0xFFF9FCFF);
 const darkGray = Color(0xFF282828);
 const fieldColor = Color(0xFF1C1C1E);
 const darkHint = Color(0xFF888888);
+
+const primaryBlue = Color(0xFF03045e);

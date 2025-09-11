@@ -2,19 +2,19 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/utils/background.dart';
-import 'package:bingo/models/pagosconvert.dart';
-import 'package:bingo/models/uvtconvert.dart';
+import 'package:bingo/core/data/models/pagosconvert.dart';
+import 'package:bingo/core/data/models/uvtconvert.dart';
+import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/utils/custom_back_button.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/io_client.dart';
 
 class UvtWidget extends StatefulWidget {
-  ModelCliente? datosuser;
+  //ModelPromotor? datosuser;
 
-  UvtWidget({super.key, required this.datosuser});
+  const UvtWidget({super.key, /*required this.datosuser*/});
 
   @override
   State<UvtWidget> createState() => _UvtWidgetState();
@@ -29,6 +29,40 @@ class _UvtWidgetState extends State<UvtWidget> {
   final pf = Preferencias();
   Future<Uvt?>? listaset;
   Uvt? listasetresponseListpagos;
+  TextEditingController dniController = TextEditingController(text: "");
+  
+  Future<String> fetchShowsdelete(Pago elemento) async {
+    String jsonBody = json.encode(elemento.toJson());
+    ioc.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    final http = IOClient(ioc);
+    final url = Uri.parse(
+        "${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor");
+
+    final response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonBody);
+
+    if (response.statusCode == 200) {
+      const snackBar = SnackBar(
+        content: Center(child: Text("Se ha confirmado la eliminación..")),
+        backgroundColor: Colors.green,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      Navigator.of(context).pop();
+      return "si";
+    } else {
+      const snackBar = SnackBar(
+        content: Center(child: Text("No se ha confirmado la eliminación..")),
+        backgroundColor: Colors.red,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      Navigator.of(context).pop();
+      throw Exception('Failed to load shows');
+    }
+  }
 
   Future<Uvt?> fetchShows() async {
     ioc.badCertificateCallback =
@@ -60,7 +94,6 @@ class _UvtWidgetState extends State<UvtWidget> {
 
   @override
   void initState() {
-    //await pf.initPrefs();
     listaset = fetchShows();
     super.initState();
 
@@ -70,7 +103,6 @@ class _UvtWidgetState extends State<UvtWidget> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    //DateTime maxDate = _selectedDate.add(const Duration(days: 365));
     return Scaffold(
         backgroundColor: const Color(0xFFcaf0f8),
         body: SingleChildScrollView(
@@ -242,7 +274,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                                   child: Column(
                                                                                 children: [
                                                                                   Text(
-                                                                                    "Valor Uvt: ${listasetresponseListpagos!.valorUvt}",
+                                                                                    'Valor Uvt: ${moneyFormatted(listasetresponseListpagos?.valorUvt ?? 0)}',
                                                                                     style: TextStyle(
                                                                                       color: const Color(0xFF0077b6),
                                                                                       fontSize: size.width * 0.034,
@@ -251,7 +283,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                                     ),
                                                                                   ),
                                                                                   Text(
-                                                                                    "Cantidad Uvt: ${listasetresponseListpagos!.cantidadUvt}",
+                                                                                    'Cantidad Uvt: ${moneyFormatted(double.parse(listasetresponseListpagos?.cantidadUvt.toString() ?? '0'))}',                                                                                    
                                                                                     style: TextStyle(
                                                                                       color: const Color(0xFF0077b6),
                                                                                       fontSize: size.width * 0.030,
@@ -260,7 +292,7 @@ class _UvtWidgetState extends State<UvtWidget> {
                                                                                     ),
                                                                                   ),
                                                                                   Text(
-                                                                                    "Valor Total: ${listasetresponseListpagos!.valorUvt! * double.parse(listasetresponseListpagos!.cantidadUvt.toString())}",
+                                                                                    'Valor Total: ${moneyFormatted(listasetresponseListpagos!.valorUvt! * double.parse(listasetresponseListpagos!.cantidadUvt.toString()))}',
                                                                                     style: TextStyle(
                                                                                       color: const Color(0xFF0077b6),
                                                                                       fontSize: size.width * 0.030,
@@ -342,39 +374,5 @@ class _UvtWidgetState extends State<UvtWidget> {
                                     const BackButtonWidget(),
               ],
             )));
-  }
-
-  TextEditingController dniController = TextEditingController(text: "");
-  Future<String> fetchShowsdelete(Pago elemento) async {
-    String jsonBody = json.encode(elemento.toJson());
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = IOClient(ioc);
-    final url = Uri.parse(
-        "${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor");
-
-    final response = await http.put(url,
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonBody);
-
-    if (response.statusCode == 200) {
-      const snackBar = SnackBar(
-        content: Center(child: Text("Se ha confirmado la eliminación..")),
-        backgroundColor: Colors.green,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      Navigator.of(context).pop();
-      return "si";
-    } else {
-      const snackBar = SnackBar(
-        content: Center(child: Text("No se ha confirmado la eliminación..")),
-        backgroundColor: Colors.red,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      Navigator.of(context).pop();
-      throw Exception('Failed to load shows');
-    }
-  }
+  }  
 }

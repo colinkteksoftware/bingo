@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferencias {
-  static final Preferencias _preferencias = new Preferencias._internal();
+  static final Preferencias _preferencias = Preferencias._internal();
 
   factory Preferencias() {
     return _preferencias;
@@ -290,9 +290,6 @@ class Preferencias {
     _prefs.setString('SalasMenus', value);
   }
 
-
- 
-
   get getServerNube {
     try {
       return _prefs.getBool('ServerNube') ?? false;
@@ -315,6 +312,78 @@ class Preferencias {
 
   set setPais(int value) {
     _prefs.setInt('Pais', value);
+  }
+
+  get getBingoId {
+    try {
+      return _prefs.getInt('bingoId') ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  set setBingoId(int id) {
+    _prefs.setInt('bingoId', id);
+  }
+
+  get getPromotorId {
+    try {
+      return _prefs.getInt('promotorId') ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  set setPromotorId(int id) {
+    _prefs.setInt('promotorId', id);
+  }
+
+  get getSellerName {
+    try {
+      return _prefs.getString('SellerName') ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  set setSellerName(String value) {
+    _prefs.setString('SellerName', value);
+  }
+
+  get getSellerLast {
+    try {
+      return _prefs.getString('SellerLast') ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  set setSellerLast(String value) {
+    _prefs.setString('SellerLast', value);
+  }
+
+  get getProfile {
+    try {
+      return _prefs.getInt('Profile') ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  set setProfile(int id) {
+    _prefs.setInt('Profile', id);
+  }
+
+  get getSellerState {
+    try {
+      return _prefs.getBool('SellerState') ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  set setSellerState(bool value) {
+    _prefs.setBool('SellerState', value);
   }
 
 }

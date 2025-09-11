@@ -1,0 +1,11 @@
+# ML Kit Vision
+-keep class com.google.mlkit.vision.text.** { *; }
+-keep class com.google.mlkit.vision.barcode.** { *; }
+-keep class com.google.mlkit.vision.face.** { *; }
+-keep class com.google.mlkit.vision.objectdetection.** { *; }
+-keep class com.google.mlkit.vision.pose.** { *; }
+-keep class com.google.mlkit.vision.selfiesegmentation.** { *; }
+-keep class com.google.mlkit.vision.digitalink.** { *; }
+-keep class com.google.mlkit.vision.entityextraction.** { *; }
+-keep class com.google.firebase.mlkit.** { *; }
+-keep class com.google.mlkit.vision.text.** { *; }

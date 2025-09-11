@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 void inicioProceso() async {
   // bind the socket server to an address and port
-  var address = new InternetAddress('192.168.5.100');
+  var address = InternetAddress('192.168.5.100');
   final server = await ServerSocket.bind(address, 1234);
 
   // listen for clent connections to the server
@@ -20,7 +20,7 @@ void handleConnection(Socket client) {
   client.listen(
     // handle data from the client
     (Uint8List data) async {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
       final message = String.fromCharCodes(data);
 
       if (message.length == 528) {
@@ -32,7 +32,7 @@ void handleConnection(Socket client) {
 
     // handle errors
     onError: (error) {
-      print(error);
+      print('ERROR ENCONTRADO EN LA CONEXION => $error');
       client.close();
     },
 

@@ -1,6 +1,6 @@
 import 'package:animated_button/animated_button.dart';
 import 'package:bingo/utils/background.dart';
-import 'package:bingo/models/promotorconvert.dart';
+import 'package:bingo/core/data/models/promotorconvert.dart';
 import 'package:flutter/material.dart';
 
 class PromotorPage extends StatefulWidget {

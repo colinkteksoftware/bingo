@@ -3,17 +3,18 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/models/personaconvert.dart';
+import 'package:bingo/core/data/models/personaconvert.dart';
 import 'package:bingo/ui/login_page.dart';
 import 'package:bingo/utils/background.dart';
+import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
 //import 'package:bingo/mainjuegos';
-import 'package:bingo/models/chatconvert.dart';
-import 'package:bingo/models/clasesmovil.dart';
-import 'package:bingo/models/modelCliente.dart';
+import 'package:bingo/core/data/models/chatconvert.dart';
+import 'package:bingo/core/data/models/clasesmovil.dart';
+import 'package:bingo/core/data/models/modelPromotor.dart';
 
 //import 'package:bingo/ui/tablaHorizontalMenu.dart';
 
@@ -62,7 +63,6 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
   }
 
   void iniciarPreferencias() async {
-    await pf.initPrefs();
     ipController.text = pf.getIp;
 
     setState(() {});
@@ -354,7 +354,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -440,7 +440,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -527,7 +527,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -613,7 +613,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -699,7 +699,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -787,7 +787,7 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                                                       TextFormField(
                                                         style: TextStyle(
                                                           color:
-                                                              Color(0xFF03045e),
+                                                              primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -943,7 +943,6 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
-    await pf.initPrefs();
 
     try {
       String ruta;

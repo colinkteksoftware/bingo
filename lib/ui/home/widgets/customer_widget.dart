@@ -1,20 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:animated_button/animated_button.dart';
-import 'package:bingo/models/modelCliente.dart';
 import 'package:bingo/utils/background.dart';
-import 'package:bingo/models/clienteconvert.dart';
-import 'package:bingo/models/pagosconvert.dart';
+import 'package:bingo/core/data/models/clienteconvert.dart';
+import 'package:bingo/core/data/models/pagosconvert.dart';
+import 'package:bingo/utils/colores.dart';
 import 'package:bingo/utils/custom_back_button.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/io_client.dart';
 
 class CustomerWidget extends StatefulWidget {
-  ModelCliente? datosuser;
 
-  CustomerWidget({super.key, required this.datosuser});
+  const CustomerWidget({super.key});
 
   @override
   State<CustomerWidget> createState() => _CustomerWidgetState();
@@ -24,7 +22,6 @@ class _CustomerWidgetState extends State<CustomerWidget> {
   String searchString = "";
   String searchStringproduct = "";
   String detectionInfo = "";
-  final DateTime _selectedDate = DateTime.now();
   final ioc = HttpClient();
   final pf = Preferencias();
   Future<Cliente?>? listaset;
@@ -69,7 +66,6 @@ class _CustomerWidgetState extends State<CustomerWidget> {
 
   @override
   void initState() {
-    //await pf.initPrefs();
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {});
@@ -78,7 +74,6 @@ class _CustomerWidgetState extends State<CustomerWidget> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    //DateTime maxDate = _selectedDate.add(const Duration(days: 365));
     return Scaffold(
         backgroundColor: const Color(0xFFcaf0f8),
         body: SingleChildScrollView(
@@ -193,7 +188,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                 enabledBorder:
                                                     OutlineInputBorder(
                                                   borderSide: const BorderSide(
-                                                    color: Color(0xFF03045e),
+                                                    color: primaryBlue,
                                                     width: 2.0,
                                                   ),
                                                   borderRadius:
@@ -281,7 +276,7 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                     BorderRadius.circular(20),
                                                 border: Border.all(
                                                   color:
-                                                      const Color(0xFF03045e),
+                                                      primaryBlue,
                                                   width: 2.0,
                                                 ),
                                                 boxShadow: [
@@ -293,22 +288,22 @@ class _CustomerWidgetState extends State<CustomerWidget> {
                                                   ),
                                                 ],
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.search,
                                                 size: 20.0,
-                                                color: Color(0xFF03045e),
+                                                color: primaryBlue,
                                               ),
                                             ),
                                           ),
                                         ],
                                       ),                                      
                                       !finded && customer == null
-                                          ? const Center(
+                                          ? Center(
                                               child: Text(
                                                 'Cliente no encontrado',
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.w600,
-                                                    color: Color(0xFF03045e),
+                                                    color: primaryBlue,
                                                     fontSize: 20),
                                               ),
                                             )
