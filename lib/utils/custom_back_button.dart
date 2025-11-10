@@ -7,7 +7,21 @@ class BackButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return Positioned(
+    return IconButton(
+      icon: Icon(
+        Icons.arrow_back,
+        color: primaryBlue,
+        size: size.width * 0.08,
+      ),
+      onPressed: () async {
+        Navigator.of(context).pop();
+      } 
+    );
+  }
+}
+
+/*
+Positioned(
       top: 10,
       left: 16,
       child: IconButton(
@@ -21,5 +35,4 @@ class BackButtonWidget extends StatelessWidget {
         } 
       ),
     );
-  }
-}
+ */

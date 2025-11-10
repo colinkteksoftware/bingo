@@ -84,4 +84,15 @@ class Bingo {
         'estado: $estado'
         ')';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Bingo &&
+          runtimeType == other.runtimeType &&
+          bingoId == other.bingoId &&
+          descripcion == other.descripcion;
+
+  @override
+  int get hashCode => bingoId.hashCode ^ descripcion.hashCode;
 }

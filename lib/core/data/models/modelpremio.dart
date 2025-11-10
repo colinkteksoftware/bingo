@@ -1,18 +1,22 @@
 class Premio {
-  int bingoPremioDetalleId;
-  int premioId;
-  String descripcion;
-  int valor;
-  int figuraGrupodetalleId;
-  int figuraId;
+  int? bingoPremioDetalleId;
+  int? premioId;
+  String? descripcion;
+  double? valor;
+  int? figuraGrupodetalleId;
+  String? grupo;
+  int? figuraId;
+  String? figura;
 
   Premio({
-    required this.bingoPremioDetalleId,
-    required this.premioId,
-    required this.descripcion,
-    required this.valor,
-    required this.figuraGrupodetalleId,
-    required this.figuraId,
+    this.bingoPremioDetalleId,
+    this.premioId,
+    this.descripcion,
+    this.valor,
+    this.figuraGrupodetalleId,
+    this.grupo,
+    this.figuraId,
+    this.figura
   });
 
   factory Premio.fromMap(Map<String, dynamic> json) {
@@ -20,9 +24,12 @@ class Premio {
       bingoPremioDetalleId: json["bingoPremioDetalleId"],
       premioId: json["premioId"],
       descripcion: json["descripcion"],
-      valor: json["valor"],
+      //valor: json["valor"],
+      valor: (json["valor"] as num?)?.toDouble(),
       figuraGrupodetalleId: json["figuraGrupodetalleId"],
+      grupo: json['grupo'],
       figuraId: json["figuraId"],
+      figura: json['figura'],
     );
   } 
 
@@ -32,6 +39,8 @@ class Premio {
         "descripcion": descripcion,
         "valor": valor,
         "figuraGrupodetalleId": figuraGrupodetalleId,
+        "grupo" : grupo,
         "figuraId": figuraId,
+        "figura": figura
       };
 }

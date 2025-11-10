@@ -40,7 +40,6 @@ class _SaleEditWidgetState extends State<SaleEditWidget> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    //final providerSale = Provider.of<SaleProvider>(context);
     final providerSale = context.watch<SaleProvider>();
 
     return Scaffold(
@@ -151,26 +150,33 @@ class _SaleEditWidgetState extends State<SaleEditWidget> {
                                   showAlerta(context, 'Mensaje Informativo',
                                       'Para ventas debes seleccionar una cartilla!!');
                                 } else {
-                                  final provider = Provider.of<BingoProvider>(
-                                      context,
-                                      listen: false);
-                                  final pago = Pago();
-                                  pago.ventaId = widget.order.ventaId;
-                                  pago.bingoId = provider.bingo.bingoId;
-                                  pago.clienteId = 0;
-                                  pago.promotorId = pf.getPromotorId;
-                                  pago.codigoModulo =
-                                      widget.order.codigoModulo.toString();
-                                  pago.multiplicado = providerSale.type == 2
-                                      ? int.parse(_controller.text)
-                                      : 0;
-                                  pago.tipo = providerSale.type + 1;
+                                  if (providerSale.counter > 1) {
+                                    openAlertBox(
+                                        context, providerSale, widget.order);
+                                  } else {
+                                    final bingoProvider =
+                                        Provider.of<BingoProvider>(context,
+                                            listen: false);
 
-                                  final success = await providerSale.postSale(
-                                      pago, context);
-                                  if (success) {
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
+                                    final pago = Pago()
+                                      ..ventaId = widget.order.ventaId
+                                      ..bingoId = bingoProvider.bingo.bingoId
+                                      ..clienteId = 0
+                                      ..promotorId = pf.getPromotorId
+                                      ..codigoModulo =
+                                          widget.order.codigoModulo.toString()
+                                      ..multiplicado = providerSale.type == 2
+                                          ? providerSale.counter
+                                          : 0
+                                      ..tipo = providerSale.type + 1;
+
+                                    final success = await providerSale.postSale(
+                                        pago, context);
+                                    if (success) {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    }
                                   }
                                 }
                               },
@@ -290,7 +296,7 @@ class _SaleEditWidgetState extends State<SaleEditWidget> {
             child: Center(
               child: SwitchListTile(
                 controlAffinity: ListTileControlAffinity.platform,
-                activeColor: const Color(0xffffb703),
+                activeThumbColor: const Color(0xffffb703),
                 title: const SizedBox(),
                 value: cartilla.quantity == 1,
                 onChanged: (value) {
@@ -306,6 +312,132 @@ class _SaleEditWidgetState extends State<SaleEditWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> openAlertBox(
+    BuildContext context,
+    SaleProvider providerSale,
+    Venta order,
+  ) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0)),
+            ),
+            contentPadding: const EdgeInsets.all(16.0),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Mensaje de Sistema',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const Divider(color: Colors.grey),
+                const SizedBox(height: 16),
+                Column(
+                  children: [
+                    const Text(
+                      '¿Está seguro de agregar este progresivo?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'X${providerSale.counter}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'No',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        elevation: 2,
+                      ),
+                      onPressed: () async {
+                        final bingoProvider =
+                            Provider.of<BingoProvider>(context, listen: false);
+
+                        final pago = Pago()
+                          ..ventaId = order.ventaId
+                          ..bingoId = bingoProvider.bingo.bingoId
+                          ..clienteId = 0
+                          ..promotorId = pf.getPromotorId
+                          ..codigoModulo = order.codigoModulo.toString()
+                          ..multiplicado =
+                              providerSale.type == 2 ? providerSale.counter : 0
+                          ..tipo = providerSale.type + 1;
+
+                        final success =
+                            await providerSale.postSale(pago, context);
+                        if (success) {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: const Text(
+                        'Sí',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

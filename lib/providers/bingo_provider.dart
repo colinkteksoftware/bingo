@@ -6,6 +6,7 @@ import 'package:bingo/core/data/models/booklet.dart';
 import 'package:bingo/core/data/models/cartillaconvert.dart';
 import 'package:bingo/core/data/models/requestQuey.dart';
 import 'package:bingo/core/data/models/saleQuery.dart';
+import 'package:bingo/utils/comparations.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -49,6 +50,22 @@ class BingoProvider with ChangeNotifier {
   Bingo _bingo = Bingo();
   Bingo get bingo => _bingo;
 
+  String? _figure = '';
+  String? get figure => _figure;
+
+  final TextEditingController counterController = TextEditingController();
+
+  BingoProvider() {
+    counterController.text = _counter.toString();
+    counterController.addListener(() {
+      final value = int.tryParse(counterController.text);
+      if (value != null && value >= 1 && value != _counter) {
+        _counter = value;
+        calculeTotal();
+      }
+    });
+  }
+
   Future<void> getBingoById() async {
     final url = Uri.parse(
         '${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetItem/${bingo.bingoId}');
@@ -62,17 +79,11 @@ class BingoProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        /*final Map<String, dynamic> info = json.decode(response.body);
-        final data = BingoResponse.fromJson(info);
-        print('info bingo actualizado => $data');
-        print('bingo actualizado => ${data.bingo}');
-        updateBingo(data.bingo);*/
-
         final Map<String, dynamic> info = json.decode(response.body);
-        print('Respuesta del servidor: $info');
+        //print('Respuesta del servidor: $info');
         final bingoData = info['bingo'];
-        final data = Bingo.fromMap(bingoData);        
-        print('Bingo actualizado: $data');
+        final data = Bingo.fromMap(bingoData);
+        //print('Bingo actualizado: $data');
         updateBingo(data);
       }
     } catch (e) {
@@ -84,6 +95,7 @@ class BingoProvider with ChangeNotifier {
     _isLoading = true;
     errorMessage = null;
     notifyListeners();
+
     final url = Uri.parse(
         '${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll');
     /*print('url => $url');
@@ -107,13 +119,39 @@ class BingoProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final info = utf8.decode(response.bodyBytes);
-        print('response: $info');
-        
+        //print('response: $info');
         List<BingoSala> bingos = bingoSalaFromMap(info);
-        print('bingos => $bingos');
-        _bingos = obtenerBingos(bingos);
-        //print('lista de bingos => $_bingos');
-        if (_bingos.isNotEmpty) {
+
+        if (bingos.isEmpty) {
+          _isLoading = false;
+          notifyListeners();
+          debugPrint(
+              '⚠️ No se encontraron bingos activos para el estado $state.');
+          return [];
+        }
+
+        if (bingos.first.premios.isEmpty) {
+          _isLoading = false;
+          notifyListeners();
+          debugPrint('⚠️ El bingo no tiene premios configurados.');
+          return [];
+        }
+
+        /*var figureGame =
+            bingos[0].premios[0].grupo ?? bingos[0].premios[0].figura ?? '';*/
+        var figureGame = bingos.first.premios.first.grupo ??
+            bingos.first.premios.first.figura ??
+            '';
+
+        updatefigure(figureGame);
+        //print('figura => $_figure');
+
+        List<Bingo> nuevosBingos = obtenerBingos(bingos);
+        bool sonIguales = listsEquals(_bingos, nuevosBingos);
+
+        if (!sonIguales) {
+          _bingos = nuevosBingos;
+
           for (var bingo in _bingos) {
             if (bingo.bingoId == pf.getBingoId) {
               updateBingo(bingo);
@@ -122,7 +160,7 @@ class BingoProvider with ChangeNotifier {
         }
         _isLoading = false;
         notifyListeners();
-        return _bingos;
+        return _bingos;        
       } else {
         _bingos = [];
         _isLoading = false;
@@ -148,6 +186,98 @@ class BingoProvider with ChangeNotifier {
       throw Exception('Error inesperado: $e');
     }
   }
+
+  /*Future<Cartilla?> fetchShowscartilla(BuildContext context) async {
+    _isLoading = true;
+    clearBooklet();
+    notifyListeners();
+
+    final url = Uri.parse(
+        '${pf.getIp.toString()}/api/GrupoCartillaDetalle/GetItemNameGrupo/$qrcode/${bingo.bingoId}');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      Cartilla newBooklet = cartillaFromJson(utf8.decode(response.bodyBytes));
+
+      if (newBooklet.grupoCartillas?.isNotEmpty == true) {
+        double total = 0.0;
+        _preciofinal = 0;
+        double precio = bingo.precioPorCartilla ?? 0;
+
+        var jsonData = jsonDecode(newBooklet.grupoCartillas!);
+
+        for (var numero in jsonData) {
+          String id = numero.toString();
+
+          // Verificar si ya existe ese id en las listas globales
+          bool existeEnInfo = _infoBooklet.any((c) => c.cartillaId == id);
+          bool existeEnList = _listBooklet
+              .expand((b) => b.listCartillas)
+              .any((c) => c.cartillaId == id);
+
+          print('agregado a infoBokklet => $existeEnInfo');
+          print('agregado a listBooklet => $existeEnList');
+
+          for (var numero in jsonData) {
+            Booklet cartilla = Booklet();
+            cartilla.cartillaId = numero.toString();
+            cartilla.quantity = 1;
+            cartilla.estado = true;
+            cartilla.price = precio;
+
+            total = total + precio;
+            _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
+
+            newBooklet.listCartillas.add(cartilla);
+            _infoBooklet.add(cartilla);
+            _listBooklet.add(newBooklet);
+          }
+
+          /*f (!existeEnInfo && !existeEnList) {
+            Booklet cartilla = Booklet()
+              ..cartillaId = id
+              ..quantity = 1
+              ..estado = true
+              ..price = precio;
+
+            total += precio;
+            _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
+
+            // ✅ Agregamos a la cartilla global
+            newBooklet.listCartillas.add(cartilla);
+            _infoBooklet.add(cartilla);
+          } else {
+            debugPrint("⚠️ Cartilla $id ya estaba en las listas, se omite.");
+          }*/
+        }
+
+        // ✅ Al final, agregamos la cartilla completa solo una vez
+        _listBooklet.add(newBooklet);
+      } else {
+        clearBooklet();
+        const snackBar = SnackBar(
+          content: Center(
+              child: Text('No Hay Cartillas disponibles para la venta..')),
+          backgroundColor: Colors.red,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return newBooklet;
+    } else {
+      _isLoading = false;
+      notifyListeners();
+      throw Exception('Failed to load shows');
+    }
+  }*/
 
   Future<Cartilla?> fetchShowscartilla(BuildContext context) async {
     /*print('===============================================================');
@@ -180,7 +310,32 @@ class BingoProvider with ChangeNotifier {
         double precio = bingo.precioPorCartilla ?? 0;
 
         var jsonData = jsonDecode(booklet.grupoCartillas!);
-        //print('jsonData grupo cartillas => $jsonData');
+        print('jsonData grupo cartillas => $jsonData');
+
+        /*for (var numero in jsonData) {
+          Booklet cartilla = Booklet();
+          cartilla.cartillaId = numero.toString();
+          cartilla.quantity = 1;
+          cartilla.estado = true;
+          cartilla.price = precio;
+
+          bool existeEnInfo =
+              _infoBooklet.any((c) => c.cartillaId == cartilla.cartillaId);
+          bool existeEnList = booklet.listCartillas
+              .any((c) => c.cartillaId == cartilla.cartillaId);
+
+          if (!existeEnInfo && !existeEnList) {
+            total = total + precio;
+            _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
+
+            booklet.listCartillas.add(cartilla);
+            _infoBooklet.add(cartilla);
+            _listBooklet.add(booklet);
+          } else {
+            debugPrint(
+                "Cartilla ${cartilla.cartillaId} ya estaba en las listas, no se agregó.");
+          }
+        }*/
 
         for (var numero in jsonData) {
           Booklet cartilla = Booklet();
@@ -220,15 +375,20 @@ class BingoProvider with ChangeNotifier {
   }
 
   Future<bool> registerSale(BuildContext context) async {
+    _isLoading = true;
+    errorMessage = null;
+    notifyListeners();
     SaleQuery sale = SaleQuery();
     List<Map<String, int>> booklets = [];
-
+    print('lista de cartillas escaneadas => ${infoBooklet.toString()}');
     if (infoBooklet.isNotEmpty) {
       for (var booklet in infoBooklet) {
-        //booklets.add({"cartillaId": int.parse(booklet.cartillaId.toString())});
         if (booklet.estado == true) {
-          booklets
-              .add({"cartillaId": int.parse(booklet.cartillaId.toString())});
+          int newCartillaId = int.parse(booklet.cartillaId.toString());
+          bool exists = booklets.any((b) => b['cartillaId'] == newCartillaId);
+          if (!exists) {
+            booklets.add({"cartillaId": newCartillaId});
+          }
         }
       }
     }
@@ -238,14 +398,14 @@ class BingoProvider with ChangeNotifier {
     sale.clienteId = 0;
     sale.promotorId = pf.getPromotorId;
     sale.codigoModulo = qrcode;
-    sale.multiplicado = aditional == 2 ? _aditional : 0;
+    sale.multiplicado = aditional == 2 ? _counter : 0;
     sale.tipo = _aditional + 1;
     sale.ventasDetalle = booklets;
 
     final url =
         Uri.parse('${pf.getIp.toString()}/api/PromotorInterno/PostVentaManual');
 
-    //print('body ventas => ${json.encode(sale.toMap())}');
+    print('body ventas => ${json.encode(sale.toMap())}');
 
     try {
       final response = await http.post(url,
@@ -259,6 +419,7 @@ class BingoProvider with ChangeNotifier {
           backgroundColor: Colors.green,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        _isLoading = false;
         notifyListeners();
         return true;
       } else {
@@ -267,6 +428,8 @@ class BingoProvider with ChangeNotifier {
           backgroundColor: Colors.red,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        _isLoading = false;
+        notifyListeners();
         return false;
       }
     } catch (e) {
@@ -276,6 +439,8 @@ class BingoProvider with ChangeNotifier {
         backgroundColor: Colors.red,
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      _isLoading = false;
+      notifyListeners();
       return false;
     }
   }
@@ -295,13 +460,21 @@ class BingoProvider with ChangeNotifier {
   }
 
   void increment() {
+    final day = DateTime.now();
+    final isWeekday = day.weekday <= 5;
+    final maxLimit = isWeekday ? 3 : 10;
+
     _counter++;
+    if (_counter > maxLimit) _counter = maxLimit;
+
+    counterController.text = _counter.toString();
     calculeTotal();
   }
 
   void decrement() {
     if (_counter > 1) {
       _counter--;
+      counterController.text = _counter.toString();
     }
     calculeTotal();
   }
@@ -309,9 +482,9 @@ class BingoProvider with ChangeNotifier {
   void calculeTotal() {
     double precio = 0;
     double total = 0.0;
-    //print('tipo bingo => $_aditional');
     switch (_aditional) {
       case 0:
+        print('lista de cartillas => $infoBooklet');
         for (var booklet in infoBooklet) {
           if (booklet.estado == true) {
             precio = bingo.precioPorCartilla ?? 0;
@@ -319,23 +492,31 @@ class BingoProvider with ChangeNotifier {
           }
         }
         _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
+        print('precio => $precio');
+        print('total => $total');
         break;
       case 2:
-        //print('cartilla activas => $infoBooklet');
         for (var booklet in infoBooklet) {
           if (booklet.estado == true) {
             precio = bingo.precioPorCartilla ?? 0;
             total = total + (precio * _counter) + precio;
+            print('total con cartilla${booklet.cartillaId} => $total');
           }
         }
         _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
-        //print('total x pagar => $_preciofinal');
+        print('precio => $precio');
+        print('total => $total');
+        print('multiplicado => $_counter');
         break;
       default:
         _preciofinal = 0;
         break;
     }
-    //updateCounter(contador);
+    notifyListeners();
+  }
+
+  void updatefigure(String value) {
+    _figure = value;
     notifyListeners();
   }
 
@@ -375,14 +556,18 @@ class BingoProvider with ChangeNotifier {
   }
 
   void updateCounter(int value) {
-    _counter = value;
-    notifyListeners();
+    if (value >= 1) {
+      _counter = value;
+      counterController.text = value.toString();
+      calculeTotal();
+    }
   }
 
   void clearBooklet() {
     _listBooklet.clear();
     _infoBooklet.clear();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      //updateQrcode('');
       notifyListeners();
     });
   }

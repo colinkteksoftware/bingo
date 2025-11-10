@@ -21,9 +21,10 @@ class BingoPage extends StatefulWidget {
 }
 
 class _BingoPageState extends State<BingoPage> {
-  String searchString = "";
-  String searchStringproduct = "";
-  String detectionInfo = "";
+  String searchString = '';
+  String searchStringproduct = '';
+  String detectionInfo = '';
+  Timer? timer;
 
   @override
   void initState() {
@@ -32,6 +33,18 @@ class _BingoPageState extends State<BingoPage> {
       final provider = Provider.of<BingoProvider>(context, listen: false);
       provider.updatestatus(1);
       provider.fetchShowBingos(1);
+    });
+    _startPolling();
+  }
+
+  void _startPolling() {
+    final provider = Provider.of<BingoProvider>(context, listen: false);
+    timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      try {
+        await provider.fetchShowBingos(1);        
+      } catch (e) {
+        print("Error al obtener el bingo: $e");
+      }
     });
   }
 

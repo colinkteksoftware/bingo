@@ -1,6 +1,7 @@
 import 'package:bingo/core/data/models/bingo.dart';
 import 'package:bingo/providers/bingo_provider.dart';
 import 'package:bingo/utils/colores.dart';
+import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:bingo/utils/routes.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +22,11 @@ class _BingosListViewState extends State<BingosListView> {
     final provider = Provider.of<BingoProvider>(context);
 
     var size = MediaQuery.of(context).size;
-    
+
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator(color: primaryBlue));
     }
-    
+
     if (provider.listBingos.isEmpty) {
       return const Center(
         child: Column(
@@ -140,6 +141,29 @@ class _BingosListViewState extends State<BingosListView> {
                                 ),
                               ],
                             ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Consumer<BingoProvider>(
+                                  builder: (context, figuraProvider, child) {
+                                    final figure = figuraProvider.figure.toString();
+                                    return Text(
+                                      (figure.toString().length > 20)
+                                          ? '${figure.toString().substring(0, 20)}...'
+                                          : figure.toString(),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         Text(
@@ -184,7 +208,8 @@ class _BingosListViewState extends State<BingosListView> {
                               ),
                             ),
                             Text(
-                              order.fecha.toString().substring(0, 16),
+                              dateFormatted(
+                                  order.fecha.toString().substring(0, 16)),
                               style: TextStyle(
                                 fontFamily: 'Gilroy',
                                 color: Colors.white,

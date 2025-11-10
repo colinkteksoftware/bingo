@@ -39,6 +39,19 @@ class SaleProvider extends ChangeNotifier {
 
   Uri url = Uri.parse('');
 
+  final TextEditingController counterController = TextEditingController();
+
+  SaleProvider() {
+    counterController.text = _counter.toString();
+    counterController.addListener(() {
+      final value = int.tryParse(counterController.text);
+      if (value != null && value >= 1 && value != _counter) {
+        _counter = value;
+        calculeTotal();
+      }
+    });
+  }
+
   Future<List<Venta>?> fetchSales() async {
     String fecha = sdf.DateFormat('yyyy-MM-dd').format(currentDate);
     _isLoading = true;
@@ -90,17 +103,7 @@ class SaleProvider extends ChangeNotifier {
     try {
       final response = await http.post(url,
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: json.encode(pago.toJson()));
-      /*body: jsonEncode({
-            "ventaId": widget.venta.ventaId,
-            "bingoId": widget.bingo!.bingoId,
-            "clienteId": 0,
-            "promotorId": widget.datosuser!.promotorId,
-            "codigoModulo": widget.venta.codigoModulo,
-            "multiplicado": _controller.text,
-            "tipo": _selectedIndex + 1,
-            "ventasDetalle": elemento
-          }));*/
+          body: json.encode(pago.toJson()));      
 
       if (response.statusCode == 200) {
         const snackBar = SnackBar(
@@ -218,15 +221,37 @@ class SaleProvider extends ChangeNotifier {
   }
 
   void increment() {
-    _counter++;
+    if (_currentDate!.weekday.toInt() <= 5) {
+      _counter++;
+      if (_counter > 3) {
+        counterController.text = '3';
+      } else{
+        counterController.text = _counter.toString();
+      }
+    } else {
+      _counter++;
+      if (_counter > 10) {
+        counterController.text = '10';
+      } else{
+        counterController.text = _counter.toString();
+      }
+    }
     calculeTotal();
+    /*_counter++;
+    counterController.text = _counter.toString();
+    calculeTotal();*/
   }
 
   void decrement() {
-    if (_counter > 1) {
+    /*if (_counter > 1) {
       _counter--;
     }
-    calculeTotal();
+    calculeTotal();*/
+    if (_counter > 1) {
+      _counter--;
+      counterController.text = _counter.toString();
+      calculeTotal();
+    }
   }
 
   void calculeTotal() {
@@ -246,7 +271,8 @@ class SaleProvider extends ChangeNotifier {
         for (var booklet in listBooklet) {
           if (booklet.estado == true) {
             precio = booklet.price ?? 0;
-            total = total + (precio * _counter) + precio;
+            //total = total + (precio * _counter) + precio;
+            total += precio * _counter;
           }
         }
         _preciofinal = double.parse(total.toStringAsFixed(2));
@@ -274,8 +300,13 @@ class SaleProvider extends ChangeNotifier {
   }
 
   void updateCounter(int value) {
-    _counter = value;
-    notifyListeners();
+    /*_counter = value;
+    notifyListeners();*/
+    if (value >= 1) {
+      _counter = value;
+      counterController.text = value.toString();
+      calculeTotal();
+    }
   }
 
   void updateUvt(Uvt uvt) {

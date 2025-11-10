@@ -24,30 +24,9 @@ class AppRoutes {
         return MaterialPageRoute(
             builder: (_) => const HomePage(),
           );
-        /*final args = route.arguments as Map<String, dynamic>?;        
-        if (args != null) {
-          final bingo = args['bingo'] as Bingo?;
-          final datosuser = args['datosuser'] as ModelPromotor?;
-
-          return MaterialPageRoute(
-            builder: (_) => HomePage(
-              bingo: bingo,
-              //datosuser: datosuser,
-            ),
-          );
-        } else {
-          return _errorRoute();
-        }*/
       case bingo:
         return MaterialPageRoute(
-              builder: (_) => const BingoPage());
-        /*final datosuser = route.arguments as ModelPromotor?;
-        if (datosuser != null) {
-          return MaterialPageRoute(
-              builder: (_) => const BingoPage());
-        }else {
-          return _errorRoute();
-        }*/
+              builder: (_) => const BingoPage());        
       case person:
         return MaterialPageRoute(builder: (_) => const PersonPage());
       case setting:

@@ -44,11 +44,13 @@ class AuthProvider with ChangeNotifier {
                 _promotor?.usuario.toString() ==
                     usuario.toString().toUpperCase() ||
             _promotor?.usuario.toString() == usuario.toString().toLowerCase()) {
+          pf.setUsuario = usuario;
           pf.setRecuerda = remember;
           pf.setpassword = password;
         } else {
           showAlerta(context, 'Mensaje Informativo',
               '¡Contraseña Incorrecta. Verificar, por favor!');
+          pf.setUsuario = '';
           pf.setpassword = '';
           _isLoading = false;
           notifyListeners();

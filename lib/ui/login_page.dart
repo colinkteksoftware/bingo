@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:animated_button/animated_button.dart';
 import 'package:bingo/providers/auth_provider.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/colores.dart';
@@ -38,12 +37,13 @@ class _LoginPage extends State<LoginPage> {
     ipController.text = pf.getIp;
     pf.setCodigoSala = 0;
     _isChecked = pf.getRecuerda;
-    txtControlerUsuario.text = pf.getUsuario;
 
     if (_isChecked) {
+      txtControlerUsuario.text = pf.getUsuario;
       txtControlerClave.text = pf.getpassword;
     } else {
-      txtControlerClave.text = "";
+      txtControlerUsuario.text = '';
+      txtControlerClave.text = '';
     }
     setState(() {});
   }
@@ -157,22 +157,46 @@ class _LoginPage extends State<LoginPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(0, 20, 0, 0),
-                                            child: Container(
+                                          GestureDetector(
+                                            onDoubleTap: () async {
+                                              try {
+                                                await Navigator.pushNamed(
+                                                    context, AppRoutes.setting);
+                                                iniciarPreferencias();
+                                              } catch (e, s) {
+                                                const snackBar = SnackBar(
+                                                  content: Center(
+                                                      child: Text(
+                                                          'Falla de enrutamiento')),
+                                                  backgroundColor: Colors.red,
+                                                );
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(snackBar);
+                                                print(
+                                                    'Error al navegar a settings: $e');
+                                                print(s);
+                                              }
+                                            },
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .fromSTEB(0, 20, 0, 0),
+                                              child: Container(
                                                 height: 100,
                                                 width: 250,
                                                 decoration: const BoxDecoration(
                                                   image: DecorationImage(
-                                                      image: AssetImage(
-                                                          "assets/images/logo.png"),
-                                                      fit: BoxFit.fill),
+                                                    image: AssetImage(
+                                                        "assets/images/logo.png"),
+                                                    fit: BoxFit.fill,
+                                                  ),
                                                 ),
                                                 alignment:
                                                     const AlignmentDirectional(
-                                                        0, 0)),
-                                          ),
+                                                        0, 0),
+                                              ),
+                                            ),
+                                          ),                                          
                                           Text(
                                             'Bienvenido',
                                             textAlign: TextAlign.center,
@@ -199,174 +223,249 @@ class _LoginPage extends State<LoginPage> {
                                               ),
                                             ),
                                           ),
-                                          TextFormField(
-                                            style: TextStyle(
-                                              color: primaryBlue,
-                                              fontSize: size.width * 0.04,
-                                              fontWeight: FontWeight.bold,
+                                          Card(
+                                            elevation: 4,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
-                                            controller: txtControlerUsuario,
-                                            decoration: InputDecoration(
-                                              labelStyle: TextStyle(
-                                                color: primaryBlue,
-                                                fontSize: size.width * 0.04,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              hintText: 'Ingrese el Usuario',
-                                              prefixIcon: const Icon(
-                                                Icons.person,
-                                                color: primaryBlue,
-                                              ),
-                                              contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-                                            ),
-                                            keyboardType: TextInputType.text,
-                                            onSaved: (value) {
-                                              txtControlerUsuario.text = value!;
-                                            },
-                                          ),
-                                          const SizedBox(height: 10),
-                                          TextFormField(
-                                            controller: txtControlerClave,
-                                            keyboardType: TextInputType.text,
-                                            style: TextStyle(
-                                              color: primaryBlue,
-                                              fontSize: size.width * 0.04,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            decoration: InputDecoration(
-                                              labelStyle: TextStyle(
-                                                color: primaryBlue,
-                                                fontSize: size.width * 0.04,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              hintText: 'Ingrese Contraseña',
-                                              prefixIcon: const Icon(
-                                                Icons.lock,
-                                                color: primaryBlue,
-                                              ),
-                                              floatingLabelBehavior:
-                                                  FloatingLabelBehavior.never,
-                                              isDense: true,
-                                              contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-                                              suffixIcon: IconButton(
-                                                  icon: Icon(
-                                                    color:
-                                                        const Color(0xFF03045e),
-                                                    ocultaClave
-                                                        ? Icons.visibility_off
-                                                        : Icons.visibility,
+                                            margin: const EdgeInsets.all(2),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  TextFormField(
+                                                    style: TextStyle(
+                                                      color: primaryBlue,
+                                                      fontSize:
+                                                          size.width * 0.04,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    controller:
+                                                        txtControlerUsuario,
+                                                    decoration: InputDecoration(
+                                                      labelStyle: TextStyle(
+                                                        color: primaryBlue,
+                                                        fontSize:
+                                                            size.width * 0.04,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      hintText:
+                                                          'Ingrese el Usuario',
+                                                      prefixIcon: const Icon(
+                                                        Icons.person,
+                                                        color: primaryBlue,
+                                                      ),
+                                                      contentPadding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                        vertical: 16.0,
+                                                        horizontal: 12.0,
+                                                      ),
+                                                    ),
+                                                    keyboardType:
+                                                        TextInputType.text,
+                                                    onSaved: (value) {
+                                                      txtControlerUsuario.text =
+                                                          value!;
+                                                    },
                                                   ),
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      ocultaClave =
-                                                          !ocultaClave;
-                                                    });
-                                                  },
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary
-                                                      .withOpacity(0.4)),
-                                            ),
-                                            obscureText: ocultaClave,
-                                            onSaved: (value) {
-                                              txtControlerClave.text = value!;
-                                            },
-                                          ),
-                                          const SizedBox(height: 15),
-                                          _checkboxRecuerda(),
-                                          Consumer<AuthProvider>(
-                                            builder:
-                                                (context, provider, child) {
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsetsDirectional
-                                                        .fromSTEB(0, 0, 0, 16),
-                                                child: GestureDetector(
-                                                  onTap: provider.isLoading
-                                                      ? null
-                                                      : () async {
-                                                          final success =
-                                                              await provider
-                                                                  .login(
-                                                            context,
-                                                            txtControlerUsuario
-                                                                .text,
-                                                            txtControlerClave
-                                                                .text,
-                                                            _isChecked,
-                                                          );
-                              
-                                                          if (success) {
-                                                            Navigator.pushNamed(
-                                                                context,
-                                                                AppRoutes
-                                                                    .bingo);
-                                                          }
+                                                  const SizedBox(height: 10),
+                                                  TextFormField(
+                                                    controller:
+                                                        txtControlerClave,
+                                                    keyboardType:
+                                                        TextInputType.text,
+                                                    style: TextStyle(
+                                                      color: primaryBlue,
+                                                      fontSize:
+                                                          size.width * 0.04,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    decoration: InputDecoration(
+                                                      labelStyle: TextStyle(
+                                                        color: primaryBlue,
+                                                        fontSize:
+                                                            size.width * 0.04,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      hintText:
+                                                          'Ingrese Contraseña',
+                                                      prefixIcon: const Icon(
+                                                        Icons.lock,
+                                                        color: primaryBlue,
+                                                      ),
+                                                      floatingLabelBehavior:
+                                                          FloatingLabelBehavior
+                                                              .never,
+                                                      isDense: true,
+                                                      contentPadding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                        vertical: 16.0,
+                                                        horizontal: 12.0,
+                                                      ),
+                                                      suffixIcon: IconButton(
+                                                        icon: Icon(
+                                                          color: const Color(
+                                                              0xFF03045e),
+                                                          ocultaClave
+                                                              ? Icons
+                                                                  .visibility_off
+                                                              : Icons
+                                                                  .visibility,
+                                                        ),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            ocultaClave =
+                                                                !ocultaClave;
+                                                          });
                                                         },
-                                                  child: Container(
-                                                    width: double.infinity,
-                                                    height: 50,
-                                                    decoration: BoxDecoration(
-                                                      gradient: provider
-                                                              .isLoading
-                                                          ? null
-                                                          : const LinearGradient(
-                                                              colors: [
-                                                                primaryBlue,
-                                                                Color(
-                                                                    0xFF0077b6),
-                                                              ],
-                                                              stops: [0, 1],
-                                                              begin:
-                                                                  AlignmentDirectional(
-                                                                      -1, 0),
-                                                              end:
-                                                                  AlignmentDirectional(
-                                                                      1, 0),
-                                                            ),
-                                                      color: provider.isLoading
-                                                          ? Colors.grey[300]
-                                                          : null,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12),
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .secondary
+                                                            .withOpacity(0.4),
+                                                      ),
                                                     ),
-                                                    child: Center(
-                                                      child: provider.isLoading
-                                                          ? const SizedBox(
-                                                              width: 24,
-                                                              height: 24,
-                                                              child:
-                                                                  CircularProgressIndicator(
-                                                                valueColor:
-                                                                    AlwaysStoppedAnimation<
-                                                                            Color>(
-                                                                        Color(
-                                                                            0xFF03045e)),
-                                                                strokeWidth: 3,
-                                                              ),
-                                                            )
-                                                          : Text(
-                                                              'Inicio de sesión',
-                                                              style: TextStyle(
-                                                                color: const Color(
-                                                                    0xFFcaf0f8),
-                                                                fontSize:
-                                                                    size.width *
-                                                                        0.04,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                            ),
-                                                    ),
+                                                    obscureText: ocultaClave,
+                                                    onSaved: (value) {
+                                                      txtControlerClave.text =
+                                                          value!;
+                                                    },
                                                   ),
-                                                ),
-                                              );
-                                            },
+                                                  const SizedBox(height: 15),
+                                                  _checkboxRecuerda(),
+                                                  Consumer<AuthProvider>(
+                                                    builder: (context, provider,
+                                                        child) {
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(
+                                                                0, 0, 0, 16),
+                                                        child: GestureDetector(
+                                                          onTap:
+                                                              provider.isLoading
+                                                                  ? null
+                                                                  : () async {
+                                                                      final success =
+                                                                          await provider
+                                                                              .login(
+                                                                        context,
+                                                                        txtControlerUsuario
+                                                                            .text,
+                                                                        txtControlerClave
+                                                                            .text,
+                                                                        _isChecked,
+                                                                      );
+
+                                                                      if (success) {
+                                                                        Navigator.pushReplacementNamed(
+                                                                            context,
+                                                                            AppRoutes.bingo);
+                                                                      }
+                                                                    },
+                                                          child: Container(
+                                                            width:
+                                                                double.infinity,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              gradient: provider
+                                                                      .isLoading
+                                                                  ? null
+                                                                  : const LinearGradient(
+                                                                      colors: [
+                                                                        primaryBlue,
+                                                                        Color(
+                                                                            0xFF0077b6),
+                                                                      ],
+                                                                      stops: [
+                                                                        0,
+                                                                        1
+                                                                      ],
+                                                                      begin:
+                                                                          AlignmentDirectional(
+                                                                              -1,
+                                                                              0),
+                                                                      end: AlignmentDirectional(
+                                                                          1, 0),
+                                                                    ),
+                                                              color: provider
+                                                                      .isLoading
+                                                                  ? Colors
+                                                                      .grey[300]
+                                                                  : null,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12),
+                                                            ),
+                                                            child: Center(
+                                                              child: provider
+                                                                      .isLoading
+                                                                  ? const SizedBox(
+                                                                      width: 24,
+                                                                      height:
+                                                                          24,
+                                                                      child:
+                                                                          CircularProgressIndicator(
+                                                                        valueColor:
+                                                                            AlwaysStoppedAnimation<Color>(Color(0xFF03045e)),
+                                                                        strokeWidth:
+                                                                            3,
+                                                                      ),
+                                                                    )
+                                                                  : Text(
+                                                                      'Inicio de sesión',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: const Color(
+                                                                            0xFFcaf0f8),
+                                                                        fontSize:
+                                                                            size.width *
+                                                                                0.04,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                      ),
+                                                                    ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                          const SizedBox(height: 5),
-                                          Row(
+                                          const SizedBox(height: 20),
+                                          Center(
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                await Navigator.pushNamed(
+                                                    context, AppRoutes.person);
+                                              },
+                                              child: const Text(
+                                                'Registrar Promotor',
+                                                style: TextStyle(
+                                                  color: primaryBlue,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  fontSize: 18,
+                                                  fontFamily: 'gotic',
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          /*Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
@@ -432,7 +531,7 @@ class _LoginPage extends State<LoginPage> {
                                                         ),
                                                       ))))
                                             ],
-                                          ),
+                                          ),*/
                                         ],
                                       ),
                                     ),

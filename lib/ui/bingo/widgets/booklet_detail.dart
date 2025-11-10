@@ -22,6 +22,7 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<BingoProvider>(context, listen: false);
+      //provider.clearBooklet();
       if ((provider.bingo.bingoId ?? 0) != 0 && provider.qrcode.isNotEmpty) {
         await provider.fetchShowscartilla(context);
       }
@@ -86,44 +87,63 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
                 ],
               ),
             ),
-            GameTypeWidget(provider, size),
+            gameTypeWidget(provider, size),
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  AnimatedButton(
-                    color: primaryBlue,
-                    height: size.height * 0.05,
-                    width: size.width * 0.4,
-                    duration: 2,
-                    onPressed: () async {
-                      //print('info status bingo => ${provider.bingo}');
-                      if (provider.bingo.estado == 3) {
-                        showAlerta(context, 'Mensaje Informativo',
-                            'El bingo ya se ha finalizado');
-                      } else {
-                        if ((provider.preciofinal == 0) &&
-                            provider.aditional != 1) {
-                          showAlerta(context, 'Mensaje Informativo',
-                              'Para ventas debes seleccionar una cartilla.');
-                        } else {
-                          await provider.registerSale(context);
-                        }
-                      }
-                    },
-                    child: Center(
-                      child: Text(
-                        "Valor venta: ${moneyFormatted(double.parse(provider.preciofinal.toString()))}",
-                        style: TextStyle(
-                          color: const Color(0xFFcaf0f8),
-                          fontSize: size.width * 0.034,
-                          fontFamily: 'gotic',
-                          fontWeight: FontWeight.bold,
+                  Consumer<BingoProvider>(
+                    builder: (context, provider, child) {
+                      return AnimatedButton(
+                        color: provider.isLoading ? Colors.grey : primaryBlue,
+                        height: size.height * 0.05,
+                        width: size.width * 0.4,
+                        duration: 2,
+                        onPressed: () async {
+                          if (!provider.isLoading) {
+                            if (provider.bingo.estado == 3) {
+                              showAlerta(context, 'Mensaje Informativo',
+                                  'El bingo ya se ha finalizado');
+                            } else {
+                              if ((provider.preciofinal == 0) &&
+                                  provider.aditional != 1) {
+                                showAlerta(context, 'Mensaje Informativo',
+                                    'Para ventas debes seleccionar una cartilla.');
+                              } else {
+                                if (provider.counter > 1) {
+                                  openAlertBox(context, provider);
+                                } else {
+                                  await provider.registerSale(context);
+                                }
+                              }
+                            }
+                          }
+                        },
+                        child: Center(
+                          child: provider.isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        primaryBlue),
+                                  ),
+                                )
+                              : Text(
+                                  'Valor venta: ${moneyFormatted(double.parse(provider.preciofinal.toString()))}',
+                                  style: TextStyle(
+                                    color: const Color(0xFFcaf0f8),
+                                    fontSize: size.width * 0.034,
+                                    fontFamily: 'gotic',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -134,14 +154,14 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
     );
   }
 
-  Center GameTypeWidget(BingoProvider provider, Size size) {
+  Center gameTypeWidget(BingoProvider provider, Size size) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
             onTap: () {
-              provider.updateaditional(0);
+              provider.updateaditional(0);              
               provider.calculeTotal();
             },
             child: Column(children: [
@@ -214,6 +234,7 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
           GestureDetector(
             onTap: () {
               provider.updateaditional(2);
+              provider.updateCounter(1);
               provider.calculeTotal();
               setState(() {
                 _controller.text = provider.counter.toString();
@@ -264,41 +285,45 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
                     ),
                     SizedBox(
                       width: size.width * 0.14,
-                      child: TextFormField(
-                        controller: _controller,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.width * 0.034,
-                          fontFamily: 'gotic',
-                          fontWeight: FontWeight.bold,
-                        ),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: size.width * 0.034,
-                            fontFamily: 'gotic',
-                            fontWeight: FontWeight.bold,
-                          ),
-                          labelStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: size.width * 0.020,
-                            fontFamily: 'gotic',
-                            fontWeight: FontWeight.bold,
-                          ),
-                          labelText: 'Cantidad',
-                          border: const OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            final newValue = int.tryParse(value);
-                            if (newValue != null && newValue >= 0) {
-                              provider.updateCounter(newValue);
-                              _controller.text = provider.counter.toString();
-                            } else {
-                              _controller.text = provider.counter.toString();
-                            }
-                          }
+                      child: Consumer<BingoProvider>(
+                        builder: (context, provider, _) {
+                          return SizedBox(
+                            width: size.width * 0.14,
+                            child: TextFormField(
+                              controller: provider.counterController,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: size.width * 0.034,
+                                fontFamily: 'gotic',
+                                fontWeight: FontWeight.bold,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: 'Cantidad',
+                                border: const OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: size.width * 0.020,
+                                  fontFamily: 'gotic',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                hintStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: size.width * 0.034,
+                                  fontFamily: 'gotic',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  final newValue = int.tryParse(value);
+                                  if (newValue != null && newValue >= 0) {
+                                    provider.updateCounter(newValue);
+                                  }
+                                }
+                              },
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -401,7 +426,7 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
             child: Center(
               child: SwitchListTile(
                 controlAffinity: ListTileControlAffinity.platform,
-                activeColor: const Color(0xffffb703),
+                activeThumbColor: const Color(0xffffb703),
                 title: const SizedBox(),
                 value: cartilla.quantity == 1,
                 onChanged: (value) {
@@ -417,6 +442,131 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> openAlertBox(
+    BuildContext context,
+    BingoProvider provider,
+  ) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0)),
+            ),
+            contentPadding: const EdgeInsets.all(16.0),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Mensaje de Sistema',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const Divider(color: Colors.grey),
+                const SizedBox(height: 16),
+                Column(
+                  children: [
+                    const Text(
+                      '¿Está seguro de agregar este progresivo?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'X${provider.counter}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Valor a cobrar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      moneyFormatted(
+                          double.parse(provider.preciofinal.toString())),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'No',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        elevation: 2,
+                      ),
+                      onPressed: () async {
+                        await provider.registerSale(context);
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        'Sí',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

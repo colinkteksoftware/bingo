@@ -5,6 +5,7 @@ import 'package:bingo/core/data/models/bingoResponse.dart';
 import 'package:bingo/core/data/models/clienteconvert.dart';
 import 'package:bingo/core/data/models/pagosconvert.dart';
 import 'package:bingo/core/data/models/uvtconvert.dart';
+import 'package:bingo/core/data/models/winner.dart';
 import 'package:bingo/providers/bingo_provider.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,9 @@ class PaymentProvider extends ChangeNotifier {
   Uvt _uvt = Uvt();
   Uvt get uvt => _uvt;
 
+  double _totalUvt = 0;
+  double get totalUvt => _totalUvt;
+
   Cliente _customer = Cliente();
   Cliente get customer => _customer;
 
@@ -44,7 +48,6 @@ class PaymentProvider extends ChangeNotifier {
         '${pf.getIp.toString()}/api/PromotorInterno/GetWinnersByBingo');
 
     try {
-
       Bingo bingo = Provider.of<BingoProvider>(context, listen: false).bingo;
 
       final response = await http.post(url,
@@ -55,6 +58,10 @@ class PaymentProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final Map<String, dynamic> info = json.decode(response.body);
         final data = BingoResponse.fromJson(info);
+        /*print(' // ================================= //');
+        print('informacion de ganadores');
+        print(' // ================================= //');
+        print('lista ganadores => ${data.ganadores.map((w) => w.toJson()).toList()}');*/
         _winners = [];
         for (var ganador in data.ganadores) {
           Pago pago = Pago();
@@ -70,6 +77,7 @@ class PaymentProvider extends ChangeNotifier {
           _winners.add(pago);
         }
         updateBingo(data.bingo);
+        //print('ganadores => ${_winners.map((e) => e.toJson()).toList()}');
         //print("Bingo actual => ${data.bingo.toString()}");
         //print('lista de ganadores => ${pagoToJson(listWinners)}');
       } else {
@@ -88,6 +96,7 @@ class PaymentProvider extends ChangeNotifier {
 
   Future<void> getAmountUVT() async {
     url = Uri.parse("${pf.getIp.toString()}/api/ParametroInterno/GetAll");
+    updateUvt(Uvt());
     try {
       final response = await http.get(
         url,
@@ -98,6 +107,12 @@ class PaymentProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         _uvt = uvtFromJson(utf8.decode(response.bodyBytes));
+        final valor = _uvt.valorUvt ?? 0;
+        final cantidad = _uvt.cantidadUvt ?? 0;
+        _totalUvt = valor * cantidad;
+        /*print('valor uvt unitario => \$${_uvt.valorUvt}');
+        print('cantidad uvt => ${_uvt.cantidadUvt}');
+        print('valor uvt actualizado => \$$_totalUvt');*/
         updateUvt(_uvt);
       } else {
         throw Exception('Failed to load uvt');
@@ -129,9 +144,10 @@ class PaymentProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> registerWinner(BuildContext context, Pago payment /*Winner payment*/) async {
+  Future<bool> registerWinner(
+      BuildContext context, Pago payment /*Winner payment*/) async {
     //String jsonBody = json.encode(payment.toJson());
-    //print('Pago realizado => $jsonBody');  
+    //print('Pago realizado => $jsonBody');
 
     url = Uri.parse(
         '${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor');
@@ -153,7 +169,6 @@ class PaymentProvider extends ChangeNotifier {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         return true;
-        
       } else {
         const snackBar = SnackBar(
           content: Center(

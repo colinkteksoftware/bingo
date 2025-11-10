@@ -1,4 +1,4 @@
-import 'package:bingo/ui/commons/scanner_overlay_widget.dart';
+/*import 'package:bingo/ui/commons/scanner_overlay_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -65,4 +65,4 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ),
     );
   }
-}
+}*/

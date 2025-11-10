@@ -28,7 +28,7 @@ List<BingoSala> bingoSalaFromMap(String str) {
   if (data is! List) {
     data = [];
   }  
-  print("Data procesada: $data");
+  //print("Data procesada: $data");
   return data.map((item) {
     try {
       return BingoSala.fromMap(item);

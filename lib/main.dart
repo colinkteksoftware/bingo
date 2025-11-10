@@ -26,6 +26,12 @@ void main() async {
   final pf = Preferencias();
   await pf.initPrefs();
 
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // Puedes usar Firebase Crashlytics aquí si quieres logs más completos    
+    print('Flutter error: ${details.exception}');
+  };
+
   runApp(
     MultiProvider(
       providers: [

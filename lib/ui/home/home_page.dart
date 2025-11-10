@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {    
       try {
         await provider.getBingoById();
-        print('bingo actual => ${provider.bingo.bingoToMap()}');
+        //print('bingo actual => ${provider.bingo.bingoToMap()}');
         if (provider.bingo.estado == 3) {
         _timer?.cancel();
         if (mounted) {

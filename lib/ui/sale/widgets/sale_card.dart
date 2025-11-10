@@ -71,10 +71,10 @@ class CustomSaleCard extends StatelessWidget {
                             ? "Juego Normal"
                             : order.tipo == 2
                                 ? "Juego Promocional"
-                                : "Juego Progresivo *${order.multiplicado}",
+                                : "Juego Progr. X${order.multiplicado}",
                         style: TextStyle(
                           color: const Color(0xFF0077b6),
-                          fontSize: size.width * 0.032,
+                          fontSize: size.width * 0.030,
                           fontFamily: 'gotic',
                           fontWeight: FontWeight.bold,
                         ),

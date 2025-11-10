@@ -1,9 +1,9 @@
 import 'package:bingo/providers/bingo_provider.dart';
-import 'package:bingo/ui/commons/qr_scanner_widget.dart';
 import 'package:bingo/utils/conversiones.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 late Future<void> _initializeControllerFuture;
 
@@ -114,16 +114,22 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                                         color: Colors.white,
                                         fontSize: size.width * 0.030,
                                         letterSpacing: 1.5,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                  ),
+                                  Text(provider.figure.toString(),
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   Row(
                                     children: [
                                       Text(
-                                        provider.bingo.fecha
+                                        dateFormatted(provider.bingo.fecha
                                             .toString()
-                                            .substring(0, 16),
+                                            .substring(0, 16)),
                                         style: TextStyle(
                                           fontFamily: 'Gilroy',
                                           color: Colors.white,
@@ -189,17 +195,34 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                                           provider.clearBooklet();
                                           provider.updateLoading(true);
                                           if (provider.isLoading) {
-                                            String scan = await Navigator.push(
+                                            /*String scan = await Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     const QRScannerScreen(),
                                               ),
-                                            );
+                                            );*/
 
-                                            if (scan.isNotEmpty ||
-                                                scan == '-1') {
-                                              provider.updateQrcode(scan);
+                                            String? scan =
+                                                await SimpleBarcodeScanner
+                                                    .scanBarcode(
+                                              context,
+                                              barcodeAppBar:
+                                                  const BarcodeAppBar(
+                                                appBarTitle: 'Test',
+                                                centerTitle: false,
+                                                enableBackButton: true,
+                                                backButtonIcon:
+                                                    Icon(Icons.arrow_back_ios),
+                                              ),
+                                              isShowFlashIcon: true,
+                                              delayMillis: 2000,
+                                              cameraFace: CameraFace.back,
+                                            );
+                                            print('result scan => $scan');
+                                            if (scan != null || scan == '-1') {
+                                              provider.updateQrcode(
+                                                  scan.toString());
                                               provider.updateLoading(false);
                                             }
                                           }

@@ -37,7 +37,6 @@ class _GameTypeWidgetState extends State<GameTypeWidget> {
             onTap: () {
               provider.updateType(0);
               provider.calculeTotal();
-              //setState(() {});
             },
             child: Column(children: [
               Container(
@@ -72,7 +71,6 @@ class _GameTypeWidgetState extends State<GameTypeWidget> {
             onTap: () {
               provider.updateType(1);
               provider.calculeTotal();
-              //setState(() {});
             },
             child: Column(children: [
               Container(
@@ -106,6 +104,7 @@ class _GameTypeWidgetState extends State<GameTypeWidget> {
           GestureDetector(
             onTap: () {
               provider.updateType(2);
+              provider.updateCounter(1);
               provider.calculeTotal();
               setState(() {
                 _controller.text = provider.counter.toString();
@@ -154,41 +153,45 @@ class _GameTypeWidgetState extends State<GameTypeWidget> {
                     ),
                     SizedBox(
                       width: size.width * 0.14,
-                      child: TextFormField(
-                        controller: _controller,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.width * 0.034,
-                          fontFamily: 'gotic',
-                          fontWeight: FontWeight.bold,
-                        ),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: size.width * 0.034,
-                            fontFamily: 'gotic',
-                            fontWeight: FontWeight.bold,
-                          ),
-                          labelStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: size.width * 0.020,
-                            fontFamily: 'gotic',
-                            fontWeight: FontWeight.bold,
-                          ),
-                          labelText: 'Cantidad',
-                          border: const OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            final newValue = int.tryParse(value);
-                            if (newValue != null && newValue >= 0) {
-                              provider.updateCounter(newValue);
-                              _controller.text = provider.counter.toString();
-                            } else {
-                              _controller.text = provider.counter.toString();
-                            }
-                          }
+                      child: Consumer<SaleProvider>(
+                        builder: (context, provider, _) {
+                          return SizedBox(
+                            width: size.width * 0.14,
+                            child: TextFormField(
+                              controller: provider.counterController,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: size.width * 0.034,
+                                fontFamily: 'gotic',
+                                fontWeight: FontWeight.bold,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: 'Cantidad',
+                                border: const OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: size.width * 0.020,
+                                  fontFamily: 'gotic',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                hintStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: size.width * 0.034,
+                                  fontFamily: 'gotic',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  final newValue = int.tryParse(value);
+                                  if (newValue != null && newValue >= 0) {
+                                    provider.updateCounter(newValue);
+                                  }
+                                }
+                              },
+                            ),
+                          );
                         },
                       ),
                     ),
