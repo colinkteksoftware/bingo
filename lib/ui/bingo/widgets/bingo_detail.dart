@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
-late Future<void> _initializeControllerFuture;
+//late Future<void> _initializeControllerFuture;
 
 class BingoDetailPage extends StatefulWidget {
   const BingoDetailPage({super.key});
@@ -18,7 +18,8 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    final provider = Provider.of<BingoProvider>(context, listen: false);
+    //final provider = Provider.of<BingoProvider>(context, listen: false);
+    final provider = context.watch<BingoProvider>();
     return SingleChildScrollView(
       child: Container(
         height:
@@ -118,7 +119,8 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                                       ),
                                     ),
                                   ),
-                                  Text(provider.figure.toString(),
+                                  Text(
+                                    provider.figure.toString(),
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -144,7 +146,109 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                               ),
                             ),
                           ),
-                          provider.bingo.estado == 1 ||
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (provider.bingo.estado == 3) {
+                                  showAlerta(
+                                    context,
+                                    'Mensaje Informativo',
+                                    'El bingo ya se encuentra finalizado',
+                                  );
+                                  return;
+                                }
+
+                                provider.updateQrcode('-1');
+                                provider.updateScan(true);
+
+                                final status =
+                                    await Permission.camera.request();
+
+                                if (!status.isDenied) {
+                                  provider.clearBooklet();
+                                  provider.updateLoading(true);
+
+                                  if (provider.isLoading) {
+                                    final String? scan =
+                                        await SimpleBarcodeScanner.scanBarcode(
+                                      context,
+                                      barcodeAppBar: const BarcodeAppBar(
+                                        appBarTitle: 'Test',
+                                        centerTitle: false,
+                                        enableBackButton: true,
+                                        backButtonIcon:
+                                            Icon(Icons.arrow_back_ios),
+                                      ),
+                                      isShowFlashIcon: true,
+                                      delayMillis: 2000,
+                                      cameraFace: CameraFace.back,
+                                    );
+
+                                    print('result scan => $scan');
+                                    if (scan != null && scan != '-1') {
+                                      provider.updateQrcode(scan);
+                                      provider.updateLoading(false);
+                                    }
+                                  }
+                                }
+                              },                              
+                              child: Builder(
+                                builder: (_) {
+                                  final estado = provider.bingo.estado;
+
+                                  if ((estado == 1 || estado == 2) &&
+                                      !provider.isScanning) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.qr_code,
+                                          color: Colors.white,
+                                          size: size.width * 0.14,
+                                        ),
+                                      ],
+                                    );
+                                  } else if (estado == 3) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on_outlined,
+                                          color: Colors.green[600],
+                                          size: size.width * 0.14,
+                                        ),
+                                      ],
+                                    );
+                                  } else if (estado == 4) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.cancel_outlined,
+                                          color: Colors.red[600],
+                                          size: size.width * 0.14,
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return const SizedBox();
+                                  }
+                                },
+                              ),
+                            ),
+                          )
+
+                          /*provider.bingo.estado == 1 ||
                                   provider.bingo.estado == 2
                               ? Padding(
                                   padding: const EdgeInsets.only(
@@ -187,6 +291,7 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                                         setState(() {});
                                       } else {
                                         provider.updateQrcode('-1');
+                                        provider.updateScan(true);
                                         final PermissionStatus status =
                                             await Permission.camera.request();
                                         if (status.isDenied) {
@@ -229,8 +334,9 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                                         }
                                       }
                                     },
-                                    child: provider.bingo.estado == 1 ||
-                                            provider.bingo.estado == 2
+                                    child: (provider.bingo.estado == 1 ||
+                                                provider.bingo.estado == 2) &&
+                                            !provider.isScanning
                                         ? Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
@@ -283,7 +389,7 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                                             ],
                                           ),
                                         )
-                                      : const SizedBox(),
+                                      : const SizedBox(),*/
                         ],
                       ),
                     ),

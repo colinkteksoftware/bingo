@@ -50,11 +50,12 @@ class CustomSaleCard extends StatelessWidget {
                       '${order.ventaId}'.toUpperCase(),
                       style: const TextStyle(
                         fontFamily: 'InterTight',
-                        color: Color(0xFFcaf0f8),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w300,
+                        color: Colors.white,//Color(0xFFcaf0f8),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
+                    //const SizedBox(width: 2),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 4, horizontal: 8),
@@ -73,7 +74,7 @@ class CustomSaleCard extends StatelessWidget {
                                 ? "Juego Promocional"
                                 : "Juego Progr. X${order.multiplicado}",
                         style: TextStyle(
-                          color: const Color(0xFF0077b6),
+                          color: order.tipo == 1 ? Colors.white : const Color(0xFF0077b6),
                           fontSize: size.width * 0.030,
                           fontFamily: 'gotic',
                           fontWeight: FontWeight.bold,
@@ -93,7 +94,7 @@ class CustomSaleCard extends StatelessWidget {
                           'Módulo: ${order.codigoModulo}',
                           style: const TextStyle(
                             fontFamily: 'InterTight',
-                            color: Color(0xFFcaf0f8),
+                            color: Colors.white,//Color(0xFFcaf0f8),
                             fontSize: 18,
                             fontWeight: FontWeight.w300,
                           ),
@@ -103,7 +104,7 @@ class CustomSaleCard extends StatelessWidget {
                           'Valor: \$${order.precioTotalCartilla?.toStringAsFixed(2) ?? '0.00'}',
                           style: const TextStyle(
                             fontFamily: 'InterTight',
-                            color: Color(0xFFcaf0f8),
+                            color: Colors.white,//Color(0xFFcaf0f8),
                             fontSize: 14,
                             fontWeight: FontWeight.w300,
                           ),
@@ -124,8 +125,8 @@ class CustomSaleCard extends StatelessWidget {
                   'Descripción: ${order.ventaId}',
                   style: const TextStyle(
                     fontFamily: 'Inter',
-                    color: Color(0xFFcaf0f8),
-                    fontWeight: FontWeight.w200,
+                    color: Colors.white,//Color(0xFFcaf0f8),
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
               ],

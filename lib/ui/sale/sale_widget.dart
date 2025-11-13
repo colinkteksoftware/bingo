@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:bingo/providers/bingo_provider.dart';
 import 'package:bingo/providers/sale_provider.dart';
 import 'package:bingo/ui/sale/widgets/sale_card.dart';
@@ -28,7 +27,7 @@ class _SaleWidgetState extends State<SaleWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final provider = Provider.of<SaleProvider>(context, listen: false);      
+      final provider = Provider.of<SaleProvider>(context, listen: false);
       provider.fetchSales();
     });
     //_startPolling();
@@ -222,7 +221,103 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                         color: primaryBlue));
                                           }
 
-                                          if (providerSale.listSales.isEmpty) {
+                                          if (providerSale
+                                              .listSalesGrouped.isEmpty) {
+                                            return const SaleNoFound();
+                                          }
+
+                                          return SizedBox(
+                                            height: size.height * 0.56,
+                                            child: ListView.separated(
+                                              separatorBuilder:
+                                                  (context, index) =>
+                                                      const Divider(
+                                                height: 0,
+                                                color: Color(0xFFcaf0f8),
+                                                thickness: 0,
+                                                indent: 0,
+                                                endIndent: 0,
+                                              ),
+                                              itemCount: providerSale
+                                                  .listSalesGrouped.length,
+                                              itemBuilder: (ctx, index) {
+                                                final group = providerSale
+                                                    .listSalesGrouped[index];
+
+                                                // Filtrar cartillas según búsqueda
+                                                final filteredCartillas = group
+                                                    .cartillas
+                                                    .where((venta) {
+                                                  final lowerSearch =
+                                                      searchString
+                                                          .toLowerCase();
+                                                  return venta.ventaId
+                                                          .toString()
+                                                          .contains(
+                                                              lowerSearch) ||
+                                                      venta.codigoModulo!
+                                                          .toLowerCase()
+                                                          .contains(
+                                                              lowerSearch) ||
+                                                      venta.cliente!
+                                                          .toLowerCase()
+                                                          .contains(
+                                                              lowerSearch);
+                                                }).toList();
+
+                                                if (filteredCartillas.isEmpty) {
+                                                  return Container();
+                                                }
+
+                                                return Card(
+                                                  margin: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 6),
+                                                  color: Colors.grey[700],
+                                                  child: ExpansionTile(
+                                                    initiallyExpanded: true,
+                                                    title: Text(
+                                                      '▸ Bingo ID: ${group.bingoid}',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16),
+                                                    ),
+                                                    children: filteredCartillas
+                                                        .map((venta) {
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 16),
+                                                        child: CustomSaleCard(
+                                                          size: MediaQuery.of(
+                                                                  context)
+                                                              .size,
+                                                          order: venta,
+                                                          context: context,
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      ),
+
+                                      /*consumer<SaleProvider>(
+                                        builder: (context, providerSale, _) {
+                                          if (providerSale.isLoading) {
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        color: primaryBlue));
+                                          }
+
+                                          if (providerSale.listSalesGrouped.isEmpty) {
                                             return const SaleNoFound();
                                           }
 
@@ -239,10 +334,10 @@ class _SaleWidgetState extends State<SaleWidget> {
                                                 endIndent: 0,
                                               ),
                                               itemCount:
-                                                  providerSale.listSales.length,
+                                                  providerSale.listSalesGrouped.length,
                                               itemBuilder: (ctx, index) {
                                                 final order = providerSale
-                                                    .listSales[index];
+                                                    .listSalesGrouped[index];
 
                                                 final matchesSearch = order
                                                             .bingo
@@ -274,7 +369,7 @@ class _SaleWidgetState extends State<SaleWidget> {
                                             ),
                                           );
                                         },
-                                      ),                                      
+                                      ),*/
                                     ]))))),
                 const BackButtonWidget(),
               ],

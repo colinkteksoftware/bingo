@@ -33,11 +33,17 @@ class _BingoPageState extends State<BingoPage> {
       final provider = Provider.of<BingoProvider>(context, listen: false);
       provider.updatestatus(1);
       provider.fetchShowBingos(1);
+      /*provider.addListener(() {
+        if (provider.status == 1) {
+          provider.fetchShowBingos(1);
+        }
+      });*/
+      //provider.fetchShowBingos(1);
     });
-    _startPolling();
+    //_startPolling();
   }
 
-  void _startPolling() {
+  /*void _startPolling() {
     final provider = Provider.of<BingoProvider>(context, listen: false);
     timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       try {
@@ -46,7 +52,7 @@ class _BingoPageState extends State<BingoPage> {
         print("Error al obtener el bingo: $e");
       }
     });
-  }
+  }*/
 
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(

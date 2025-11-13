@@ -26,6 +26,9 @@ class BingoProvider with ChangeNotifier {
   String _qrcode = "-1";
   String get qrcode => _qrcode;
 
+  bool _isScanning = false;
+  bool get isScanning => _isScanning;
+
   int _status = 1;
   int get status => _status;
 
@@ -94,7 +97,7 @@ class BingoProvider with ChangeNotifier {
   Future<List<Bingo>> fetchShowBingos(int state) async {
     _isLoading = true;
     errorMessage = null;
-    notifyListeners();
+    notifyListeners();    
 
     final url = Uri.parse(
         '${pf.getIp.toString()}/api/BingoPremioDetalleInterno/GetAll');
@@ -123,17 +126,18 @@ class BingoProvider with ChangeNotifier {
         List<BingoSala> bingos = bingoSalaFromMap(info);
 
         if (bingos.isEmpty) {
+          _bingos.clear();
           _isLoading = false;
           notifyListeners();
-          debugPrint(
-              '⚠️ No se encontraron bingos activos para el estado $state.');
+          /*debugPrint(
+              '⚠️ No se encontraron bingos activos para el estado $state.');*/
           return [];
         }
 
         if (bingos.first.premios.isEmpty) {
           _isLoading = false;
           notifyListeners();
-          debugPrint('⚠️ El bingo no tiene premios configurados.');
+          /*debugPrint('⚠️ El bingo no tiene premios configurados.');*/
           return [];
         }
 
@@ -160,7 +164,7 @@ class BingoProvider with ChangeNotifier {
         }
         _isLoading = false;
         notifyListeners();
-        return _bingos;        
+        return _bingos;
       } else {
         _bingos = [];
         _isLoading = false;
@@ -187,98 +191,6 @@ class BingoProvider with ChangeNotifier {
     }
   }
 
-  /*Future<Cartilla?> fetchShowscartilla(BuildContext context) async {
-    _isLoading = true;
-    clearBooklet();
-    notifyListeners();
-
-    final url = Uri.parse(
-        '${pf.getIp.toString()}/api/GrupoCartillaDetalle/GetItemNameGrupo/$qrcode/${bingo.bingoId}');
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      Cartilla newBooklet = cartillaFromJson(utf8.decode(response.bodyBytes));
-
-      if (newBooklet.grupoCartillas?.isNotEmpty == true) {
-        double total = 0.0;
-        _preciofinal = 0;
-        double precio = bingo.precioPorCartilla ?? 0;
-
-        var jsonData = jsonDecode(newBooklet.grupoCartillas!);
-
-        for (var numero in jsonData) {
-          String id = numero.toString();
-
-          // Verificar si ya existe ese id en las listas globales
-          bool existeEnInfo = _infoBooklet.any((c) => c.cartillaId == id);
-          bool existeEnList = _listBooklet
-              .expand((b) => b.listCartillas)
-              .any((c) => c.cartillaId == id);
-
-          print('agregado a infoBokklet => $existeEnInfo');
-          print('agregado a listBooklet => $existeEnList');
-
-          for (var numero in jsonData) {
-            Booklet cartilla = Booklet();
-            cartilla.cartillaId = numero.toString();
-            cartilla.quantity = 1;
-            cartilla.estado = true;
-            cartilla.price = precio;
-
-            total = total + precio;
-            _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
-
-            newBooklet.listCartillas.add(cartilla);
-            _infoBooklet.add(cartilla);
-            _listBooklet.add(newBooklet);
-          }
-
-          /*f (!existeEnInfo && !existeEnList) {
-            Booklet cartilla = Booklet()
-              ..cartillaId = id
-              ..quantity = 1
-              ..estado = true
-              ..price = precio;
-
-            total += precio;
-            _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
-
-            // ✅ Agregamos a la cartilla global
-            newBooklet.listCartillas.add(cartilla);
-            _infoBooklet.add(cartilla);
-          } else {
-            debugPrint("⚠️ Cartilla $id ya estaba en las listas, se omite.");
-          }*/
-        }
-
-        // ✅ Al final, agregamos la cartilla completa solo una vez
-        _listBooklet.add(newBooklet);
-      } else {
-        clearBooklet();
-        const snackBar = SnackBar(
-          content: Center(
-              child: Text('No Hay Cartillas disponibles para la venta..')),
-          backgroundColor: Colors.red,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-
-      _isLoading = false;
-      notifyListeners();
-      return newBooklet;
-    } else {
-      _isLoading = false;
-      notifyListeners();
-      throw Exception('Failed to load shows');
-    }
-  }*/
-
   Future<Cartilla?> fetchShowscartilla(BuildContext context) async {
     /*print('===============================================================');
     print('***** busqueda de cartillas *****');
@@ -290,97 +202,108 @@ class BingoProvider with ChangeNotifier {
     clearBooklet();
     notifyListeners();
 
-    final url = Uri.parse(
-        '${pf.getIp.toString()}/api/GrupoCartillaDetalle/GetItemNameGrupo/$qrcode/${bingo.bingoId}');
+    try {
+      final url = Uri.parse(
+          '${pf.getIp.toString()}/api/GrupoCartillaDetalle/GetItemNameGrupo/$qrcode/${bingo.bingoId}');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      Cartilla booklet = cartillaFromJson(utf8.decode(response.bodyBytes));
-      //print('cartilla encontrada => $booklet');
+      if (response.statusCode == 200) {
+        Cartilla booklet = cartillaFromJson(utf8.decode(response.bodyBytes));
+        //print('cartilla encontrada => $booklet');
 
-      if (booklet.grupoCartillas?.isNotEmpty == true) {
-        double total = 0.0;
-        _preciofinal = 0;
-        double precio = bingo.precioPorCartilla ?? 0;
+        if (booklet.grupoCartillas?.isNotEmpty == true) {
+          double total = 0.0;
+          _preciofinal = 0;
+          double precio = bingo.precioPorCartilla ?? 0;
 
-        var jsonData = jsonDecode(booklet.grupoCartillas!);
-        print('jsonData grupo cartillas => $jsonData');
+          var jsonData = jsonDecode(booklet.grupoCartillas!);
+          //print('jsonData grupo cartillas => $jsonData');
 
-        /*for (var numero in jsonData) {
-          Booklet cartilla = Booklet();
-          cartilla.cartillaId = numero.toString();
-          cartilla.quantity = 1;
-          cartilla.estado = true;
-          cartilla.price = precio;
+          for (var numero in jsonData) {
+            Booklet cartilla = Booklet();
+            cartilla.cartillaId = numero.toString();
+            cartilla.quantity = 1;
+            cartilla.estado = true;
+            cartilla.price = precio;
 
-          bool existeEnInfo =
-              _infoBooklet.any((c) => c.cartillaId == cartilla.cartillaId);
-          bool existeEnList = booklet.listCartillas
-              .any((c) => c.cartillaId == cartilla.cartillaId);
-
-          if (!existeEnInfo && !existeEnList) {
             total = total + precio;
             _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
 
             booklet.listCartillas.add(cartilla);
             _infoBooklet.add(cartilla);
             _listBooklet.add(booklet);
-          } else {
-            debugPrint(
-                "Cartilla ${cartilla.cartillaId} ya estaba en las listas, no se agregó.");
           }
-        }*/
-
-        for (var numero in jsonData) {
-          Booklet cartilla = Booklet();
-          cartilla.cartillaId = numero.toString();
-          cartilla.quantity = 1;
-          cartilla.estado = true;
-          cartilla.price = precio;
-
-          total = total + precio;
-          _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
-
-          booklet.listCartillas.add(cartilla);
-          _infoBooklet.add(cartilla);
-          _listBooklet.add(booklet);
+          //print('lista cartillas armadas => ${booklet.toJson()}');
+          //print('lista _response => $_reponse');
+          //print('lista _responsevalores => $_reponsevalores');
+        } else {
+          clearBooklet();
+          const snackBar = SnackBar(
+            content: Center(
+                child: Text('No Hay Cartillas disponibles para la venta..')),
+            backgroundColor: Colors.red,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
-        //print('lista cartillas armadas => ${booklet.toJson()}');
-        //print('lista _response => $_reponse');
-        //print('lista _responsevalores => $_reponsevalores');
+        _isLoading = false;
+        notifyListeners();
+        updateScan(false);
+        //print('lista cartillas => $infoBooklet');
+        return booklet;
       } else {
+        _isLoading = false;
+        notifyListeners();
         clearBooklet();
-        const snackBar = SnackBar(
-          content: Center(
-              child: Text('No Hay Cartillas disponibles para la venta..')),
-          backgroundColor: Colors.red,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        updateScan(false);
+        throw Exception(
+            'Failed to load shows: Error HTTP ${response.statusCode}');
       }
+    } on SocketException catch (e) {
+      // 🔌 Error de red
+      print('No hay conexión con el servidor: $e');
+      reset();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('No se pudo conectar con el servidor. Verifica tu red.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      print('Error inesperado: $e');
+      reset();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error inesperado: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
       _isLoading = false;
+      updateScan(false);
       notifyListeners();
-      //print('lista cartillas => $infoBooklet');
-      return booklet;
-    } else {
-      _isLoading = false;
-      notifyListeners();
-      throw Exception('Failed to load shows');
     }
+
+    return Cartilla(
+      grupoCartillas: '',
+      listCartillas: [],
+    );
   }
 
   Future<bool> registerSale(BuildContext context) async {
     _isLoading = true;
     errorMessage = null;
     notifyListeners();
+    updateScan(true);
     SaleQuery sale = SaleQuery();
     List<Map<String, int>> booklets = [];
-    print('lista de cartillas escaneadas => ${infoBooklet.toString()}');
+    //print('lista de cartillas escaneadas => ${infoBooklet.toString()}');
     if (infoBooklet.isNotEmpty) {
       for (var booklet in infoBooklet) {
         if (booklet.estado == true) {
@@ -405,7 +328,7 @@ class BingoProvider with ChangeNotifier {
     final url =
         Uri.parse('${pf.getIp.toString()}/api/PromotorInterno/PostVentaManual');
 
-    print('body ventas => ${json.encode(sale.toMap())}');
+    //print('body ventas => ${json.encode(sale.toMap())}');
 
     try {
       final response = await http.post(url,
@@ -421,6 +344,7 @@ class BingoProvider with ChangeNotifier {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         _isLoading = false;
         notifyListeners();
+        updateScan(false);
         return true;
       } else {
         const snackBar = SnackBar(
@@ -430,10 +354,11 @@ class BingoProvider with ChangeNotifier {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         _isLoading = false;
         notifyListeners();
+        updateScan(false);
         return false;
       }
     } catch (e) {
-      print('error => $e');
+      //print('error => $e');
       const snackBar = SnackBar(
         content: Center(child: Text('Error al procesar la venta.')),
         backgroundColor: Colors.red,
@@ -441,6 +366,7 @@ class BingoProvider with ChangeNotifier {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       _isLoading = false;
       notifyListeners();
+      updateScan(false);
       return false;
     }
   }
@@ -484,7 +410,7 @@ class BingoProvider with ChangeNotifier {
     double total = 0.0;
     switch (_aditional) {
       case 0:
-        print('lista de cartillas => $infoBooklet');
+        //print('lista de cartillas => $infoBooklet');
         for (var booklet in infoBooklet) {
           if (booklet.estado == true) {
             precio = bingo.precioPorCartilla ?? 0;
@@ -492,21 +418,21 @@ class BingoProvider with ChangeNotifier {
           }
         }
         _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
-        print('precio => $precio');
-        print('total => $total');
+        //print('precio => $precio');
+        //print('total => $total');
         break;
       case 2:
         for (var booklet in infoBooklet) {
           if (booklet.estado == true) {
             precio = bingo.precioPorCartilla ?? 0;
             total = total + (precio * _counter) + precio;
-            print('total con cartilla${booklet.cartillaId} => $total');
+            //print('total con cartilla${booklet.cartillaId} => $total');
           }
         }
         _preciofinal = double.parse(total.toStringAsFixed(2)).toInt();
-        print('precio => $precio');
+        /*print('precio => $precio');
         print('total => $total');
-        print('multiplicado => $_counter');
+        print('multiplicado => $_counter');*/
         break;
       default:
         _preciofinal = 0;
@@ -550,6 +476,11 @@ class BingoProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateScan(bool active) {
+    _isScanning = active;
+    notifyListeners();
+  }
+
   void updateBingoState(List<Bingo> updatedBingos) {
     _bingos = updatedBingos;
     notifyListeners();
@@ -577,6 +508,7 @@ class BingoProvider with ChangeNotifier {
     _preciofinal = 0;
     _aditional = 0;
     _qrcode = '-1';
+    _isScanning = false;
     clearBooklet();
   }
 }

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:bingo/core/data/models/booklet.dart';
 import 'package:bingo/core/data/models/pagosconvert.dart';
+import 'package:bingo/core/data/models/saleGroup.dart';
 import 'package:bingo/core/data/models/uvtconvert.dart';
-import 'package:bingo/core/data/models/ventasconvert.dart';
 import 'package:bingo/providers/bingo_provider.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +13,11 @@ import 'package:provider/provider.dart';
 class SaleProvider extends ChangeNotifier {
   final pf = Preferencias();
 
-  List<Venta> _sales = [];
-  List<Venta> get listSales => _sales;
+  /*List<Venta> _sales = [];
+  List<Venta> get listSales => _sales;*/
+
+  List<SaleGroup> _salesGrouped = [];
+  List<SaleGroup> get listSalesGrouped => _salesGrouped;
 
   List<Booklet> _listBooklet = [];
   List<Booklet> get listBooklet => _listBooklet;
@@ -52,7 +55,38 @@ class SaleProvider extends ChangeNotifier {
     });
   }
 
-  Future<List<Venta>?> fetchSales() async {
+  Future<List<SaleGroup>?> fetchSales() async {
+    String fecha = sdf.DateFormat('yyyy-MM-dd').format(currentDate);
+    _isLoading = true;
+    notifyListeners();
+
+    final url = Uri.parse(
+        '${pf.getIp.toString()}/api/PromotorInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
+    print('url => $url');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    print('Status code: ${response.statusCode}');
+    print('Body: ${utf8.decode(response.bodyBytes)}');
+
+    if (response.statusCode == 200) {
+      _salesGrouped = ventaGroupFromMap(utf8.decode(response.bodyBytes));
+      print('lista de ventas => $_salesGrouped');
+      _isLoading = false;
+      notifyListeners();
+      return _salesGrouped;
+    } else {
+      _isLoading = false;
+      notifyListeners();
+      throw Exception('Failed to load grouped sales. Status: ${response.statusCode}');
+    }
+  }
+
+  /*Future<List<Venta>?> fetchSales() async {
     String fecha = sdf.DateFormat('yyyy-MM-dd').format(currentDate);
     _isLoading = true;
     notifyListeners();
@@ -78,7 +112,7 @@ class SaleProvider extends ChangeNotifier {
       notifyListeners();
       throw Exception('Failed to load shows');
     }
-  }
+  }*/
 
   Future<bool> postSale(Pago pago, BuildContext context) async {
     List<Map<String, int>> booklets = [];
@@ -86,7 +120,7 @@ class SaleProvider extends ChangeNotifier {
     if (listBooklet.isNotEmpty) {
       for (var booklet in listBooklet) {
         try {
-          int cartillaId = int.parse(booklet.cartillaId.toString());          
+          int cartillaId = int.parse(booklet.cartillaId.toString());
           if (booklet.estado == true) {
             //print('cartilla => $cartillaId');
             booklets.add({"cartillaId": cartillaId});
@@ -103,14 +137,14 @@ class SaleProvider extends ChangeNotifier {
     try {
       final response = await http.post(url,
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
-          body: json.encode(pago.toJson()));      
+          body: json.encode(pago.toJson()));
 
       if (response.statusCode == 200) {
         const snackBar = SnackBar(
           content: Center(child: Text("Se ha confirmado la actualización..")),
           backgroundColor: Colors.green,
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);        
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
         await fetchSales();
         return true;
       } else {
@@ -186,7 +220,7 @@ class SaleProvider extends ChangeNotifier {
           booklet.estado = true;
           booklet.price = bk['price'];
           _listBooklet.add(booklet);
-        }        
+        }
         calculeTotal();
       }
       _isLoading = false;
@@ -225,14 +259,14 @@ class SaleProvider extends ChangeNotifier {
       _counter++;
       if (_counter > 3) {
         counterController.text = '3';
-      } else{
+      } else {
         counterController.text = _counter.toString();
       }
     } else {
       _counter++;
       if (_counter > 10) {
         counterController.text = '10';
-      } else{
+      } else {
         counterController.text = _counter.toString();
       }
     }
