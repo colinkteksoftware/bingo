@@ -44,3 +44,46 @@ app.*.map.json
 
 .codegpt
 .android
+
+# Generated plugin registrants
+**/GeneratedPluginRegistrant.*
+
+# IDEs y configuración local
+.idea/
+.vscode/
+*.iml
+
+# macOS
+macos/Flutter/ephemeral/
+macos/Pods/
+macos/Runner.xcworkspace/
+macos/Runner/GeneratedPluginRegistrant.swift
+
+# iOS
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Pods/
+ios/Runner.xcworkspace/
+
+# Android
+#android/.gradle/
+#android/app/build/
+#android/local.properties
+
+# Windows
+windows/flutter/
+windows/runner/Debug/
+windows/runner/Release/
+windows/runner/x64/
+
+# Web
+web/.dart_tool/
+web/build/
+
+# Others
+*.log
+*.tmp
+*.swp
+*.lock
