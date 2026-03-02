@@ -1,16 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:bingo/core/data/models/bingo.dart';
+import 'package:bingo/core/data/models/udp_data.dart';
 import 'package:bingo/providers/bingo_provider.dart';
 import 'package:bingo/ui/bingo/widgets/bingo_list_view.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/colores.dart';
 import 'package:bingo/utils/conversiones.dart';
+import 'package:bingo/utils/defaults.dart';
 import 'package:bingo/utils/routes.dart';
 import 'package:bingo/ui/user/update_person_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
+import 'package:udp/udp.dart';
 
 // ignore: must_be_immutable
 class BingoPage extends StatefulWidget {
@@ -25,6 +30,10 @@ class _BingoPageState extends State<BingoPage> {
   String searchStringproduct = '';
   String detectionInfo = '';
   Timer? timer;
+
+  final List<String> _receivedMessages = [];
+  UDP? _receiver;
+  bool isListening = false;
 
   @override
   void initState() {
@@ -43,6 +52,12 @@ class _BingoPageState extends State<BingoPage> {
     //_startPolling();
   }
 
+  @override
+  void dispose() {
+    _stopListening();
+    super.dispose();
+  }
+
   /*void _startPolling() {
     final provider = Provider.of<BingoProvider>(context, listen: false);
     timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
@@ -53,6 +68,107 @@ class _BingoPageState extends State<BingoPage> {
       }
     });
   }*/
+
+  // ======================================================== //
+  //                        INICIO SOCKET
+  // ======================================================== //
+
+  Future<void> _startListening() async {
+    try {
+      final port = int.parse(udpPort);
+      _receiver = await UDP.bind(Endpoint.any(port: Port(port)));
+      //print('Escuchando en puerto $port');
+      setState(() {
+        isListening = true;
+      });
+
+      _receiver?.asStream().listen((datagram) {
+        print('datagram => ${datagram.toString()}');
+        if (datagram != null) {
+          final message = String.fromCharCodes(datagram.data);
+          /*final address = datagram.address.address;
+          final port = datagram.port;
+          final timestamp = DateTime.now().toString().substring(11, 19);
+
+          setState(() {
+            _receivedMessages.add('[$timestamp] De $address:$port - $message');
+          });*/
+
+          /*
+          print('// ============= JSON MODEL =============== //');
+
+          final dataObj = UdpData.fromJson(jsonDecode(message));
+          print('udp model => ${dataObj.toString()}');
+          print(dataObj.action);
+          print(dataObj.bingoid);
+          print(dataObj.estado);*/
+
+          final dataObj = UdpData.fromJson(jsonDecode(message));
+         
+
+          switch (dataObj.action) {
+            case 'creacion':
+              if (dataObj.bingoid != 0) {
+                /*final bingo = Bingo()
+                  ..bingoId = dataObj.bingoid
+                  ..precioPorCartilla = dataObj.precio
+                  //..tiempo = dataObj.inicio
+                  ..estado = dataObj.estado;*/
+
+                final provider =
+                    Provider.of<BingoProvider>(context, listen: false);
+                provider.updatestatus(1);
+                provider.fetchShowBingos(1);
+              }
+              break;
+            case 'cierre':
+              /*pf.setBingoId = 0;
+              context.read<ModuleBloc>().add(UpdateBingo(Bingo()));
+              context.read<ModuleBloc>().add(UpdatePrecio(0));*/
+              if (dataObj.bingoid != 0) {
+                print('bingo ${dataObj.bingoid} finalizado');
+              }
+              print('Notificación de cierre via UDP');
+              break;
+          }
+
+          /*if (_receivedMessages.isNotEmpty) {
+            print(
+              'mensaje recibido => ${_receivedMessages[_receivedMessages.length - 1]}',
+            );
+          }*/
+        }
+      });
+    } catch (e) {
+      print('Connection UPD failed!');
+      //buscar reconectar
+      _stopListening();
+      //ESCUCHANDO FALSE
+      //ONLINE = FALSE;
+      //RECONECTAR
+
+      setState(() {
+        //_status = 'Error: $e';
+        //ESCUCHANDO FALSE
+        isListening = false;
+      });
+    }
+  }
+
+  Future<void> _stopListening() async {
+    if (_receiver != null) {
+      _receiver?.close();
+      _receiver = null;
+      //_isListening = false;
+      /*setState(() {
+        _status = 'No escuchando';
+      });*/
+    }
+  }
+
+  // ======================================================== //
+  //                        FIN SOCKET
+  // ======================================================== //
 
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
@@ -66,6 +182,7 @@ class _BingoPageState extends State<BingoPage> {
     final provider = Provider.of<BingoProvider>(context);
     DateTime maxDate = provider.currentDate.add(const Duration(days: 365));
     var size = MediaQuery.of(context).size;
+    _startListening(); 
     return Scaffold(
         backgroundColor: const Color(0xFFcaf0f8),
         body: SingleChildScrollView(

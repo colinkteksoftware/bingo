@@ -26,6 +26,8 @@ class _PaymentWidgetState extends State<PaymentWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<BingoProvider>(context, listen: false);
       loadBingos(provider.bingo);
+      /*final provider = Provider.of<PaymentProvider>(context, listen: false);
+      await provider.getWinners(context);*/
     });
   }
 
@@ -38,7 +40,10 @@ class _PaymentWidgetState extends State<PaymentWidget> {
         Navigator.pushNamed(context, AppRoutes.bingo);
       } else {
         await provider.getAmountUVT();
-        await provider.getWinnersByBingo(context);
+        //await provider.getWinnersByBingo(context);
+
+        //ganadores
+        await provider.getWinners(context);
       }
     } catch (e) {
       print('Error al cargar el bingo: $e');

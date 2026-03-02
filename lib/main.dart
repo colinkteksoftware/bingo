@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bingo/app.dart';
 import 'package:bingo/core/data/datasource/datasource.dart';
 import 'package:bingo/core/data/repositories/repository_impl.dart';
@@ -21,16 +23,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-  ]);
+  ]); 
 
   final pf = Preferencias();
   await pf.initPrefs();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
-    // Puedes usar Firebase Crashlytics aquí si quieres logs más completos    
+    // Puedes usar Firebase Crashlytics aquí si quieres logs más completos
     print('Flutter error: ${details.exception}');
   };
+
+  HttpOverrides.global = MyHttpOverrides();
 
   runApp(
     MultiProvider(
@@ -52,4 +56,13 @@ void main() async {
       }),
     ),
   );
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
 }
