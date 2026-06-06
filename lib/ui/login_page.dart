@@ -378,7 +378,7 @@ class _LoginPage extends State<LoginPage> {
                                                                         if (success) {
                                                                           Navigator.pushReplacementNamed(
                                                                               context,
-                                                                              AppRoutes.bingo);
+                                                                              AppRoutes.bingo); //AppRoutes.started);
                                                                         }
                                                                       } else {
                                                                         showAlerta(
