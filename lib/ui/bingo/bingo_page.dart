@@ -1,16 +1,23 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:bingo/core/data/models/bingo.dart';
+import 'package:bingo/core/data/models/udp_data.dart';
 import 'package:bingo/providers/bingo_provider.dart';
 import 'package:bingo/ui/bingo/widgets/bingo_list_view.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/colores.dart';
 import 'package:bingo/utils/conversiones.dart';
+import 'package:bingo/utils/defaults.dart';
+import 'package:bingo/utils/preferencias.dart';
 import 'package:bingo/utils/routes.dart';
 import 'package:bingo/ui/user/update_person_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
+import 'package:udp/udp.dart';
 
 // ignore: must_be_immutable
 class BingoPage extends StatefulWidget {
@@ -26,6 +33,10 @@ class _BingoPageState extends State<BingoPage> {
   String detectionInfo = '';
   Timer? timer;
 
+  final List<String> _receivedMessages = [];
+  UDP? _receiver;
+  bool isListening = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +44,8 @@ class _BingoPageState extends State<BingoPage> {
       final provider = Provider.of<BingoProvider>(context, listen: false);
       provider.updatestatus(1);
       provider.fetchShowBingos(1);
+      _startListening();
+      //registerClient();
       /*provider.addListener(() {
         if (provider.status == 1) {
           provider.fetchShowBingos(1);
@@ -40,7 +53,31 @@ class _BingoPageState extends State<BingoPage> {
       });*/
       //provider.fetchShowBingos(1);
     });
+    
     //_startPolling();
+  }
+
+  @override
+  void dispose() {
+    _stopListening();
+    super.dispose();
+  }
+
+  Future<void> registerClient() async {
+    final sender = await UDP.bind(Endpoint.any());
+    final port = int.parse(udpPort);
+    final pf = Preferencias();
+    String ip = pf.getIp.toString().trim().split("//")[1].split(":")[0];
+
+    final message = jsonEncode({"type": "register", "app": "flutter_client"});
+
+    sender.send(
+      message.codeUnits,
+      Endpoint.unicast(
+        InternetAddress(ip),
+        port: Port(port),
+      ),
+    );
   }
 
   /*void _startPolling() {
@@ -54,6 +91,123 @@ class _BingoPageState extends State<BingoPage> {
     });
   }*/
 
+  // ======================================================== //
+  //                        INICIO SOCKET
+  // ======================================================== //
+
+  Future<void> _startListening() async {
+    print("INICIANDO UDP");
+    try {
+      final port = int.parse(udpPort);
+      _receiver = await UDP.bind(Endpoint.any(port: Port(port)));
+      print('Escuchando en puerto $port');
+      /*if (!mounted) return;
+      setState(() {
+        isListening = true;
+      });*/
+
+      _receiver?.asStream().listen((datagram) {
+        print('datagram => ${datagram.toString()}');
+        if (datagram != null) {
+          final message = String.fromCharCodes(datagram.data);
+          final address = datagram.address.address;
+          final port = datagram.port;
+          final timestamp = DateTime.now().toString().substring(11, 19);
+
+          setState(() {
+            _receivedMessages.add('[$timestamp] De $address:$port - $message');
+          });
+
+          /*print('// ============= JSON CRUDO =============== //');
+          Map<String, dynamic> jsonData = jsonDecode(message);
+          print('body => ${jsonData.toString()}');
+          String action = jsonData['action'];
+          int bingoid = jsonData['bingoid'];
+          int estado = jsonData['estado'];
+
+          print(action);
+          print(bingoid);
+          print(estado);
+
+          print('// ============= JSON MODEL =============== //');
+
+          final dataObj = UdpData.fromJson(jsonDecode(message));
+          print('udp model => ${dataObj.toString()}');
+          print(dataObj.action);
+          print(dataObj.bingoid);
+          print(dataObj.estado);*/
+
+          final dataObj = UdpData.fromJson(jsonDecode(message));
+          print(dataObj.action);
+          print(dataObj.bingoid);
+          print(dataObj.estado);
+          print(dataObj.bolilla);
+          print(dataObj.bolillas);
+
+          switch (dataObj.action) {
+            case 'creacion':
+              if (dataObj.bingoid != 0) {
+                /*final bingo = Bingo()
+                  ..bingoId = dataObj.bingoid
+                  ..precioPorCartilla = dataObj.precio
+                  //..tiempo = dataObj.inicio
+                  ..estado = dataObj.estado;*/
+
+                final provider =
+                    Provider.of<BingoProvider>(context, listen: false);
+                provider.updatestatus(1);
+                provider.fetchShowBingos(1);
+              }
+              break;
+            case 'cierre':
+              /*pf.setBingoId = 0;
+              context.read<ModuleBloc>().add(UpdateBingo(Bingo()));
+              context.read<ModuleBloc>().add(UpdatePrecio(0));*/
+              if (dataObj.bingoid != 0) {
+                print('bingo ${dataObj.bingoid} finalizado');
+              }
+              print('Notificación de cierre via UDP');
+              break;
+          }
+
+          if (_receivedMessages.isNotEmpty) {
+            print(
+              'mensaje recibido => ${_receivedMessages[_receivedMessages.length - 1]}',
+            );
+          }
+        }
+      });
+    } catch (e) {
+      print('Connection UPD failed!');
+      //buscar reconectar
+      _stopListening();
+      //ESCUCHANDO FALSE
+      //ONLINE = FALSE;
+      //RECONECTAR
+
+     /* setState(() {
+        //_status = 'Error: $e';
+        //ESCUCHANDO FALSE
+        isListening = false;
+      });*/
+    }
+  } 
+
+  Future<void> _stopListening() async {
+    if (_receiver != null) {
+      _receiver?.close();
+      _receiver = null;
+      //_isListening = false;
+      /*setState(() {
+        _status = 'No escuchando';
+      });*/
+    }
+  }
+
+  // ======================================================== //
+  //                        FIN SOCKET
+  // ======================================================== //
+
   final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -66,6 +220,7 @@ class _BingoPageState extends State<BingoPage> {
     final provider = Provider.of<BingoProvider>(context);
     DateTime maxDate = provider.currentDate.add(const Duration(days: 365));
     var size = MediaQuery.of(context).size;
+    //_startListening();
     return Scaffold(
         backgroundColor: const Color(0xFFcaf0f8),
         body: SingleChildScrollView(

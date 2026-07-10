@@ -1,27 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:animated_button/animated_button.dart';
 import 'package:bingo/core/data/models/personaconvert.dart';
-import 'package:bingo/ui/login_page.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/colores.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
-
-//import 'package:bingo/mainjuegos';
-import 'package:bingo/core/data/models/chatconvert.dart';
-import 'package:bingo/core/data/models/clasesmovil.dart';
-import 'package:bingo/core/data/models/modelPromotor.dart';
-
-//import 'package:bingo/ui/tablaHorizontalMenu.dart';
-
 import 'package:bingo/utils/preferencias.dart';
 import 'package:http/io_client.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 
 Future<List<Persona>?>? chats;
 
@@ -35,32 +24,25 @@ class PersonPage extends StatefulWidget {
 }
 
 class _PersonPageState extends State<PersonPage> {
-  //ModelCliente _modelGanadoresDisplay = new ModelCliente(
-  //idCliente:0,
-//contrato:"",
-//id_sala_nube:0,
-//NomClie:"",
-//Apeclie:"",
-//FechaNacimiento:null,
-//Sexo:1,
-//Correo:"",
-//clave:"",
-//Telefono:"",
-//Dni:"",
-//Nacionalidad:"",
-//PuntosRedimibles:0,
-//PuntosCupones:0,
-//PuntosJugables:0,
-//FechaRegistro:null,
-//Fecha_UltimaVisita:null,
-//Estado:1
-  //);
-
   final pf = Preferencias();
+  bool dniEmpty = true;
+  bool nameEmpty = true;
+  bool lastNameEmpty = true;
+  bool passEmpty = true;
+  bool success = false;
+
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
+
   @override
   void initState() {
     iniciarPreferencias();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    isLoading.dispose();
+    super.dispose();
   }
 
   void iniciarPreferencias() async {
@@ -86,14 +68,15 @@ class _PersonPageState extends State<PersonPage> {
   final estadoController = TextEditingController();
   final ipController = TextEditingController(text: "0.0.0.0");
   final ioc = HttpClient();
-  
+
   Future<Persona> fetchPost(int status, String dni) async {
     ioc.badCertificateCallback =
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
     final pf = Preferencias();
 
-    final url = Uri.parse("${ipController.text}/Apicentral/api/Clientes/ConsultaCliente/${pf.getCodigoSala}/$dni");
+    final url = Uri.parse(
+        "${ipController.text}/Apicentral/api/Clientes/ConsultaCliente/${pf.getCodigoSala}/$dni");
 
     var respuesta = await http.get(url);
     try {
@@ -131,20 +114,20 @@ class _PersonPageState extends State<PersonPage> {
       } else {
         const snackBar = SnackBar(
             content: Center(
-              child: Text(
-                  "Error al Conectarse con la Api\n posiblemente Servidor Principal esta fuera de Linea!!"),
-            ));
+          child: Text(
+              "Error al Conectarse con la Api\n posiblemente Servidor Principal esta fuera de Linea!!"),
+        ));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        throw new Exception("Error al Conectarse con la Api");
+        throw Exception("Error al Conectarse con la Api");
       }
     } catch (e) {
       const snackBar = SnackBar(
           content: Center(
-            child: Text(
-                "Error al Conectarse con la Api\n posiblemente Servidor Principal esta fuera de Linea!!"),
-          ));
+        child: Text(
+            "Error al Conectarse con la Api\n posiblemente Servidor Principal esta fuera de Linea!!"),
+      ));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      throw new Exception("Error al Conectarse con la Api");
+      throw Exception("Error al Conectarse con la Api");
     }
   }
 
@@ -167,14 +150,16 @@ class _PersonPageState extends State<PersonPage> {
     }
   }
 
-  final boxDecoration = BoxDecoration(
+  final boxDecoration = const BoxDecoration(
       gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Color(0xFFcaf0f8), Color(0xFF00b4d8)],
           stops: [0.3, 0.9]));
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController? foldernameController = TextEditingController(text: "");
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -189,8 +174,8 @@ class _PersonPageState extends State<PersonPage> {
                     child: Container(
                         width: 100,
                         height: double.infinity,
-                        decoration: BoxDecoration(),
-                        alignment: AlignmentDirectional(0, -1),
+                        decoration: const BoxDecoration(),
+                        alignment: const AlignmentDirectional(0, -1),
                         child: SingleChildScrollView(
                             child: Column(
                                 mainAxisSize: MainAxisSize.max,
@@ -219,11 +204,11 @@ class _PersonPageState extends State<PersonPage> {
                                   ),
                                 ),
                                 Align(
-                                    alignment: AlignmentDirectional(0, 0),
+                                    alignment: const AlignmentDirectional(0, 0),
                                     child: Container(
                                         height: size.height,
                                         width: double.infinity,
-                                        constraints: BoxConstraints(
+                                        constraints: const BoxConstraints(
                                           maxWidth: 570,
                                         ),
                                         decoration: BoxDecoration(
@@ -272,7 +257,7 @@ class _PersonPageState extends State<PersonPage> {
                                                                     0.08,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: Color(
+                                                            color: const Color(
                                                                 0xFF03045e),
                                                             fontFamily:
                                                                 'Poppins',
@@ -280,9 +265,9 @@ class _PersonPageState extends State<PersonPage> {
                                                           )),
                                                       Padding(
                                                         padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(0, 12,
-                                                                    0, 24),
+                                                            const EdgeInsetsDirectional
+                                                                .fromSTEB(
+                                                                0, 12, 0, 24),
                                                         child: Text(
                                                             'Registra los datos para crear tu cuenta.',
                                                             textAlign: TextAlign
@@ -294,7 +279,7 @@ class _PersonPageState extends State<PersonPage> {
                                                               fontWeight:
                                                                   FontWeight
                                                                       .bold,
-                                                              color: Color(
+                                                              color: const Color(
                                                                   0xFF03045e),
                                                               fontFamily:
                                                                   'Poppins',
@@ -303,95 +288,57 @@ class _PersonPageState extends State<PersonPage> {
                                                             )),
                                                       ),
                                                       TextFormField(
-                                                        style: TextStyle(
-                                                          color:
-                                                              primaryBlue,
-                                                          fontSize:
-                                                              size.width * 0.04,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
                                                         controller:
                                                             dniController,
-                                                        enabled: true,
-                                                        obscureText: false,
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            dniEmpty = value
+                                                                .trim()
+                                                                .isEmpty;
+                                                          });
+                                                        },
                                                         decoration:
                                                             InputDecoration(
-                                                          labelText: 'doi',
-                                                          hintText: 'doi',
-                                                          labelStyle: TextStyle(
-                                                            color: Color(
-                                                                0xFF03045e),
-                                                            fontSize:
-                                                                size.width *
-                                                                    0.04,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
+                                                          labelText: 'dni',
+                                                          hintText: 'dni',
                                                           enabledBorder:
                                                               OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
                                                             borderRadius:
                                                                 BorderRadius
                                                                     .circular(
                                                                         12.0),
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: dniEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
+                                                              width: 1.5,
+                                                            ),
                                                           ),
                                                           focusedBorder:
                                                               OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
                                                             borderRadius:
                                                                 BorderRadius
                                                                     .circular(
                                                                         12.0),
-                                                          ),
-                                                          errorBorder:
-                                                              OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
+                                                              color: dniEmpty
+                                                                  ? Colors.red
+                                                                  : primaryBlue,
+                                                              width: 2,
                                                             ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedErrorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
                                                           ),
                                                           filled: true,
                                                           fillColor:
                                                               Colors.white,
                                                         ),
                                                       ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
+                                                      const SizedBox(height: 5),
                                                       TextFormField(
                                                         style: TextStyle(
-                                                          color:
-                                                              primaryBlue,
+                                                          color: primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -406,7 +353,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           labelText: 'Nombre',
                                                           hintText: 'Nombre',
                                                           labelStyle: TextStyle(
-                                                            color: Color(
+                                                            color: const Color(
                                                                 0xFF03045e),
                                                             fontSize:
                                                                 size.width *
@@ -418,8 +365,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
                                                               width: 0.0,
                                                             ),
                                                             borderRadius:
@@ -431,9 +380,12 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : primaryBlue,
+                                                              /*Color(
+                                                                  0xff525f7f),*/
+                                                              width: 1.5,
                                                             ),
                                                             borderRadius:
                                                                 BorderRadius
@@ -444,8 +396,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
                                                               width: 0.0,
                                                             ),
                                                             borderRadius:
@@ -457,8 +411,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
                                                               width: 0.0,
                                                             ),
                                                             borderRadius:
@@ -470,14 +426,18 @@ class _PersonPageState extends State<PersonPage> {
                                                           fillColor:
                                                               Colors.white,
                                                         ),
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            passEmpty = value
+                                                                .trim()
+                                                                .isEmpty;
+                                                          });
+                                                        },
                                                       ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
+                                                      const SizedBox(height: 5),
                                                       TextFormField(
                                                         style: TextStyle(
-                                                          color:
-                                                              primaryBlue,
+                                                          color: primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -489,11 +449,10 @@ class _PersonPageState extends State<PersonPage> {
                                                         obscureText: false,
                                                         decoration:
                                                             InputDecoration(
-                                                          hintText: 'Apellidos',
-                                                          labelText:
-                                                              'Apellidos',
+                                                          labelText: 'Apellido',
+                                                          hintText: 'Apellido',
                                                           labelStyle: TextStyle(
-                                                            color: Color(
+                                                            color: const Color(
                                                                 0xFF03045e),
                                                             fontSize:
                                                                 size.width *
@@ -505,8 +464,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
                                                               width: 0.0,
                                                             ),
                                                             borderRadius:
@@ -518,9 +479,12 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : primaryBlue,
+                                                              /*Color(
+                                                                  0xff525f7f),*/
+                                                              width: 1.5,
                                                             ),
                                                             borderRadius:
                                                                 BorderRadius
@@ -531,8 +495,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
                                                               width: 0.0,
                                                             ),
                                                             borderRadius:
@@ -544,8 +510,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               OutlineInputBorder(
                                                             borderSide:
                                                                 BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
                                                               width: 0.0,
                                                             ),
                                                             borderRadius:
@@ -558,13 +526,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               Colors.white,
                                                         ),
                                                       ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
+                                                      const SizedBox(height: 5),
                                                       TextFormField(
                                                         style: TextStyle(
-                                                          color:
-                                                              primaryBlue,
+                                                          color: primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -579,7 +544,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           labelText: 'Correo',
                                                           hintText: 'Correo',
                                                           labelStyle: TextStyle(
-                                                            color: Color(
+                                                            color: const Color(
                                                                 0xFF03045e),
                                                             fontSize:
                                                                 size.width *
@@ -590,7 +555,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           enabledBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -603,7 +568,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           focusedBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -616,7 +581,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           errorBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -629,7 +594,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           focusedErrorBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -644,99 +609,10 @@ class _PersonPageState extends State<PersonPage> {
                                                               Colors.white,
                                                         ),
                                                       ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
+                                                      const SizedBox(height: 5),
                                                       TextFormField(
                                                         style: TextStyle(
-                                                          color:
-                                                              primaryBlue,
-                                                          fontSize:
-                                                              size.width * 0.04,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        controller:
-                                                            claveController,
-                                                        enabled: true,
-                                                        obscureText: false,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText: 'Clave',
-                                                          hintText: 'Clave',
-                                                          labelStyle: TextStyle(
-                                                            color: Color(
-                                                                0xFF03045e),
-                                                            fontSize:
-                                                                size.width *
-                                                                    0.04,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                          enabledBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          errorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          focusedErrorBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Color(
-                                                                  0xff525f7f),
-                                                              width: 0.0,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        12.0),
-                                                          ),
-                                                          filled: true,
-                                                          fillColor:
-                                                              Colors.white,
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 5,
-                                                      ),
-                                                      TextFormField(
-                                                        style: TextStyle(
-                                                          color:
-                                                              primaryBlue,
+                                                          color: primaryBlue,
                                                           fontSize:
                                                               size.width * 0.04,
                                                           fontWeight:
@@ -751,7 +627,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           labelText: 'Telefono',
                                                           hintText: 'Telefono',
                                                           labelStyle: TextStyle(
-                                                            color: Color(
+                                                            color: const Color(
                                                                 0xFF03045e),
                                                             fontSize:
                                                                 size.width *
@@ -762,7 +638,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           enabledBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -775,7 +651,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           focusedBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -788,7 +664,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           errorBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -801,7 +677,7 @@ class _PersonPageState extends State<PersonPage> {
                                                           focusedErrorBorder:
                                                               OutlineInputBorder(
                                                             borderSide:
-                                                                BorderSide(
+                                                                const BorderSide(
                                                               color: Color(
                                                                   0xff525f7f),
                                                               width: 0.0,
@@ -816,20 +692,166 @@ class _PersonPageState extends State<PersonPage> {
                                                               Colors.white,
                                                         ),
                                                       ),
-                                                      SizedBox(
-                                                        height: 15,
+                                                      const SizedBox(height: 5),
+                                                      TextFormField(
+                                                        style: TextStyle(
+                                                          color: primaryBlue,
+                                                          fontSize:
+                                                              size.width * 0.04,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                        controller:
+                                                            claveController,
+                                                        enabled: true,
+                                                        obscureText: false,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText: 'Clave',
+                                                          hintText: 'Clave',
+                                                          labelStyle: TextStyle(
+                                                            color: const Color(
+                                                                0xFF03045e),
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.04,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                          enabledBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
+                                                              width: 0.0,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12.0),
+                                                          ),
+                                                          focusedBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : primaryBlue,
+                                                              /*Color(
+                                                                  0xff525f7f),*/
+                                                              width: 1.5,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12.0),
+                                                          ),
+                                                          errorBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
+                                                              width: 0.0,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12.0),
+                                                          ),
+                                                          focusedErrorBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: passEmpty
+                                                                  ? Colors.red
+                                                                  : const Color(
+                                                                      0xff525f7f),
+                                                              width: 0.0,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12.0),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor:
+                                                              Colors.white,
+                                                        ),
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            passEmpty = value
+                                                                .trim()
+                                                                .isEmpty;
+                                                          });
+                                                        },
                                                       ),
-                                                      AnimatedButton(
-                                                          color:
-                                                              primaryBlue,
+                                                      const SizedBox(
+                                                          height: 15),
+                                                      ValueListenableBuilder<
+                                                          bool>(
+                                                        valueListenable:
+                                                            isLoading,
+                                                        builder: (context,
+                                                            loading, child) {
+                                                          return AnimatedButton(
+                                                            color: primaryBlue,
+                                                            height:
+                                                                size.height *
+                                                                    0.05,
+                                                            width: size.width *
+                                                                0.6,
+                                                            duration: 2,
+                                                            onPressed: () {
+                                                              if (!loading) {
+                                                                _registrar(
+                                                                    context);
+                                                              }
+                                                            },
+                                                            child: loading
+                                                                ? const SizedBox(
+                                                                    height: 20,
+                                                                    width: 20,
+                                                                    child:
+                                                                        CircularProgressIndicator(
+                                                                      strokeWidth:
+                                                                          2,
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  )
+                                                                : Text(
+                                                                    "Crear Promotor",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: const Color(
+                                                                          0xFFcaf0f8),
+                                                                      fontSize:
+                                                                          size.width *
+                                                                              0.032,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                          );
+                                                        },
+                                                      )
+                                                      /*AnimatedButton(
+                                                          color: primaryBlue,
                                                           height: size.height *
                                                               0.05,
                                                           width:
                                                               size.width * 0.6,
                                                           duration: 2,
-                                                          onPressed: () async {
-                                                            _login(context);
-                                                          },
+                                                          onPressed: success ? () async {
+                                                            _registrar(context);
+                                                          } : null,
                                                           child: Container(
                                                               padding:
                                                                   const EdgeInsets
@@ -844,7 +866,7 @@ class _PersonPageState extends State<PersonPage> {
                                                                 "Crear Promotor",
                                                                 style:
                                                                     TextStyle(
-                                                                  color: Color(
+                                                                  color: const Color(
                                                                       0xFFcaf0f8),
                                                                   fontSize:
                                                                       size.width *
@@ -855,7 +877,7 @@ class _PersonPageState extends State<PersonPage> {
                                                                       FontWeight
                                                                           .bold,
                                                                 ),
-                                                              )))),
+                                                              )))),*/
                                                     ])))))
                               ])
                             ]))))
@@ -863,21 +885,29 @@ class _PersonPageState extends State<PersonPage> {
             ])));
   }
 
-  void _login(BuildContext context) async {
-    ioc.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    final http = new IOClient(ioc);
+  Future<void> _registrar(BuildContext context) async {
+    String ruta = "${ipController.text}/api/Login/InsertarPromotor";
+    final uri = Uri.parse(ruta);
+    final headers = {'Content-Type': 'application/json'};
+    final encoding = Encoding.getByName('utf-8');
+
+    if (!validarCampos()) {
+      if (dniController.text.toString().trim().isEmpty) {
+        dniEmpty = true;
+      }
+      if (nomClieController.text.toString().trim().isEmpty) {
+        nameEmpty = true;
+      }
+      if (apeclieController.text.toString().trim().isEmpty) {
+        lastNameEmpty = true;
+      }
+      if (claveController.text.toString().trim().isEmpty) {
+        passEmpty = true;
+      }
+      return;
+    }
 
     try {
-      String ruta;
-
-      ruta = ipController.text + "/api/Login/InsertarPromotor";
-
-      final uri = Uri.parse(ruta);
-      final headers = {'Content-Type': 'application/json'};
-
-      final encoding = Encoding.getByName('utf-8');
-
       Response response = await post(uri,
           headers: headers,
           encoding: encoding,
@@ -896,21 +926,44 @@ class _PersonPageState extends State<PersonPage> {
           }));
 
       if (response.statusCode == 200) {
-        const snackBar = SnackBar(content: Center(child: Text("Se ha creado el promotor..")), backgroundColor: Colors.green,);
+        setState(() {
+          success = true;
+        });
+        const snackBar = SnackBar(
+          content: Center(child: Text("Se ha creado el promotor..")),
+          backgroundColor: Colors.green,
+        );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         await Future.delayed(const Duration(seconds: 2), () {
           Navigator.of(context).pop();
         });
       } else {
-        const snackBar =
-            SnackBar(content: Center(child: Text("Error registro con problemas..")));
+        setState(() {
+          success = false;
+        });
+        const snackBar = SnackBar(
+            content: Center(child: Text("Error registro con problemas..")));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
-      const snackBar =
-          SnackBar(content: Center(child: Text("Error registro con problemas..")));
+      setState(() {
+        success = false;
+      });
+      const snackBar = SnackBar(
+          content: Center(child: Text("Error registro con problemas..")));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      throw new Exception("Error al Conectarse con la Api");
+      throw Exception("Error al Conectarse con la Api");
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  bool validarCampos() {
+    if (nomClieController.text.toString().trim().isEmpty) return false;
+    if (apeclieController.text.toString().trim().isEmpty) return false;
+    if (dniController.text.toString().trim().isEmpty) return false;
+    if (claveController.text.toString().trim().isEmpty) return false;
+
+    return true;
   }
 }

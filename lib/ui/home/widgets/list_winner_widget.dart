@@ -1,3 +1,4 @@
+import 'package:bingo/core/data/models/detallePremioFigura.dart';
 import 'package:bingo/core/data/models/pagosconvert.dart';
 import 'package:bingo/providers/payment_provider.dart';
 import 'package:bingo/ui/payment/winner_nofound.dart';
@@ -16,9 +17,7 @@ class BuildWinnersList extends StatefulWidget {
 
 class _BuildWinnersListState extends State<BuildWinnersList> {
   TextEditingController dniController = TextEditingController();
-  /*double amount = 0;
-  double totalValorPremio = 0;
-  double totalPremioAdicional = 0;*/
+  bool isPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -71,14 +70,17 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                   ),
                   children: [
                     if (winner.detallePremioFigura != null &&
-                        winner.detallePremioFigura!.isNotEmpty)
-                      if (winner.detallePremioFigura!.length > 1) ...[
+                        winner.detallePremioFigura?.isNotEmpty == true)
+                      if ((winner.detallePremioFigura?.length ?? 0) > 1) ...[
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: winner.detallePremioFigura!.length,
+                          itemCount: winner.detallePremioFigura?.length,
                           itemBuilder: (context, i) {
-                            final premio = winner.detallePremioFigura![i];
+                            /*print(
+                                'cantidad de premios => ${winner.detallePremioFigura?.length ?? 0}');*/
+                            final premio = winner.detallePremioFigura?[i] ??
+                                DetallePremioFigura();
                             final valor = (premio.valorPremio ?? 0).toDouble();
                             final adicionales = premio.listaAdicionales
                                     ?.fold<double>(
@@ -138,17 +140,27 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                     ),
                                   ],
                                 ),
-                                onTap: () {
-                                  collectPrize(context, provider, winner, total,
-                                      size, valor, adicionales);
-                                },
+                                onTap:
+                                    (winner.detallePremioFigura?.length ?? 0) ==
+                                            1
+                                        ? () {
+                                            collectPrize(
+                                                context,
+                                                provider,
+                                                winner,
+                                                total,
+                                                size,
+                                                valor,
+                                                adicionales);
+                                          }
+                                        : null,
                               ),
                             );
                           },
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
+                              vertical: 3.0, horizontal: 16.0),
                           child: Divider(
                             color: Colors.amber,
                             thickness: 1,
@@ -174,21 +186,75 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                             padding: const EdgeInsets.symmetric(
                                 vertical: 8.0, horizontal: 12.0),
                             child: Center(
-                              child: Text(
-                                'Total a pagar: ${moneyFormatted(totalGeneral)}',
-                                style: const TextStyle(
-                                  color: Colors.amber,
-                                  fontFamily: 'gotic',
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(8),
+                                  onTapDown: (_) {
+                                    setState(() => isPressed = true);
+                                  },
+                                  onTapUp: (_) {
+                                    setState(() => isPressed = false);
+                                  },
+                                  onTapCancel: () {
+                                    setState(() => isPressed = false);
+                                  },
+                                  onTap: () {
+                                    double adicionales = 0.0;
+                                    for (final win
+                                        in winner.detallePremioFigura ?? []) {
+                                      if (win.listaAdicionales.isNotEmpty ==
+                                          true) {
+                                        adicionales = win.listaAdicionales
+                                                ?.fold<double>(
+                                                    0.0,
+                                                    (sum, a) =>
+                                                        sum +
+                                                        ((a.premioAdicional ??
+                                                                0) as num)
+                                                            .toDouble()) ??
+                                            0.0;
+                                      }
+
+                                      print('premio => ${winner.toJson()}');
+                                      print('total => $totalGeneral');
+                                      print('size => $size');
+                                      print('valor => ${win.valorPremio}');
+                                      print('adicionales => $adicionales');
+                                    }
+
+                                    collectPrize(context, provider, winner,
+                                        totalGeneral, size, 0, adicionales);
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 100),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 12.0),
+                                    decoration: BoxDecoration(
+                                      color: isPressed
+                                          ? Colors.amber
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      'Total a pagar: ${moneyFormatted(totalGeneral)}',
+                                      style: TextStyle(
+                                        color: isPressed
+                                            ? Colors.black
+                                            : Colors.amber,
+                                        fontFamily: 'gotic',
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           );
                         }),
-                      ]
-                      else
-                        // 👉 Si solo tiene un premio, muestra el total general
+                      ] else
+                        // Si solo tiene un premio, muestra el total general
                         ListTile(
                           leading: const Icon(
                             Icons.workspace_premium_sharp,
@@ -197,7 +263,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                           ),
                           title: Center(
                             child: Text(
-                              winner.detallePremioFigura!.first.nombreFigura ??
+                              winner.detallePremioFigura?.first.nombreFigura ??
                                   "Sin figura",
                               style: const TextStyle(
                                 color: Colors.white,
@@ -232,238 +298,21 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                                 size, totalValorPremio, totalPremioAdicional);
                           },
                         )
-
-                      /*if (winner.detallePremioFigura != null &&
-                        winner.detallePremioFigura!.isNotEmpty)
-                      // 👉 Si tiene más de un premio, muestra cada uno individual
-                      if (winner.detallePremioFigura!.length > 1)
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: winner.detallePremioFigura!.length,
-                          itemBuilder: (context, i) {
-                            final premio = winner.detallePremioFigura![i];
-                            final valor = (premio.valorPremio ?? 0).toDouble();
-                            final adicionales = premio.listaAdicionales
-                                    ?.fold<double>(
-                                        0.0,
-                                        (sum, a) =>
-                                            sum +
-                                            ((a.premioAdicional ?? 0) as num)
-                                                .toDouble()) ??
-                                0.0;
-                            final total = valor + adicionales;
-
-                            return ListTile(
-                              leading: const Icon(
-                                Icons.workspace_premium_sharp,
-                                color: Color.fromARGB(255, 210, 193, 3),
-                                size: 50,
-                              ),
-                              title: Center(
-                                child: Text(
-                                  premio.nombreFigura ?? "Sin figura",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              subtitle: Column(
-                                children: [
-                                  Text(
-                                    'Premio: ${moneyFormatted(valor)}',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'gotic'),
-                                  ),
-                                  Text(
-                                    'Premio adicional: ${moneyFormatted(adicionales)}',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'gotic'),
-                                  ),
-                                  Text(
-                                    'Premio total: ${moneyFormatted(total)}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'gotic',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                collectPrize(context, provider, winner, total,
-                                    size, valor, adicionales);
-                              },
-                            );
-                          },
-                        )
-                      else
-                        // 👉 Si solo tiene un premio, muestra el total general
-                        ListTile(
-                          leading: const Icon(
-                            Icons.workspace_premium_sharp,
-                            color: Color.fromARGB(255, 210, 193, 3),
-                            size: 50,
-                          ),
-                          title: Center(
-                            child: Text(
-                              winner.detallePremioFigura!.first.nombreFigura ??
-                                  "Sin figura",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          subtitle: Column(
-                            children: [
-                              Text(
-                                'Premio: ${moneyFormatted(totalValorPremio)}',
-                                style: const TextStyle(
-                                    color: Colors.white, fontFamily: 'gotic'),
-                              ),
-                              Text(
-                                'Premio adicional: ${moneyFormatted(totalPremioAdicional)}',
-                                style: const TextStyle(
-                                    color: Colors.white, fontFamily: 'gotic'),
-                              ),
-                              Text(
-                                'Premio total: ${moneyFormatted(amount)}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'gotic',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            collectPrize(context, provider, winner, amount,
-                                size, totalValorPremio, totalPremioAdicional);
-                          },
-                        )*/
-                      else
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Sin premios registrados', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                        ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-
-        /*ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: provider.listWinners.length,
-          itemBuilder: (context, index) {
-            final winner = provider.listWinners[index];
-            print('winner => ${winner.toJson()}');
-
-            final totals = calculeTotals(winner);
-            final amount = totals['amount'] ?? 0;
-            final totalValorPremio = totals['valor'] ?? 0;
-            final totalPremioAdicional = totals['adicional'] ?? 0;
-
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 3,
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/venta.png"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: ExpansionTile(
-                  collapsedIconColor: Colors.white,
-                  iconColor: Colors.white,
-                  title: Text(
-                    "MODULO: ${winner.codigoModulo ?? '-'}",
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    'Cartilla: ${winner.cartillaId}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  children: [
-                    if (winner.detallePremioFigura != null &&
-                        winner.detallePremioFigura!.isNotEmpty)
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: winner.detallePremioFigura!.length,
-                        itemBuilder: (context, i) {
-                          final premio = winner.detallePremioFigura![i];
-                          return ListTile(
-                            leading: const Icon(
-                              Icons.workspace_premium_sharp,
-                              color: Color.fromARGB(255, 210, 193, 3),
-                              size: 50,
-                            ),
-                            title: Center(
-                                child: Text(
-                              premio.nombreFigura ?? "Sin figura",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )),
-                            subtitle: Column(
-                              children: [
-                                Text(
-                                  'Premio: ${moneyFormatted(amount)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'gotic',
-                                  ),
-                                ),
-                                Text(
-                                  'Premio adicional: ${moneyFormatted(totalPremioAdicional)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'gotic',
-                                  ),
-                                ),
-                                Text(
-                                  'Premio Total: ${moneyFormatted(amount)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'gotic',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              collectPrize(context, provider, winner, amount,
-                                  size, totalValorPremio, totalPremioAdicional);
-                            },
-                          );
-                        },
-                      )
                     else
                       const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Text("Sin premios registrados"),
+                        child: Text(
+                          'Sin premios registrados',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
                       ),
                   ],
                 ),
               ),
             );
           },
-        );*/
+        );
       },
     );
   }
@@ -474,9 +323,10 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
     double totalPremioAdicional = 0;
 
     if (winner.detallePremioFigura != null &&
-        winner.detallePremioFigura!.isNotEmpty) {
-      if (winner.detallePremioFigura!.length == 1) {
-        final detalle = winner.detallePremioFigura!.first;
+        winner.detallePremioFigura?.isNotEmpty == true) {
+      if ((winner.detallePremioFigura?.length ?? 0) == 1) {
+        final detalle =
+            winner.detallePremioFigura?.first ?? DetallePremioFigura();
         totalValorPremio = detalle.valorPremio ?? 0;
 
         if (detalle.listaAdicionales != null &&
@@ -576,8 +426,10 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
       double amount,
       Size size,
       double totalValorPremio,
-      double totalPremioAdicional) {
+      double totalPremioAdicional,
+      {int nroWin = 1}) {
     final provider = Provider.of<PaymentProvider>(context, listen: false);
+    print('datos del pago => ${order.toJson()}');
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -603,8 +455,63 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
             Column(
               children: [
                 Column(children: [
-                  Text(
-                    "Premio: ${order.detallePremioFigura!.first.nombreFigura}",
+                  order.detallePremioFigura?.length == 1
+                      ? Column(
+                          children: [
+                            Text(
+                              "Premio: ${order.detallePremioFigura?.first.nombreFigura}",
+                              style: const TextStyle(
+                                color: Color(0xFF0077b6),
+                                fontSize: 14,
+                                fontFamily: 'gotic',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "Valor Premio: ${moneyFormatted(totalValorPremio)}",
+                              style: const TextStyle(
+                                color: Color(0xFF0077b6),
+                                fontSize: 14,
+                                fontFamily: 'gotic',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: order.detallePremioFigura!
+                              .map(
+                                (figura) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Premio: ${figura.nombreFigura}",
+                                      style: const TextStyle(
+                                        color: Color(0xFF0077b6),
+                                        fontSize: 14,
+                                        fontFamily: 'gotic',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Valor Premio: ${moneyFormatted(figura.valorPremio ?? 0)}",
+                                      style: const TextStyle(
+                                        color: Color(0xFF0077b6),
+                                        fontSize: 14,
+                                        fontFamily: 'gotic',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                  ],
+                                ),
+                              )
+                              .toList(),
+                        ),
+
+                  /*Text(
+                    "Premio: ${order.detallePremioFigura?.first.nombreFigura}",
                     style: const TextStyle(
                       color: Color(0xFF0077b6),
                       fontSize: 14,
@@ -620,10 +527,10 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                       fontFamily: 'gotic',
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
+                  ),*/
                 ]),
                 for (var adicionales
-                    in order.detallePremioFigura!.first.listaAdicionales!)
+                    in order.detallePremioFigura?.first.listaAdicionales ?? [])
                   Column(children: [
                     Text(
                       "Premio Adicional: ${adicionales.categoria}",
@@ -745,6 +652,7 @@ class _BuildWinnersListState extends State<BuildWinnersList> {
                               color: const Color(0xFFcaf0f8)),
                         ),
                         onPressed: () async {
+                          print('datos de pago => ${order.toJson()}');
                           if (amount >= provider.totalUvt) {
                             if (dniController.text == '') {
                               const snackBar = SnackBar(

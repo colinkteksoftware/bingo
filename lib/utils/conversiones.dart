@@ -392,5 +392,17 @@ String dateApiFormatted(DateTime date) {
 }
 
 String moneyFormatted(double amount) {
-  return '\$${NumberFormat('#,##0', 'en_US').format(amount)}';
+  double resp = double.parse(amount.toString()) * 10.truncate() / 10;
+  double format = double.parse(resp.toStringAsFixed(3));
+  return NumberFormat('#,##0', 'en_US').format(format);
+
+  /*String total = NumberFormat('#,##0', 'en_US').format(amount);
+  
+  return '\$${res.toStringAsFixed(3)}';*/
+}
+
+String changeIp(String ip, int promotorId) {
+  String noPort = '${ip.substring(0, ip.length - 4)}7881';
+  String proto = noPort.replaceFirst('http', 'https');
+  return '$proto/api/JuegoClienteManual/GetGanadoresForPromotor?promotorId=$promotorId';
 }

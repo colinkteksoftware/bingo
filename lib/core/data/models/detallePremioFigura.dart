@@ -26,6 +26,25 @@ class DetallePremioFigura {
   });
 
   factory DetallePremioFigura.fromJson(Map<String, dynamic> json) =>
+    DetallePremioFigura(
+      premioId: json["premioId"],
+      valorPremio: (json["valorPremio"] as num).toDouble(),
+      figuraId: json["figuraId"],
+      nombreFigura: json["nombreFigura"],
+      isTipoGrupo: json["isTipoGrupo"],
+      nombreGrupo: json["nombreGrupo"],
+      estadoPago: json["estadoPago"],
+      listaAdicionales: json["listaAdicionales"] == null
+          ? []
+          : List<Adicional>.from(
+              json["listaAdicionales"]
+                  .map((x) => Adicional.fromJson(x))),
+      isGanadorCartaRey: json["isGanadorCartaRey"],
+      nombreCartaRey: json["nombreCartaRey"],
+    );
+
+
+  /*factory DetallePremioFigura.fromJson(Map<String, dynamic> json) =>
       DetallePremioFigura(
         premioId: json["PremioId"] ?? 0,
         valorPremio: (json["ValorPremio"] == null ||
@@ -43,7 +62,7 @@ class DetallePremioFigura {
                 json["ListaAdicionales"]!.map((x) => Adicional.fromJson(x))),
         isGanadorCartaRey: json["IsGanadorCartaRey"] ?? false,
         nombreCartaRey: json["NombreCartaRey"] ?? '',
-      );
+      );*/
 
   Map<String, dynamic> toJson() => {
         "premioId": premioId,

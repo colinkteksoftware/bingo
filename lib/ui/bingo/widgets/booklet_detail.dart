@@ -1,10 +1,15 @@
 import 'package:bingo/core/data/models/booklet.dart';
 import 'package:bingo/providers/bingo_provider.dart';
+import 'package:bingo/ui/bingo/bloc/bingo_bloc.dart';
+import 'package:bingo/ui/bingo/bloc/bingo_event.dart';
+import 'package:bingo/ui/bingo/bloc/bingo_state.dart';
 import 'package:bingo/ui/bingo/widgets/booklet_nofound.dart';
+import 'package:bingo/ui/bingo/widgets/game_type_widget.dart';
 import 'package:bingo/utils/colores.dart';
 import 'package:bingo/utils/conversiones.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_button/animated_button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class BookletDetailPage extends StatefulWidget {
@@ -87,7 +92,73 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
                 ],
               ),
             ),
-            gameTypeWidget(provider, size),
+            //gameTypeWidget(provider, size),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: BlocProvider(
+                create: (_) => GameTypeBloc(),
+                child: BlocListener<GameTypeBloc, GameTypeState>(
+                  listenWhen: (previous, current) =>
+                      previous.counter != current.counter ||
+                      previous.aditional != current.aditional,
+                  listener: (context, state) {
+                    // Actualiza el TextEditingController solo si es diferente
+                    if (_controller.text != state.counter.toString()) {
+                      _controller.text = state.counter.toString();
+                    }
+                  },
+                  child: BlocBuilder<GameTypeBloc, GameTypeState>(
+                    builder: (context, state) {
+                      return GameTypeWidget(
+                        aditional: state.aditional,
+                        counter: state.counter,
+                        onTypeSelected: (value) {
+                          context
+                              .read<GameTypeBloc>()
+                              .add(SelectAditional(value));
+                        },
+                        onIncrement: () {
+                          context.read<GameTypeBloc>().add(IncrementCounter());
+                        },
+                        onDecrement: () {
+                          context.read<GameTypeBloc>().add(DecrementCounter());
+                        },
+                        onCounterChanged: (value) {
+                          context
+                              .read<GameTypeBloc>()
+                              .add(ChangeCounter(value));
+                        },
+                        counterController: _controller,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            /*Padding(
+              padding: const EdgeInsets.all(16),
+              child: BlocBuilder<GameTypeBloc, GameTypeState>(
+                builder: (context, state) {
+                  return GameTypeWidget(
+                    aditional: state.aditional,
+                    counter: state.counter,
+                    onTypeSelected: (value) {
+                      context.read<GameTypeBloc>().add(SelectAditional(value));
+                    },
+                    onIncrement: () {
+                      context.read<GameTypeBloc>().add(IncrementCounter());
+                    },
+                    onDecrement: () {
+                      context.read<GameTypeBloc>().add(DecrementCounter());
+                    },
+                    onCounterChanged: (value) {
+                      context.read<GameTypeBloc>().add(ChangeCounter(value));
+                    },
+                    counterController: _controller,
+                  );
+                },
+              ),
+            ),*/
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Row(
@@ -161,7 +232,7 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
         children: [
           GestureDetector(
             onTap: () {
-              provider.updateaditional(0);              
+              provider.updateaditional(0);
               provider.calculeTotal();
             },
             child: Column(children: [

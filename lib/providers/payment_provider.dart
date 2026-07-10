@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:bingo/core/data/models/bingo.dart';
 import 'package:bingo/core/data/models/bingoResponse.dart';
@@ -7,9 +8,11 @@ import 'package:bingo/core/data/models/pagosconvert.dart';
 import 'package:bingo/core/data/models/uvtconvert.dart';
 import 'package:bingo/core/data/models/winner.dart';
 import 'package:bingo/providers/bingo_provider.dart';
+import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/utils/preferencias.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:provider/provider.dart';
 
 class PaymentProvider extends ChangeNotifier {
@@ -40,7 +43,7 @@ class PaymentProvider extends ChangeNotifier {
 
   Uri url = Uri.parse('');
 
-  Future<void> getWinnersByBingo(BuildContext context) async {
+  /*Future<void> getWinnersByBingo(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
@@ -86,6 +89,65 @@ class PaymentProvider extends ChangeNotifier {
       }
       _isLoading = false;
       notifyListeners();
+    } catch (error) {
+      _isLoading = false;
+      _winners = [];
+      notifyListeners();
+      throw Exception('Failed to load winners: $error');
+    }
+  }*/
+
+  Future<void> getWinners(BuildContext context) async {
+    _isLoading = true;
+    _winners.clear();
+    notifyListeners();
+
+    //String ip = changeIp(pf.getIp.toString(), pf.getPromotorId);
+    /*url = Uri.parse(
+        'https://192.168.1.50:7881/api/JuegoClienteManual/GetGanadoresForPromotor?promotorId=${pf.getPromotorId}');*/
+    url = Uri.parse(changeIp(pf.getIp.toString(), pf.getPromotorId));  // api-bingo
+
+    //url = Uri.parse('${pf.getIp}/api/PromotorInterno/GetGanadoresForPromotor/4');  // api-app 
+    //print('url converted => $ip');
+    //print('buscando ganadores en => $url');
+
+    try {
+      final client = IOClient(HttpClient());
+
+      final response = await client.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        //print('response => ${response.statusCode}');
+
+        final Map<String, dynamic> info = json.decode(response.body);
+        //print('respuesta => ${info.toString()}');
+
+        final List<Pago> pagos =
+            (info['data'] as List).map((e) => Pago.fromJson(e)).toList();
+
+        /*print(' // ================================= //');
+        print('informacion de ganadores');
+        print(' // ================================= //');
+        print('total ganadores => ${pagos.length}');
+        print('primer ganador => ${pagos.first.detallePremioFigura}');
+        print('lista ganadores => ${pagos.toString()}');*/
+
+        /*for (var ganador in pagos) {
+         //print('ganador => ${ganador.toJson()}');
+          _winners.add(ganador);
+        }*/
+        _winners = pagos;
+
+        _isLoading = false;
+        notifyListeners();
+      } else {
+        throw Exception('Failed to load winners');
+      }
     } catch (error) {
       _isLoading = false;
       _winners = [];
@@ -144,8 +206,7 @@ class PaymentProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> registerWinner(
-      BuildContext context, Pago payment /*Winner payment*/) async {
+  Future<bool> registerWinner(BuildContext context, Pago payment) async {
     //String jsonBody = json.encode(payment.toJson());
     //print('Pago realizado => $jsonBody');
 
@@ -155,14 +216,15 @@ class PaymentProvider extends ChangeNotifier {
     /*print('URL WINNER => $url');
     print('DATA WINNER => $jsonBody');*/
     try {
-      final response = await http.put(url,
+      final response = await http.post(url,
           headers: {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: json.encode(payment.toJson()));
       //print('RESPONSE CODE => ${response.statusCode}');
       if (response.statusCode == 200) {
-        await getWinnersByBingo(context);
+        //await getWinnersByBingo(context);                               // abrir
+        await getWinners(context);
         const snackBar = SnackBar(
           content: Center(child: Text("Se ha confirmado el pago..")),
           backgroundColor: Colors.green,

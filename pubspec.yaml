@@ -2,7 +2,7 @@ name: bingo
 description: 'App para la gestión de bingo'
 publish_to: 'none' 
 
-version: 1.0.10
+version: 1.0.11
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -23,6 +23,9 @@ dependencies:
   simple_barcode_scanner: ^0.3.0
   package_info_plus: ^8.3.1
   lottie: ^3.3.1
+  msix: ^3.16.12
+  flutter_bloc: ^9.1.1
+  udp: ^5.0.3
 
   flutter_localizations:
     sdk: flutter
@@ -42,6 +45,17 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/icons/bingo.ico"
+
+msix_config:
+  display_name: APP Bingo
+  publisher_display_name: Colinktek S.A.S
+  identity_name: www.colinktek.com
+  msix_version: 1.0.0.0
+  logo_path: assets/icons/bingo.ico
+  start_menu_icon_path: assets/icons/bingo.ico
+  tile_icon_path: assets/icons/bingo.ico
+  vs_generated_images_folder_path: windows/runner/resources
+  install_certificate: false
 
 flutter:
 

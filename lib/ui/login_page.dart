@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:bingo/providers/auth_provider.dart';
 import 'package:bingo/utils/background.dart';
 import 'package:bingo/utils/colores.dart';
+import 'package:bingo/utils/conversiones.dart';
 import 'package:bingo/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:bingo/utils/preferencias.dart';
@@ -196,7 +197,7 @@ class _LoginPage extends State<LoginPage> {
                                                         0, 0),
                                               ),
                                             ),
-                                          ),                                          
+                                          ),
                                           Text(
                                             'Bienvenido',
                                             textAlign: TextAlign.center,
@@ -354,21 +355,36 @@ class _LoginPage extends State<LoginPage> {
                                                               provider.isLoading
                                                                   ? null
                                                                   : () async {
-                                                                      final success =
-                                                                          await provider
-                                                                              .login(
-                                                                        context,
-                                                                        txtControlerUsuario
-                                                                            .text,
-                                                                        txtControlerClave
-                                                                            .text,
-                                                                        _isChecked,
-                                                                      );
+                                                                      if (txtControlerUsuario
+                                                                              .text
+                                                                              .toString()
+                                                                              .trim()
+                                                                              .isNotEmpty &&
+                                                                          txtControlerClave
+                                                                              .text
+                                                                              .toString()
+                                                                              .trim()
+                                                                              .isNotEmpty) {
+                                                                        final success =
+                                                                            await provider.login(
+                                                                          context,
+                                                                          txtControlerUsuario
+                                                                              .text,
+                                                                          txtControlerClave
+                                                                              .text,
+                                                                          _isChecked,
+                                                                        );
 
-                                                                      if (success) {
-                                                                        Navigator.pushReplacementNamed(
+                                                                        if (success) {
+                                                                          Navigator.pushReplacementNamed(
+                                                                              context,
+                                                                              AppRoutes.bingo); //AppRoutes.started);
+                                                                        }
+                                                                      } else {
+                                                                        showAlerta(
                                                                             context,
-                                                                            AppRoutes.bingo);
+                                                                            'Mensaje Informativo',
+                                                                            '¡Credenciales Incorrecta. Ingrese un usuario válido, por favor!');
                                                                       }
                                                                     },
                                                           child: Container(
