@@ -21,10 +21,12 @@ class BookletDetailPage extends StatefulWidget {
 
 class _BookletDetailPageState extends State<BookletDetailPage> {
   final TextEditingController _controller = TextEditingController(text: "0");
+  late final GameTypeBloc _gameTypeBloc;
 
   @override
   void initState() {
     super.initState();
+    _gameTypeBloc = GameTypeBloc();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<BingoProvider>(context, listen: false);
       //provider.clearBooklet();
@@ -36,6 +38,7 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
 
   @override
   void dispose() {
+    _gameTypeBloc.close();
     _controller.dispose();
     super.dispose();
   }
@@ -95,13 +98,28 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
             //gameTypeWidget(provider, size),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: BlocProvider(
-                create: (_) => GameTypeBloc(),
+              child: BlocProvider.value(
+                value: _gameTypeBloc,
                 child: BlocListener<GameTypeBloc, GameTypeState>(
                   listenWhen: (previous, current) =>
                       previous.counter != current.counter ||
                       previous.aditional != current.aditional,
                   listener: (context, state) {
+                    final bingoProvider =
+                        Provider.of<BingoProvider>(context, listen: false);
+
+                    if (bingoProvider.aditional != state.aditional) {
+                      bingoProvider.updateaditional(state.aditional);
+                    }
+
+                    if (state.aditional == 2) {
+                      if (bingoProvider.counter != state.counter) {
+                        bingoProvider.updateCounter(state.counter);
+                      }
+                    } else if (bingoProvider.counter != 1) {
+                      bingoProvider.updateCounter(1);
+                    }
+
                     // Actualiza el TextEditingController solo si es diferente
                     if (_controller.text != state.counter.toString()) {
                       _controller.text = state.counter.toString();
@@ -183,7 +201,8 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
                                 showAlerta(context, 'Mensaje Informativo',
                                     'Para ventas debes seleccionar una cartilla.');
                               } else {
-                                if (provider.counter > 1) {
+                                if (provider.aditional == 2 &&
+                                    provider.counter > 1) {
                                   openAlertBox(context, provider);
                                 } else {
                                   await provider.registerSale(context);

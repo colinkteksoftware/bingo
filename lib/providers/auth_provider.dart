@@ -33,6 +33,12 @@ class AuthProvider with ChangeNotifier {
 
       _promotor = await useCase.login(user);
 
+      final normalizedInputUser = usuario.trim().toLowerCase();
+      final normalizedResponseUser =
+          (_promotor?.usuario ?? '').trim().toLowerCase();
+      final isAuthenticated =
+          (_promotor?.estado == true) && normalizedResponseUser == normalizedInputUser;
+
       pf.setPromotorId = _promotor?.promotorId ?? 0;
       pf.setSellerName = _promotor?.nombres ?? '';
       pf.setSellerLast = _promotor?.apellidos ?? '';
@@ -40,10 +46,7 @@ class AuthProvider with ChangeNotifier {
       pf.setSellerState = _promotor?.estado ?? false;
 
       if (remember) {
-        if (_promotor?.estado == true &&
-                _promotor?.usuario.toString() ==
-                    usuario.toString().toUpperCase() ||
-            _promotor?.usuario.toString() == usuario.toString().toLowerCase()) {
+        if (isAuthenticated) {
           pf.setUsuario = usuario;
           pf.setRecuerda = remember;
           pf.setpassword = password;
@@ -62,10 +65,7 @@ class AuthProvider with ChangeNotifier {
         pf.setRecuerda = false;
       }
 
-      if (_promotor?.estado == true &&
-              _promotor?.usuario.toString() ==
-                  usuario.toString().toUpperCase() ||
-          _promotor?.usuario.toString() == usuario.toString().toLowerCase()) {
+      if (isAuthenticated) {
         const snackBar = SnackBar(
             content: Center(
               child: Text("Iniciando sesión un momento ..."),

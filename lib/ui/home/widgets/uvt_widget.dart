@@ -37,7 +37,7 @@ class _UvtWidgetState extends State<UvtWidget> {
         (X509Certificate cert, String host, int port) => true;
     final http = IOClient(ioc);
     final url = Uri.parse(
-        "${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor");
+      "${pf.getIp.toString()}/api/JuegoClienteManual/RegistrarGanadorForPromotor");
 
     final response = await http.put(url,
         headers: {

@@ -26,13 +26,23 @@ class WinnerProvider with ChangeNotifier {
       print('ganadores x promotor => ${pf.getPromotorId}');
 
       url = Uri.parse(
-          '${pf.getIp.toString()}/api/PromotorInterno/GetGanadoresForPromotor/${pf.getPromotorId ?? 0}');
+          '${pf.getIp.toString()}/api/JuegoClienteManual/GetGanadoresForPromotor?promotorId=${pf.getPromotorId ?? 0}');
 
       final response = await http.get(url,
           headers: {'Content-Type': 'application/json; charset=UTF-8'});
 
       if (response.statusCode == 200) {
-        paymentsList = pagoFromJson(utf8.decode(response.bodyBytes));
+        final dynamic decoded = json.decode(utf8.decode(response.bodyBytes));
+        final dynamic data =
+            decoded is Map<String, dynamic> ? decoded['data'] : decoded;
+
+        if (data is List) {
+          paymentsList = data
+              .map((x) => Pago.fromJson(x as Map<String, dynamic>))
+              .toList();
+        } else {
+          paymentsList = [];
+        }
         //print('PAGOS PENDIENTES => ${pagoToJson(paymentsList!)}');
         isLoadingWinners = false;
         notifyListeners();

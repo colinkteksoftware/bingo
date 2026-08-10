@@ -102,12 +102,9 @@ class PaymentProvider extends ChangeNotifier {
     _winners.clear();
     notifyListeners();
 
-    //String ip = changeIp(pf.getIp.toString(), pf.getPromotorId);
-    /*url = Uri.parse(
-        'https://192.168.1.50:7881/api/JuegoClienteManual/GetGanadoresForPromotor?promotorId=${pf.getPromotorId}');*/
-    url = Uri.parse(changeIp(pf.getIp.toString(), pf.getPromotorId));  // api-bingo
+    url = Uri.parse(
+      '${pf.getIp.toString()}/api/JuegoClienteManual/GetGanadoresForPromotor?promotorId=${pf.getPromotorId}');
 
-    //url = Uri.parse('${pf.getIp}/api/PromotorInterno/GetGanadoresForPromotor/4');  // api-app 
     //print('url converted => $ip');
     //print('buscando ganadores en => $url');
 
@@ -211,12 +208,12 @@ class PaymentProvider extends ChangeNotifier {
     //print('Pago realizado => $jsonBody');
 
     url = Uri.parse(
-        '${pf.getIp.toString()}/api/PromotorInterno/RegistrarGanadorForPromotor');
+      '${pf.getIp.toString()}/api/JuegoClienteManual/RegistrarGanadorForPromotor');
 
     /*print('URL WINNER => $url');
     print('DATA WINNER => $jsonBody');*/
     try {
-      final response = await http.post(url,
+      final response = await http.put(url,
           headers: {
             'Content-Type': 'application/json; charset=UTF-8',
           },

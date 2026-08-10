@@ -61,7 +61,7 @@ class SaleProvider extends ChangeNotifier {
     notifyListeners();
 
     final url = Uri.parse(
-        '${pf.getIp.toString()}/api/PromotorInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
+      '${pf.getIp.toString()}/api/VentaInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
     print('url => $url');
     final response = await http.get(
       url,
@@ -74,7 +74,17 @@ class SaleProvider extends ChangeNotifier {
     print('Body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 200) {
-      _salesGrouped = ventaGroupFromMap(utf8.decode(response.bodyBytes));
+      final dynamic decoded = json.decode(utf8.decode(response.bodyBytes));
+      final dynamic data =
+          decoded is Map<String, dynamic> ? decoded['data'] : decoded;
+
+      if (data is List) {
+        _salesGrouped = data
+            .map((x) => SaleGroup.fromMap(x as Map<String, dynamic>))
+            .toList();
+      } else {
+        _salesGrouped = [];
+      }
       print('lista de ventas => $_salesGrouped');
       _isLoading = false;
       notifyListeners();
@@ -91,7 +101,7 @@ class SaleProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     url = Uri.parse(
-        '${pf.getIp.toString()}/api/PromotorInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
+      '${pf.getIp.toString()}/api/VentaInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
 
     final response = await http.get(
       url,
@@ -133,7 +143,7 @@ class SaleProvider extends ChangeNotifier {
     pago.ventasDetalle = booklets.toList();
     print('body edit sale => ${json.encode(pago.toJson())}');
     url = Uri.parse(
-        '${pf.getIp.toString()}/api/PromotorInterno/UpdateVentaManual');
+      '${pf.getIp.toString()}/api/VentaInterno/UpdateVentaManual');
     try {
       final response = await http.post(url,
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
@@ -166,7 +176,7 @@ class SaleProvider extends ChangeNotifier {
 
   Future<bool> deleteSale(BuildContext context, String ventaId) async {
     url =
-        Uri.parse('${pf.getIp.toString()}/api/PromotorInterno/Delete/$ventaId');
+        Uri.parse('${pf.getIp.toString()}/api/VentaInterno/Delete/$ventaId');
 
     final response = await http.delete(
       url,

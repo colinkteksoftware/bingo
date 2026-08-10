@@ -37,9 +37,7 @@ class GameTypeBloc extends Bloc<GameTypeEvent, GameTypeState> {
 
     on<IncrementCounter>((event, emit) {
       if (state.aditional == 2) {
-        final day = DateTime.now();
-        final isWeekday = day.weekday <= 5;
-        final maxLimit = isWeekday ? 2 : 9;
+        const maxLimit = 10;
 
         int newCounter = state.counter + 1;
 
@@ -78,10 +76,7 @@ class GameTypeBloc extends Bloc<GameTypeEvent, GameTypeState> {
         int newCounter = event.counter;
         if (newCounter < 1) newCounter = 1;
 
-        // Validar máximo según día
-        final day = DateTime.now();
-        final isWeekday = day.weekday <= 5;
-        final maxLimit = isWeekday ? 2 : 9;
+        const maxLimit = 10;
         if (newCounter > maxLimit) newCounter = maxLimit;
 
         emit(state.copyWith(

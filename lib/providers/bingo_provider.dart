@@ -325,30 +325,74 @@ class BingoProvider with ChangeNotifier {
     sale.tipo = _aditional + 1;
     sale.ventasDetalle = booklets;
 
-    final url =
-        Uri.parse('${pf.getIp.toString()}/api/PromotorInterno/PostVentaManual');
+    final urlPostVentaManual =
+      Uri.parse('${pf.getIp.toString()}/api/VentaInterno/PostVentaManual');
+    final urlVentaInternoLegacy =
+      Uri.parse('${pf.getIp.toString()}/api/VentaInterno');
 
     //print('body ventas => ${json.encode(sale.toMap())}');
 
     try {
-      final response = await http.post(url,
+      var response = await http.post(urlPostVentaManual,
           headers: {'Content-Type': 'application/json'},
           body: json.encode(sale.toMap()));
 
+      // Compatibility fallback: some deployments expose manual sale on /api/VentaInterno
+      if (response.statusCode == 404) {
+        response = await http.post(urlVentaInternoLegacy,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(sale.toMap()));
+      }
+
       if (response.statusCode == 200) {
-        reset();
-        const snackBar = SnackBar(
-          content: Center(child: Text('Venta exitosa.')),
-          backgroundColor: Colors.green,
+        final dynamic body = json.decode(response.body);
+        final bool hasError =
+            body is Map<String, dynamic> && (body['error'] == true);
+
+        if (!hasError) {
+          reset();
+          const snackBar = SnackBar(
+            content: Center(child: Text('Venta exitosa.')),
+            backgroundColor: Colors.green,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          _isLoading = false;
+          notifyListeners();
+          updateScan(false);
+          return true;
+        }
+
+        final String errorMessage = body is Map<String, dynamic>
+            ? (body['errormensaje']?.toString().trim().isNotEmpty == true
+                ? body['errormensaje'].toString()
+                : 'No Se ha confirmado la venta.')
+            : 'No Se ha confirmado la venta.';
+
+        final snackBar = SnackBar(
+          content: Center(child: Text(errorMessage)),
+          backgroundColor: Colors.red,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         _isLoading = false;
         notifyListeners();
         updateScan(false);
-        return true;
+        return false;
       } else {
-        const snackBar = SnackBar(
-          content: Center(child: Text('No Se ha confirmado la venta.')),
+        String errorMessage =
+            'No Se ha confirmado la venta. (HTTP ${response.statusCode})';
+
+        try {
+          final dynamic body = json.decode(response.body);
+          if (body is Map<String, dynamic> &&
+              body['errormensaje']?.toString().trim().isNotEmpty == true) {
+            errorMessage = body['errormensaje'].toString();
+          }
+        } catch (_) {
+          // Keep generic HTTP-based message when response body is not JSON.
+        }
+
+        final snackBar = SnackBar(
+          content: Center(child: Text(errorMessage)),
           backgroundColor: Colors.red,
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -425,7 +469,7 @@ class BingoProvider with ChangeNotifier {
         for (var booklet in infoBooklet) {
           if (booklet.estado == true) {
             precio = bingo.precioPorCartilla ?? 0;
-            total = total + (precio * _counter) + precio;
+            total = total + (precio * (_counter + 1));
             //print('total con cartilla${booklet.cartillaId} => $total');
           }
         }
@@ -458,7 +502,7 @@ class BingoProvider with ChangeNotifier {
 
   void updateaditional(int value) {
     _aditional = value;
-    notifyListeners();
+    calculeTotal();
   }
 
   void updateBingo(Bingo info) {

@@ -833,14 +833,14 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
     try {
       String ruta;
 
-      ruta = ipController.text + "/api/Login/ActualizaPromotor";
+      ruta = ipController.text + "/api/PromotorInterno";
 
       final uri = Uri.parse(ruta);
       final headers = {'Content-Type': 'application/json'};
 
       final encoding = Encoding.getByName('utf-8');
 
-      Response response = await http.post(uri,
+      Response response = await http.put(uri,
           headers: headers,
           encoding: encoding,
           body: jsonEncode({
@@ -892,14 +892,14 @@ class _UpdatePersonPageState extends State<UpdatePersonPage> {
     try {
       String ruta;
 
-      ruta = ipController.text + "/api/Login/ActualizaPromotor";
+      ruta = ipController.text + "/api/PromotorInterno";
 
       final uri = Uri.parse(ruta);
       final headers = {'Content-Type': 'application/json'};
 
       final encoding = Encoding.getByName('utf-8');
 
-      Response response = await post(uri,
+      Response response = await put(uri,
           headers: headers,
           encoding: encoding,
           body: jsonEncode({

@@ -13,15 +13,27 @@ class ApiService {
   final pf = Preferencias();
 
   Future<ModelPromotor> login(Auth user) async {
-    final url = Uri.parse('${pf.getIp}${Endpoints.login()}');
+    final url = Uri.parse('${pf.getIp}${Endpoints.login()}').replace(
+      queryParameters: {
+        'usuario': user.usuario ?? '',
+        'password': user.password ?? '',
+      },
+    );
     final headers = {'Content-Type': 'application/json'};
-    final response = await http.post(url,
-        headers: headers, body: json.encode(user.authToMap()));
+    final response = await http.post(url, headers: headers, body: '{}');
     //print('status connection => $response');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      ModelPromotor promotor = ModelPromotor();
-      promotor = ModelPromotor.fromMap(data);
+      final dynamic payload =
+          data is Map<String, dynamic> && data['data'] is Map<String, dynamic>
+              ? data['data']
+              : data;
+
+      if (payload is! Map<String, dynamic>) {
+        throw Failure();
+      }
+
+      ModelPromotor promotor = ModelPromotor.fromMap(payload);
       /*print(
           '===================================================================');
       print(url);

@@ -886,7 +886,7 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   Future<void> _registrar(BuildContext context) async {
-    String ruta = "${ipController.text}/api/Login/InsertarPromotor";
+    String ruta = "${ipController.text}/api/PromotorInterno";
     final uri = Uri.parse(ruta);
     final headers = {'Content-Type': 'application/json'};
     final encoding = Encoding.getByName('utf-8');

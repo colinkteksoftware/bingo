@@ -16,11 +16,11 @@ class GameTypeState {
   });
 
   GameTypeState copyWith({
-    int? aditional = 0,
-    int? counter = 1,
+    int? aditional,
+    int? counter,
     List<Booklet>? booklets,
     double? precioPorCartilla,
-    int? total = 0,
+    int? total,
   }) {
     return GameTypeState(
       aditional: aditional ?? this.aditional,
