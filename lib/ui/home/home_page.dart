@@ -68,14 +68,6 @@ class _HomePageState extends State<HomePage> {
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {    
       try {
         await provider.getBingoById();
-        //print('bingo actual => ${provider.bingo.bingoToMap()}');
-        if (provider.bingo.estado == 3) {
-        _timer?.cancel();
-        if (mounted) {
-          //Navigator.of(context).popUntil((route) => route.isFirst);
-          Navigator.pushNamed(context, AppRoutes.bingo);
-        }       
-      }
       } catch (e) {
         print("Error al obtener el bingo: $e");
       }      
@@ -232,20 +224,13 @@ class _HomePageState extends State<HomePage> {
                                                               ),
                                               );
 
-                                              if (provider.bingo.estado == 3) {
-                                                showAlerta(
-                                                    context,
-                                                    'Juego Finalizado',
-                                                    'El bingo ya ha sido finalizado!!!');
-                                              } else {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return const SaleWidget();
-                                                  },
-                                                );
-                                              }
+                                              await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return const SaleWidget();
+                                                },
+                                              );
                                             },
                                             onUvtPressed: () async {
                                               await showDialog(

@@ -76,7 +76,7 @@ class _BingosListViewState extends State<BingosListView> {
                 'bingo': playing,
               });
 
-              provider.fetchShowBingos(1);
+              provider.fetchShowBingos(provider.status);
             },
             child: Padding(
               padding: const EdgeInsets.only(left: 8, right: 8, top: 3),

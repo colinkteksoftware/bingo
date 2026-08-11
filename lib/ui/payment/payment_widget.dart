@@ -35,16 +35,9 @@ class _PaymentWidgetState extends State<PaymentWidget> {
     try {
       final provider = Provider.of<PaymentProvider>(context, listen: false);
       provider.updateBingo(bingo);
-
-      if (provider.bingo.estado == 3) {
-        Navigator.pushNamed(context, AppRoutes.bingo);
-      } else {
-        await provider.getAmountUVT();
-        //await provider.getWinnersByBingo(context);
-
-        //ganadores
-        await provider.getWinners(context);
-      }
+      await provider.getAmountUVT();
+      //ganadores
+      await provider.getWinners(context);
     } catch (e) {
       print('Error al cargar el bingo: $e');
     }
@@ -55,10 +48,14 @@ class _PaymentWidgetState extends State<PaymentWidget> {
     return Consumer<PaymentProvider>(
       builder: (context, provider, _) {
         //print('informacion del bingo seleccionado => ${provider.bingo}');
-        if (provider.bingo.estado == 1 || provider.bingo.estado == 2) {
+        if (provider.bingo.estado == 1 ||
+            provider.bingo.estado == 2 ||
+            provider.bingo.estado == 3) {
           return Consumer<PaymentProvider>(
             builder: (context, provider, _) {
-              if (provider.bingo.estado == 1 || provider.bingo.estado == 2) {
+              if (provider.bingo.estado == 1 ||
+                  provider.bingo.estado == 2 ||
+                  provider.bingo.estado == 3) {
                 return Scaffold(
                   backgroundColor: const Color(0xFFcaf0f8),
                   body: Stack(

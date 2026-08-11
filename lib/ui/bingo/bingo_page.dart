@@ -42,8 +42,7 @@ class _BingoPageState extends State<BingoPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<BingoProvider>(context, listen: false);
-      provider.updatestatus(1);
-      provider.fetchShowBingos(1);
+      provider.fetchShowBingos(provider.status);
       _startListening();
       //registerClient();
       /*provider.addListener(() {
@@ -155,8 +154,7 @@ class _BingoPageState extends State<BingoPage> {
 
                 final provider =
                     Provider.of<BingoProvider>(context, listen: false);
-                provider.updatestatus(1);
-                provider.fetchShowBingos(1);
+                provider.fetchShowBingos(provider.status);
               }
               break;
             case 'cierre':

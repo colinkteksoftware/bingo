@@ -61,7 +61,7 @@ class SaleProvider extends ChangeNotifier {
     notifyListeners();
 
     final url = Uri.parse(
-      '${pf.getIp.toString()}/api/VentaInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
+      '${pf.getIp.toString()}/api/PromotorInterno/GetMisVentasByPromotor?PromotorId=${pf.getPromotorId}&FechaCompra=$fecha');
     print('url => $url');
     final response = await http.get(
       url,
