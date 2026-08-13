@@ -1,9 +1,9 @@
 import 'package:bingo/providers/bingo_provider.dart';
+import 'package:bingo/ui/commons/qr_scanner_widget.dart';
 import 'package:bingo/utils/conversiones.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 //late Future<void> _initializeControllerFuture;
 
@@ -15,6 +15,53 @@ class BingoDetailPage extends StatefulWidget {
 }
 
 class _BingoDetailPageState extends State<BingoDetailPage> {
+  Future<void> _scanBooklet(BingoProvider provider) async {
+    if (provider.bingo.estado == 3) {
+      showAlerta(
+        context,
+        'Mensaje Informativo',
+        'El bingo ya se encuentra finalizado',
+      );
+      return;
+    }
+
+    provider.updateQrcode('-1');
+    provider.updateScan(true);
+
+    final status = await Permission.camera.request();
+    if (status.isDenied || status.isPermanentlyDenied) {
+      provider.updateLoading(false);
+      provider.updateScan(false);
+      return;
+    }
+
+    provider.clearBooklet();
+    provider.updateLoading(true);
+
+    try {
+      if (!mounted) {
+        return;
+      }
+
+      final scan = await Navigator.of(context).push<String>(
+        MaterialPageRoute(
+          builder: (_) => const QRScannerScreen(),
+        ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (scan != null && scan != '-1' && scan.isNotEmpty) {
+        provider.updateQrcode(scan);
+      }
+    } finally {
+      provider.updateLoading(false);
+      provider.updateScan(false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -149,50 +196,7 @@ class _BingoDetailPageState extends State<BingoDetailPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: GestureDetector(
-                              onTap: () async {
-                                if (provider.bingo.estado == 3) {
-                                  showAlerta(
-                                    context,
-                                    'Mensaje Informativo',
-                                    'El bingo ya se encuentra finalizado',
-                                  );
-                                  return;
-                                }
-
-                                provider.updateQrcode('-1');
-                                provider.updateScan(true);
-
-                                final status =
-                                    await Permission.camera.request();
-
-                                if (!status.isDenied) {
-                                  provider.clearBooklet();
-                                  provider.updateLoading(true);
-
-                                  if (provider.isLoading) {
-                                    final String? scan =
-                                        await SimpleBarcodeScanner.scanBarcode(
-                                      context,
-                                      barcodeAppBar: const BarcodeAppBar(
-                                        appBarTitle: 'Test',
-                                        centerTitle: false,
-                                        enableBackButton: true,
-                                        backButtonIcon:
-                                            Icon(Icons.arrow_back_ios),
-                                      ),
-                                      isShowFlashIcon: true,
-                                      delayMillis: 2000,
-                                      cameraFace: CameraFace.back,
-                                    );
-
-                                    print('result scan => $scan');
-                                    if (scan != null && scan != '-1') {
-                                      provider.updateQrcode(scan);
-                                      provider.updateLoading(false);
-                                    }
-                                  }
-                                }
-                              },                              
+                              onTap: () => _scanBooklet(provider),
                               child: Builder(
                                 builder: (_) {
                                   final estado = provider.bingo.estado;

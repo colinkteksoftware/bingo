@@ -41,6 +41,8 @@ class BingoProvider with ChangeNotifier {
   int _counter = 1;
   int get counter => _counter;
 
+  bool get isPremioDiferidoGame => (bingo.presupuestoPremio ?? 0) <= 0;
+
   List<Bingo> _bingos = [];
   List<Bingo> get listBingos => _bingos;
 
@@ -134,20 +136,12 @@ class BingoProvider with ChangeNotifier {
           return [];
         }
 
-        if (bingos.first.premios.isEmpty) {
-          _isLoading = false;
-          notifyListeners();
-          /*debugPrint('⚠️ El bingo no tiene premios configurados.');*/
-          return [];
+        final premios = bingos.expand((item) => item.premios);
+        final primerPremio = premios.isEmpty ? null : premios.first;
+        if (primerPremio != null) {
+          final figureGame = primerPremio.grupo ?? primerPremio.figura ?? '';
+          updatefigure(figureGame);
         }
-
-        /*var figureGame =
-            bingos[0].premios[0].grupo ?? bingos[0].premios[0].figura ?? '';*/
-        var figureGame = bingos.first.premios.first.grupo ??
-            bingos.first.premios.first.figura ??
-            '';
-
-        updatefigure(figureGame);
         //print('figura => $_figure');
 
         List<Bingo> nuevosBingos = obtenerBingos(bingos);
@@ -296,7 +290,11 @@ class BingoProvider with ChangeNotifier {
     );
   }
 
-  Future<bool> registerSale(BuildContext context) async {
+  Future<bool> registerSale(
+    BuildContext context, {
+    int? forcedAditional,
+    int? forcedCounter,
+  }) async {
     _isLoading = true;
     errorMessage = null;
     notifyListeners();
@@ -321,27 +319,44 @@ class BingoProvider with ChangeNotifier {
     sale.clienteId = 0;
     sale.promotorId = pf.getPromotorId;
     sale.codigoModulo = qrcode;
-    sale.multiplicado = aditional == 2 ? _counter : 0;
-    sale.tipo = _aditional + 1;
+    final int effectiveAditional = forcedAditional ?? _aditional;
+    final int effectiveCounter = (forcedCounter ?? _counter) < 1 ? 1 : (forcedCounter ?? _counter);
+    final bool canApplyProgresivo = !isPremioDiferidoGame;
+    final bool isProgressiveSale = effectiveAditional == 2 && canApplyProgresivo;
+
+    sale.multiplicado = isProgressiveSale ? effectiveCounter : 0;
+    sale.tipo = isProgressiveSale ? 3 : (effectiveAditional == 1 ? 2 : 1);
     sale.ventasDetalle = booklets;
 
-    final urlPostVentaManual =
-      Uri.parse('${pf.getIp.toString()}/api/VentaInterno/PostVentaManual');
-    final urlVentaInternoLegacy =
-      Uri.parse('${pf.getIp.toString()}/api/VentaInterno');
+    final String baseUrl = pf.getIp.toString().trim().replaceAll(RegExp(r'/+$'), '');
+    final List<Uri> ventaEndpoints = [
+      Uri.parse('$baseUrl/api/VentaInterno/PostVentaManual'),
+      Uri.parse('$baseUrl/api/VentaInterno'),
+      Uri.parse('$baseUrl/VentaInterno/PostVentaManual'),
+      Uri.parse('$baseUrl/VentaInterno'),
+    ];
 
     //print('body ventas => ${json.encode(sale.toMap())}');
 
     try {
-      var response = await http.post(urlPostVentaManual,
+      http.Response? response;
+      for (final endpoint in ventaEndpoints) {
+        final currentResponse = await http.post(
+          endpoint,
           headers: {'Content-Type': 'application/json'},
-          body: json.encode(sale.toMap()));
+          body: json.encode(sale.toMap()),
+        );
 
-      // Compatibility fallback: some deployments expose manual sale on /api/VentaInterno
-      if (response.statusCode == 404) {
-        response = await http.post(urlVentaInternoLegacy,
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(sale.toMap()));
+        response = currentResponse;
+
+        // Stop at the first non-404 response (200, 400, 500, etc.).
+        if (currentResponse.statusCode != 404) {
+          break;
+        }
+      }
+
+      if (response == null) {
+        throw Exception('No se pudo ejecutar la venta en ningun endpoint.');
       }
 
       if (response.statusCode == 200) {
@@ -452,6 +467,7 @@ class BingoProvider with ChangeNotifier {
   void calculeTotal() {
     double precio = 0;
     double total = 0.0;
+    final bool canApplyProgresivo = !isPremioDiferidoGame;
     switch (_aditional) {
       case 0:
         //print('lista de cartillas => $infoBooklet');
@@ -469,7 +485,11 @@ class BingoProvider with ChangeNotifier {
         for (var booklet in infoBooklet) {
           if (booklet.estado == true) {
             precio = bingo.precioPorCartilla ?? 0;
-            total = total + (precio * (_counter + 1));
+            if (canApplyProgresivo) {
+              total = total + (precio * (_counter + 1));
+            } else {
+              total = total + precio;
+            }
             //print('total con cartilla${booklet.cartillaId} => $total');
           }
         }

@@ -192,20 +192,33 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
                         duration: 2,
                         onPressed: () async {
                           if (!provider.isLoading) {
+                            final uiState = _gameTypeBloc.state;
+                            final int currentAditional = uiState.aditional;
+                            final int currentCounter = uiState.counter < 1 ? 1 : uiState.counter;
+
                             if (provider.bingo.estado == 3) {
                               showAlerta(context, 'Mensaje Informativo',
                                   'El bingo ya se ha finalizado');
                             } else {
                               if ((provider.preciofinal == 0) &&
-                                  provider.aditional != 1) {
+                                  currentAditional != 1) {
                                 showAlerta(context, 'Mensaje Informativo',
                                     'Para ventas debes seleccionar una cartilla.');
                               } else {
-                                if (provider.aditional == 2 &&
-                                    provider.counter > 1) {
-                                  openAlertBox(context, provider);
+                                if (currentAditional == 2 &&
+                                    currentCounter > 1) {
+                                  openAlertBox(
+                                    context,
+                                    provider,
+                                    currentAditional,
+                                    currentCounter,
+                                  );
                                 } else {
-                                  await provider.registerSale(context);
+                                  await provider.registerSale(
+                                    context,
+                                    forcedAditional: currentAditional,
+                                    forcedCounter: currentCounter,
+                                  );
                                 }
                               }
                             }
@@ -538,6 +551,8 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
   Future<void> openAlertBox(
     BuildContext context,
     BingoProvider provider,
+    int aditional,
+    int counter,
   ) {
     return showDialog(
       context: context,
@@ -639,7 +654,11 @@ class _BookletDetailPageState extends State<BookletDetailPage> {
                         elevation: 2,
                       ),
                       onPressed: () async {
-                        await provider.registerSale(context);
+                        await provider.registerSale(
+                          context,
+                          forcedAditional: aditional,
+                          forcedCounter: counter,
+                        );
                         Navigator.of(context).pop();
                       },
                       child: const Text(

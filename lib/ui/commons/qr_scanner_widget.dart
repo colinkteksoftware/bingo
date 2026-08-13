@@ -1,9 +1,9 @@
-/*import 'package:bingo/ui/commons/scanner_overlay_widget.dart';
+import 'package:bingo/ui/commons/scanner_overlay_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class QRScannerScreen extends StatefulWidget {  
+class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
 
   @override
@@ -11,8 +11,8 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
-  final MobileScannerController controller = MobileScannerController();  
-  bool _hasScanned = false;  
+  final MobileScannerController controller = MobileScannerController();
+  bool _hasScanned = false;
 
   @override
   void initState() {
@@ -25,23 +25,27 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     controller.dispose();
     super.dispose();
   }
-  
+
   Future<void> _requestCameraPermission() async {
-    var status = await Permission.camera.status;
+    final status = await Permission.camera.status;
     if (!status.isGranted) {
       await Permission.camera.request();
     }
+  }
+
+  Future<void> _toggleCamera() async {
+    await controller.switchCamera();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Escanear QR"),
+        title: const Text('Escanear QR'),
         actions: [
           IconButton(
             icon: const Icon(Icons.cameraswitch),
-            onPressed: () { controller.switchCamera(); },            
+            onPressed: _toggleCamera,
           ),
         ],
       ),
@@ -54,7 +58,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               final barcode = capture.barcodes.first;
               final String? code = barcode.rawValue;
 
-              if (!_hasScanned && code != null) {
+              if (!_hasScanned && code != null && code.isNotEmpty) {
                 _hasScanned = true;
                 Navigator.of(context).pop(code);
               }
@@ -65,4 +69,4 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ),
     );
   }
-}*/
+}
